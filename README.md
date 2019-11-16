@@ -9,6 +9,6 @@ you can get the library by compiling it from the [source](https://github.com/ray
 ```json
 "libs": [ "raylib" ]
 ```
-# [Docs / cheatsheet](https://github.com/onroundit/raylib-d/wiki)
+# [Docs / cheatsheet](https://github.com/onroundit/raylib-d/wiki/Docs-(cheatsheet))
 # License
 raylib-d is licensed under an unmodified zlib/libpng license. View [LICENSE](LICENSE).
