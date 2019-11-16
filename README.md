@@ -3,4 +3,4 @@
 # Installation
 `dub add raylib-d`
 # License
-raylib (D) is licensed under an unmodified zlib/libpng license. View [LICENSE](LICENSE).
+raylib-d is licensed under an unmodified zlib/libpng license. View [LICENSE](LICENSE).
