@@ -4,7 +4,7 @@
 # Installation
 `dub add raylib-d`
 ## First, get a copy of Raylib
-you can get the library by compiling it from the (source)[https://github.com/raysan5/raylib], download the (official precompiled binaries)[https://github.com/raysan5/raylib/releases] or (download them from our repository)[https://google.com/] (originally taken from official releases, sorted in folders for each system).
+you can get the library by compiling it from the [source](https://github.com/raysan5/raylib), download the [official precompiled binaries](https://github.com/raysan5/raylib/releases) or [download them from our repository](https://google.com/) (originally taken from official releases, sorted in folders for each system).
 ## In order to link against raylib, add it to your dub.json.
 ```json
 "libs": [ "raylib" ]
