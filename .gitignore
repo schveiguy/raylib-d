@@ -13,3 +13,4 @@ draylib-test-*
 *.o
 *.obj
 *.lst
+docs.md
