@@ -19,8 +19,8 @@ void main()
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
-		ClearBackground(Color(255, 200, 200, 200));
-		DrawText("Hello, World!", 400, 300, 28, Color(0, 0, 0, 255));
+		ClearBackground(RAYWHITE);
+		DrawText(BLACK);
 		EndDrawing();
 	}
 	CloseWindow();
