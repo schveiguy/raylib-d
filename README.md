@@ -20,7 +20,7 @@ void main()
 	{
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
-		DrawText(BLACK);
+		DrawText("Hello, World!", 400, 300, 28, BLACK);
 		EndDrawing();
 	}
 	CloseWindow();
