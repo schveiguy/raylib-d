@@ -9,6 +9,23 @@ you can get the library by compiling it from the [source](https://github.com/ray
 ```json
 "libs": [ "raylib" ]
 ```
+# Sample
+```D
+import raylib;
+
+void main()
+{
+	InitWindow(800, 600, "Hello, Raylib-D!");
+	while (!WindowShouldClose())
+	{
+		BeginDrawing();
+		ClearBackground(Color(255, 200, 200, 200));
+		DrawText("Hello, World!", 400, 300, 28, Color(0, 0, 0, 255));
+		EndDrawing();
+	}
+	CloseWindow();
+}
+```
 # [Docs / cheatsheet](https://github.com/onroundit/raylib-d/wiki/Docs-(cheatsheet))
 # License
 raylib-d is licensed under an unmodified zlib/libpng license. View [LICENSE](LICENSE).
