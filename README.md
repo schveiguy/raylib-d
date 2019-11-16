@@ -1,5 +1,5 @@
 ![](raylib_logo.png)
-# raylib-d [![DUB](https://img.shields.io/dub/v/raylib-d?style=for-the-badge)](https://raylib-d.dub.pm)
+# raylib-d [![DUB](https://img.shields.io/dub/v/raylib-d?style=for-the-badge)](https://code.dlang.org/packages/raylib-d)
 (static) D bindings for [raylib](https://www.raylib.com/), a simple and easy-to-use library to learn videogames programming.
 # Installation
 `dub add raylib-d`
