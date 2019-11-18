@@ -3,11 +3,11 @@ docs.json
 __dummy.html
 docs/
 /draylib
-draylib.so
-draylib.dylib
-draylib.dll
-draylib.a
-draylib.lib
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
 draylib-test-*
 *.exe
 *.o

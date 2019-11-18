@@ -1,4 +1,8 @@
 module raylib;
+
+public {
+    import rlgl;
+}
 /**********************************************************************************************
 *
 *   raylib - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
@@ -76,7 +80,7 @@ import core.stdc.config;
 import core.stdc.stdarg;
 import core.stdc.stdlib;
 
-extern (C):
+extern (C) @nogc nothrow:
 
 // Required for: va_list - Only used by TraceLogCallback
 
