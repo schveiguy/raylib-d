@@ -6,8 +6,10 @@
 	"dependencies": {
 		"raylib-d": "~>3.0.0"
 	},
-  "libs": [ "raylib" ],
+	"libs": [
+		"raylib"
+	],
 	"description": "A minimal D application.",
-	"license": "zlib License",
+	"license": "Zlib",
 	"name": "example"
 }
