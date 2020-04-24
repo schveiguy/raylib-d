@@ -2,8 +2,8 @@
 	"authors": [
 		"ONROUNDIT"
 	],
-	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit)",
-	"description": "D binding for Raylib 2.5.",
+	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry)",
+	"description": "D binding for Raylib",
 	"license": "Zlib",
 	"name": "raylib-d"
 }
