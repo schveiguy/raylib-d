@@ -1,0 +1,13 @@
+{
+	"authors": [
+		"Unknown"
+	],
+	"copyright": "Copyright © 2020, Unknown",
+	"dependencies": {
+		"raylib-d": "~>3.0.0"
+	},
+  "libs": [ "raylib" ],
+	"description": "A minimal D application.",
+	"license": "zlib License",
+	"name": "example"
+}
