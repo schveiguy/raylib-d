@@ -9,6 +9,7 @@ docs/
 *.a
 *.lib
 draylib-test-*
+raylib-d-test-*
 *.exe
 *.o
 *.obj

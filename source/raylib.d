@@ -2,6 +2,7 @@ module raylib;
 
 public {
     import rlgl;
+    import raymath;
 }
 /**********************************************************************************************
 *
@@ -153,6 +154,7 @@ struct Vector2
 {
     float x;
     float y;
+    mixin Linear;
 }
 
 // Vector3 type
@@ -161,7 +163,26 @@ struct Vector3
     float x;
     float y;
     float z;
+    mixin Linear;
 }
+
+// Bivector3 type
+struct Bivector3
+{
+    float yz;
+    float zx;    
+    float xy;
+    mixin Linear;
+}
+
+// Rotor type
+struct Rotor3
+{
+    float a;
+    Bivector3 b;
+    alias b this;
+}
+alias Quaternion = Rotor3;
 
 // Vector4 type
 struct Vector4
@@ -170,13 +191,11 @@ struct Vector4
     float y;
     float z;
     float w;
+    mixin Linear;
 }
 
-// Quaternion type, same as Vector4
-alias Quaternion = Vector4;
-
 // Matrix type (OpenGL style 4x4 - right handed, column major)
-struct Matrix
+struct Matrix4
 {
     float m0;
     float m4;
@@ -195,6 +214,7 @@ struct Matrix
     float m11;
     float m15;
 }
+alias Matrix = Matrix4;
 
 // Color type, RGBA (32bit)
 struct Color
@@ -212,7 +232,10 @@ struct Rectangle
     float y;
     float width;
     float height;
+    alias w = width;
+    alias h = height;
 }
+
 
 // Image type, bpp always RGBA (32bit)
 // NOTE: Data stored in CPU memory (RAM)
