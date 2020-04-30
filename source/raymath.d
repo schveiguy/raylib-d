@@ -28,7 +28,7 @@ mixin template Linear()
         return mixin("T(" ~ fragment ~ ")");
     }
 
-    T opUnary(string op)() if (["+", "-"].canFind(op))
+    inout T opUnary(string op)() if (["+", "-"].canFind(op))
     {
         enum fragment = [FieldNameTuple!T].map!(field => op ~ field).join(",");
         return mixin("T(" ~ fragment ~ ")");
@@ -37,7 +37,7 @@ mixin template Linear()
     static if (is(T == Rotor3))
     {
         /// Returns a rotor equivalent to first apply p, then apply q
-        Rotor3 opBinary(string op)(Rotor3 q) if (op == "*")
+        inout Rotor3 opBinary(string op)(inout Rotor3 q) if (op == "*")
         {
             alias p = this;
             Rotor3 r;
@@ -48,7 +48,7 @@ mixin template Linear()
             return r;
         }
 
-        Vector3 opBinary(string op)(Vector3 v) if (op == "*")
+        inout Vector3 opBinary(string op)(inout Vector3 v) if (op == "*")
         {
             Vector3 rv;
             rv.x = a * v.x + xy * v.y - zx * v.z;
@@ -57,7 +57,7 @@ mixin template Linear()
             return rv;
         }
 
-        Vector3 opBinaryRight(string op)(Vector3 v) if (op == "*")
+        inout Vector3 opBinaryRight(string op)(inout Vector3 v) if (op == "*")
         {
             Vector3 vr;
             vr.x = v.x * a - v.y * xy + v.z * zx;
@@ -68,20 +68,20 @@ mixin template Linear()
     }
     else
     {
-        T opBinary(string op)(T rhs) if (["+", "-"].canFind(op))
+        inout T opBinary(string op)(inout T rhs) if (["+", "-"].canFind(op))
         {
             enum fragment = [FieldNameTuple!T].map!(field => field ~ op ~ "rhs." ~ field).join(",");
             return mixin("T(" ~ fragment ~ ")");
         }
     }
 
-    T opBinary(string op)(float rhs) if (["+", "-", "*", "/"].canFind(op))
+    inout T opBinary(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
     {
         enum fragment = [FieldNameTuple!T].map!(field => field ~ op ~ "rhs").join(",");
         return mixin("T(" ~ fragment ~ ")");
     }
 
-    T opBinaryRight(string op)(float lhs) if (["+", "-", "*", "/"].canFind(op))
+    inout T opBinaryRight(string op)(inout float lhs) if (["+", "-", "*", "/"].canFind(op))
     {
         enum fragment = [FieldNameTuple!T].map!(field => "lhs" ~ op ~ field).join(",");
         return mixin("T(" ~ fragment ~ ")");
@@ -91,7 +91,10 @@ mixin template Linear()
 unittest
 {
     Assert.equal(-Vector2(1, 2), Vector2(-1, -2));
-    Assert.equal(Vector3(1, 2, 9) + Vector3(3, 4, 9), Vector3(4, 6, 18));
+    auto a = Vector3(1, 2, 9);
+    immutable b = Vector3(3, 4, 9);
+    Vector3 c = a + b;
+    Assert.equal(c, Vector3(4, 6, 18));
     Assert.equal(4.0f - Vector2.zero, Vector2(4, 4));
     Assert.equal(Vector2.one - 3.0f, Vector2(-2, -2));
 }
@@ -126,8 +129,10 @@ float dot(T)(T lhs, T rhs)
 unittest
 {
     Assert.equal(Vector2(3, 4).length, 5);
-    Assert.equal(cast(const) Vector2(-3, 4).normal, Vector2(-3. / 5., 4. / 5.));
-    Assert.equal(cast(immutable) Vector2(9, 8).distance(Vector2(-3, 3)), 13);
+    const a = Vector2(-3, 4);
+    Assert.equal(a.normal, Vector2(-3. / 5., 4. / 5.));
+    immutable b = Vector2(9, 8);
+    Assert.equal(b.distance(Vector2(-3, 3)), 13);
     Assert.equal(Vector3(2, 3, 4).dot(Vector3(4, 5, 6)), 47);
     Assert.equal(Vector2.one.length, sqrt(2.0f));
 }
