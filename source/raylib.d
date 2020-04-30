@@ -274,10 +274,10 @@ struct Color
 // Rectangle type
 struct Rectangle
 {
-    float x;
-    float y;
-    float width;
-    float height;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
     alias w = width;
     alias h = height;
 }
@@ -372,7 +372,7 @@ struct Camera2D
 {
     Vector2 offset; // Camera offset (displacement from target)
     Vector2 target; // Camera target (rotation and zoom origin)
-    float rotation; // Camera rotation in degrees
+    float rotation = 0.0f; // Camera rotation in degrees
     float zoom = 1.0f; // Camera zoom (scaling), should be 1.0f by default
 }
 
