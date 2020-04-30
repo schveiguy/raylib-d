@@ -157,6 +157,12 @@ struct Vector2
     mixin Linear;
 }
 
+struct Bivector2
+{
+    float xy;
+    alias xy this;
+}
+
 // Vector3 type
 struct Vector3
 {

@@ -50,7 +50,7 @@ import std.traits : FieldNameTuple;
 import std.algorithm : map;
 import std.range : join;
 
-float length(T)(T v) if (__traits(compiles, v * v))
+float length(T)(T v)
 {
     enum fragment = [FieldNameTuple!T].map!(field => "v." ~ field ~ "*" ~ "v." ~ field).join("+");
     return mixin("sqrt(" ~ fragment ~ ")");
@@ -58,7 +58,7 @@ float length(T)(T v) if (__traits(compiles, v * v))
 
 T normalize(T)(T v)
 {
-    return v / this.length;
+    return v / v.length;
 }
 
 float distance(T)(T lhs, T rhs)
@@ -105,13 +105,26 @@ Vector2 rotate(Vector2 v, float angle)
     return Vector2(v.x * cos(angle) - v.y * sin(angle), v.x * sin(angle) + v.y * cos(angle));
 }
 
-Vector3 cross(Vector3 lhs, Vector3 rhs)
+Vector2 slide(Vector2 v, Vector2 along)
 {
-    return Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
-            lhs.x * rhs.y - lhs.y * rhs.x);
+    return along.normalize * dot(v, along);
+}
+
+Bivector2 wedge(Vector2 lhs, Vector2 rhs)
+{
+    return Bivector2(lhs.x * rhs.y - lhs.y * rhs.x);
 }
 
 // dfmt off
+Bivector3 wedge(Vector3 lhs, Vector3 rhs)
+{
+    return Bivector3(
+        lhs.y * rhs.z - lhs.z * rhs.y,
+        lhs.z * rhs.x - lhs.x * rhs.z,
+        lhs.x * rhs.y - lhs.y * rhs.x,
+    );
+}
+
 Vector3 transform(Vector3 v, Matrix4 mat)
 {
     with (v) with (mat)
@@ -123,7 +136,20 @@ Vector3 transform(Vector3 v, Matrix4 mat)
 }
 // dfmt on
 
+Vector3 cross(Vector3 lhs, Vector3 rhs)
+{
+    auto v = wedge(lhs, rhs);
+    return Vector3(v.yz, v.zx, v.xy);
+}
+
 // TODO implement rotor3
 // Vector3 rotate(Vector3 v, Rotor3 r) {
 //     return ;
 // }
+
+unittest
+{
+    import std.format;
+    const v = Vector2.one;
+    assert(v.length == sqrt(2.0f), "%s %s".format(v,v.length));
+}
