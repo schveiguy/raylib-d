@@ -90,6 +90,8 @@ mixin template Linear()
 
 unittest
 {
+    Assert.equal(Vector2.init, Vector2.zero);
+    Assert.equal(Vector2(), Vector2.zero);
     Assert.equal(-Vector2(1, 2), Vector2(-1, -2));
     auto a = Vector3(1, 2, 9);
     immutable b = Vector3(3, 4, 9);

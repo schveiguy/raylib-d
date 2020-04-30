@@ -153,14 +153,14 @@ const RAYWHITE = Color(245, 245, 245, 255); // My own White (raylib logo)
 // Vector2 type
 struct Vector2
 {
-    float x;
-    float y;
+    float x = 0.0f;
+    float y = 0.0f;
     mixin Linear;
 }
 
 struct Bivector2
 {
-    float xy;
+    float xy = 0.0f;
     alias xy this;
     mixin Linear;
 }
@@ -168,9 +168,9 @@ struct Bivector2
 // Vector3 type
 struct Vector3
 {
-    float x;
-    float y;
-    float z;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
     mixin Linear;
 }
 
@@ -179,19 +179,19 @@ struct Vector3
 /// xy is the first field
 struct Bivector3
 {
-    float xy;
-    float yz;
-    float zx;
+    float xy = 0.0f;
+    float yz = 0.0f;
+    float zx = 0.0f;
     mixin Linear;
 }
 
 // Rotor type
 struct Rotor3
 {
-    float a;
-    float xy;
-    float yz;
-    float zx;
+    float a = 1.0f;
+    float xy = 0.0f;
+    float yz = 0.0f;
+    float zx = 0.0f;
     mixin Linear;
 
     alias i = yz;
@@ -231,32 +231,33 @@ alias Quaternion = Rotor3;
 // Vector4 type
 struct Vector4
 {
-    float x;
-    float y;
-    float z;
-    float w;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float w = 0.0f;
     mixin Linear;
 }
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
 struct Matrix4
 {
-    float m0;
-    float m4;
-    float m8;
-    float m12;
-    float m1;
-    float m5;
-    float m9;
-    float m13;
-    float m2;
-    float m6;
-    float m10;
-    float m14;
-    float m3;
-    float m7;
-    float m11;
-    float m15;
+    float m0 = 0.0f;
+    float m4 = 0.0f;
+    float m8 = 0.0f;
+    float m12 = 0.0f;
+    float m1 = 0.0f;
+    float m5 = 0.0f;
+    float m9 = 0.0f;
+    float m13 = 0.0f;
+    float m2 = 0.0f;
+    float m6 = 0.0f;
+    float m10 = 0.0f;
+    float m14 = 0.0f;
+    float m3 = 0.0f;
+    float m7 = 0.0f;
+    float m11 = 0.0f;
+    float m15 = 0.0f;
+    mixin Linear;
 }
 
 alias Matrix = Matrix4;
@@ -361,7 +362,7 @@ struct Camera3D
     Vector3 target; // Camera target it looks-at
     Vector3 up; // Camera up vector (rotation over its axis)
     float fovy; // Camera field-of-view apperture in Y (degrees) in perspective, used as near plane width in orthographic
-    int type; // Camera type, defines projection type: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
+    CameraType type; // Camera type, defines projection type: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
 }
 
 alias Camera = Camera3D; // Camera type fallback, defaults to Camera3D
@@ -372,7 +373,7 @@ struct Camera2D
     Vector2 offset; // Camera offset (displacement from target)
     Vector2 target; // Camera target (rotation and zoom origin)
     float rotation; // Camera rotation in degrees
-    float zoom; // Camera zoom (scaling), should be 1.0f by default
+    float zoom = 1.0f; // Camera zoom (scaling), should be 1.0f by default
 }
 
 // Vertex data definning a mesh
@@ -946,7 +947,7 @@ enum CameraMode
 }
 
 // Camera projection modes
-enum CameraType
+enum CameraType : int
 {
     CAMERA_PERSPECTIVE = 0,
     CAMERA_ORTHOGRAPHIC = 1
