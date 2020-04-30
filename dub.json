@@ -1,9 +1,18 @@
 {
+	"name": "raylib-d",
+	"description": "D binding for Raylib",
+	"license": "Zlib",
 	"authors": [
 		"ONROUNDIT"
 	],
 	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry)",
-	"description": "D binding for Raylib",
-	"license": "Zlib",
-	"name": "raylib-d"
+	"configurations": [
+        {
+            "name": "unittest",
+            "dependencies": {
+                "fluent-asserts": "~>0.13.0",
+            }
+        }
+    ],	
+	"targetType": "sourceLibrary"
 }
