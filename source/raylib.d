@@ -3,7 +3,7 @@ module raylib;
 public
 {
     import rlgl;
-    import raymath;
+    import raymathext;
 }
 /**********************************************************************************************
 *

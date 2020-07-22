@@ -1,3 +1,5 @@
+module raymathext;
+
 import raylib;
 import std.math;
 
