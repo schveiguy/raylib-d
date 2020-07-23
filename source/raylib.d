@@ -117,35 +117,37 @@ alias RL_FREE = free;
 
 alias CLITERAL = Color;
 
-// Some Basic Colors
-// NOTE: Custom raylib color palette for amazing visuals on WHITE background // Light Gray // Gray // Dark Gray // Yellow // Gold // Orange // Pink // Red // Maroon // Green // Lime // Dark Green // Sky Blue // Blue // Dark Blue // Purple // Violet // Dark Purple // Beige // Brown // Dark Brown // White // Black // Blank (Transparent) // Magenta // My own White (raylib logo)
-const LIGHTGRAY = Color(200, 200, 200, 255); // Light Gray
-const GRAY = Color(130, 130, 130, 255); // Gray
-const DARKGRAY = Color(80, 80, 80, 255); // Dark Gray
-const YELLOW = Color(253, 249, 0, 255); // Yellow
-const GOLD = Color(255, 203, 0, 255); // Gold
-const ORANGE = Color(255, 161, 0, 255); // Orange
-const PINK = Color(255, 109, 194, 255); // Pink
-const RED = Color(230, 41, 55, 255); // Red
-const MAROON = Color(190, 33, 55, 255); // Maroon
-const GREEN = Color(0, 228, 48, 255); // Green
-const LIME = Color(0, 158, 47, 255); // Lime
-const DARKGREEN = Color(0, 117, 44, 255); // Dark Green
-const SKYBLUE = Color(102, 191, 255, 255); // Sky Blue
-const BLUE = Color(0, 121, 241, 255); // Blue
-const DARKBLUE = Color(0, 82, 172, 255); // Dark Blue
-const PURPLE = Color(200, 122, 255, 255); // Purple
-const VIOLET = Color(135, 60, 190, 255); // Violet
-const DARKPURPLE = Color(112, 31, 126, 255); // Dark Purple
-const BEIGE = Color(211, 176, 131, 255); // Beige
-const BROWN = Color(127, 106, 79, 255); // Brown
-const DARKBROWN = Color(76, 63, 47, 255); // Dark Brown
+enum Colors {
+    // Some Basic Colors
+    // NOTE: Custom raylib color palette for amazing visuals on WHITE background // Light Gray // Gray // Dark Gray // Yellow // Gold // Orange // Pink // Red // Maroon // Green // Lime // Dark Green // Sky Blue // Blue // Dark Blue // Purple // Violet // Dark Purple // Beige // Brown // Dark Brown // White // Black // Blank (Transparent) // Magenta // My own White (raylib logo)
+    LIGHTGRAY = Color(200, 200, 200, 255), // Light Gray
+    GRAY = Color(130, 130, 130, 255), // Gray
+    DARKGRAY = Color(80, 80, 80, 255), // Dark Gray
+    YELLOW = Color(253, 249, 0, 255), // Yellow
+    GOLD = Color(255, 203, 0, 255), // Gold
+    ORANGE = Color(255, 161, 0, 255), // Orange
+    PINK = Color(255, 109, 194, 255), // Pink
+    RED = Color(230, 41, 55, 255), // Red
+    MAROON = Color(190, 33, 55, 255), // Maroon
+    GREEN = Color(0, 228, 48, 255), // Green
+    LIME = Color(0, 158, 47, 255), // Lime
+    DARKGREEN = Color(0, 117, 44, 255), // Dark Green
+    SKYBLUE = Color(102, 191, 255, 255), // Sky Blue
+    BLUE = Color(0, 121, 241, 255), // Blue
+    DARKBLUE = Color(0, 82, 172, 255), // Dark Blue
+    PURPLE = Color(200, 122, 255, 255), // Purple
+    VIOLET = Color(135, 60, 190, 255), // Violet
+    DARKPURPLE = Color(112, 31, 126, 255), // Dark Purple
+    BEIGE = Color(211, 176, 131, 255), // Beige
+    BROWN = Color(127, 106, 79, 255), // Brown
+    DARKBROWN = Color(76, 63, 47, 255), // Dark Brown
 
-const WHITE = Color(255, 255, 255, 255); // White
-const BLACK = Color(0, 0, 0, 255); // Black
-const BLANK = Color(0, 0, 0, 0); // Blank (Transparent)
-const MAGENTA = Color(255, 0, 255, 255); // Magenta
-const RAYWHITE = Color(245, 245, 245, 255); // My own White (raylib logo)
+    WHITE = Color(255, 255, 255, 255), // White
+    BLACK = Color(0, 0, 0, 255), // Black
+    BLANK = Color(0, 0, 0, 0), // Blank (Transparent)
+    MAGENTA = Color(255, 0, 255, 255), // Magenta
+    RAYWHITE = Color(245, 245, 245, 255), // My own White (raylib logo)
+}
 
 //----------------------------------------------------------------------------------
 // Structures Definition
