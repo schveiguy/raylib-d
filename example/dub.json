@@ -4,7 +4,7 @@
 	],
 	"copyright": "Copyright © 2020, Unknown",
 	"dependencies": {
-		"raylib-d": "~>3.0.0"
+		"raylib-d": {"path": "../"}
 	},
 	"libs": [
 		"raylib"
