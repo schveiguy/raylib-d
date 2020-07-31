@@ -17,8 +17,8 @@ void main()
     scope (exit)
       EndDrawing();
 
-    ClearBackground(RAYWHITE);
-    DrawText("Hello, World!", 330, 300, 28, BLACK);
+    ClearBackground(Colors.RAYWHITE);
+    DrawText("Hello, World!", 330, 300, 28, Colors.BLACK);
   }
 
   writeln("Ending a raylib example.");
