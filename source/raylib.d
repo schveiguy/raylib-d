@@ -4,6 +4,7 @@ public
 {
     import rlgl;
     import raymath;
+    import easings;
     import raymathext;
 }
 /**********************************************************************************************
