@@ -15,7 +15,7 @@ You can get the library by compiling it from the [source](https://github.com/ray
 ```
 For more information look into the [wiki](https://github.com/onroundit/raylib-d/wiki/Installation).
 
-# Sample
+# Example
 ```D
 import raylib;
 
@@ -25,7 +25,7 @@ void main()
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
-		ClearBackground(RAYWHITE);
+		ClearBackground(Colors.RAYWHITE);
 		DrawText("Hello, World!", 400, 300, 28, BLACK);
 		EndDrawing();
 	}
