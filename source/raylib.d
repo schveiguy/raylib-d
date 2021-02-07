@@ -404,7 +404,7 @@ struct Mesh
 
     // OpenGL identifiers
     uint vaoId; // OpenGL Vertex Array Object id
-    uint[7] vboId; // OpenGL Vertex Buffer Objects id (default vertex data)
+    uint* vboId; // OpenGL Vertex Buffer Objects id (default vertex data)
 }
 
 // Shader type (generic)
