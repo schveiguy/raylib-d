@@ -26,7 +26,7 @@ void main()
 	{
 		BeginDrawing();
 		ClearBackground(Colors.RAYWHITE);
-		DrawText("Hello, World!", 400, 300, 28, BLACK);
+		DrawText("Hello, World!", 400, 300, 28, Colors.BLACK);
 		EndDrawing();
 	}
 	CloseWindow();
