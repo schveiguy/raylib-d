@@ -75,6 +75,13 @@ mixin template Linear()
             enum fragment = [FieldNameTuple!T].map!(field => field ~ op ~ "rhs." ~ field).join(",");
             return mixin("T(" ~ fragment ~ ")");
         }
+
+        T opOpAssign(string op)(inout T rhs) if (["+", "-", "*", "/"].canFind(op))
+        {
+            static foreach (field; [FieldNameTuple!T])
+                mixin(field ~ op ~ "= rhs." ~ field ~ ";");
+            return this;
+        }
     }
 
     inout T opBinary(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
@@ -87,6 +94,13 @@ mixin template Linear()
     {
         enum fragment = [FieldNameTuple!T].map!(field => "lhs" ~ op ~ field).join(",");
         return mixin("T(" ~ fragment ~ ")");
+    }
+
+    T opOpAssign(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
+    {
+        static foreach (field; [FieldNameTuple!T])
+            mixin(field ~ op ~ "= rhs;");
+        return this;
     }
 }
 
