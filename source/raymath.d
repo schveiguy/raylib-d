@@ -3,7 +3,7 @@ module raymath;
 import raylib;
 /**********************************************************************************************
 *
-*   raymath v1.2 - Math functions to work with Vector3, Matrix and Quaternions
+*   raymath v1.5 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
 *
 *   CONFIGURATION:
 *
@@ -12,13 +12,18 @@ import raylib;
 *       If not defined, the library is in header only mode and can be included in other headers
 *       or source files without problems. But only ONE file should hold the implementation.
 *
-*   #define RAYMATH_HEADER_ONLY
+*   #define RAYMATH_STATIC_INLINE
 *       Define static inline functions code, so #include header suffices for use.
 *       This may use up lots of memory.
 *
-*   #define RAYMATH_STANDALONE
-*       Avoid raylib.h header inclusion in this file.
-*       Vector3 and Matrix data types are defined internally in raymath module.
+*   CONVENTIONS:
+*
+*     - Functions are always self-contained, no function use another raymath function inside,
+*       required code is directly re-implemented inside
+*     - Functions input parameters are always received by value (2 unavoidable exceptions)
+*     - Functions use always a "result" anmed variable for return
+*     - Functions are always defined inline
+*     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
 *
 *
 *   LICENSE: zlib/libpng
@@ -44,10 +49,7 @@ import raylib;
 
 extern (C) @nogc nothrow:
 
-//#define RAYMATH_STANDALONE      // NOTE: To use raymath as standalone lib, just uncomment this line
-//#define RAYMATH_HEADER_ONLY     // NOTE: To compile functions as static inline, uncomment this line
-
-// Required for structs: Vector3, Matrix
+// Function specifiers definition
 
 // We are building raylib as a Win32 shared library (.dll).
 
@@ -63,14 +65,20 @@ extern (C) @nogc nothrow:
 // Defines and Macros
 //----------------------------------------------------------------------------------
 
-// Return float vector for Matrix
+enum PI = 3.14159265358979323846f;
+
+enum DEG2RAD = PI / 180.0f;
+
+enum RAD2DEG = 180.0f / PI;
+
+// Get float vector for Matrix
 
 extern (D) auto MatrixToFloat(T)(auto ref T mat)
 {
     return MatrixToFloatV(mat).v;
 }
 
-// Return float vector for Vector3
+// Get float vector for Vector3
 
 extern (D) auto Vector3ToFloat(T)(auto ref T vec)
 {
@@ -91,6 +99,11 @@ extern (D) auto Vector3ToFloat(T)(auto ref T vec)
 
 // Matrix type (OpenGL style 4x4 - right handed, column major)
 
+// Matrix first row (4 components)
+// Matrix second row (4 components)
+// Matrix third row (4 components)
+// Matrix fourth row (4 components)
+
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
 struct float3
 {
@@ -102,7 +115,7 @@ struct float16
     float[16] v;
 }
 
-// Required for: sinf(), cosf(), sqrtf(), tan(), fabs()
+// Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), fminf(), fmaxf(), fabs()
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Utils math
@@ -181,10 +194,12 @@ Vector2 Vector2Normalize(Vector2 v);
 Vector2 Vector2Lerp(Vector2 v1, Vector2 v2, float amount);
 
 // Calculate reflected vector to normal
+
+// Dot product
 Vector2 Vector2Reflect(Vector2 v, Vector2 normal);
 
-// Rotate Vector by float in Degrees.
-Vector2 Vector2Rotate(Vector2 v, float degs);
+// Rotate vector by angle
+Vector2 Vector2Rotate(Vector2 v, float angle);
 
 // Move Vector towards target
 Vector2 Vector2MoveTowards(Vector2 v, Vector2 target, float maxDistance);
@@ -221,6 +236,8 @@ Vector3 Vector3Multiply(Vector3 v1, Vector3 v2);
 Vector3 Vector3CrossProduct(Vector3 v1, Vector3 v2);
 
 // Calculate one vector perpendicular vector
+
+// Cross product between vectors
 Vector3 Vector3Perpendicular(Vector3 v);
 
 // Calculate vector length
@@ -235,6 +252,12 @@ float Vector3DotProduct(Vector3 v1, Vector3 v2);
 // Calculate distance between two vectors
 float Vector3Distance(Vector3 v1, Vector3 v2);
 
+// Calculate angle between two vectors in XY and XZ
+
+// Angle in XZ
+// Angle in XY
+Vector2 Vector3Angle(Vector3 v1, Vector3 v2);
+
 // Negate provided vector (invert direction)
 Vector3 Vector3Negate(Vector3 v);
 
@@ -247,6 +270,14 @@ Vector3 Vector3Normalize(Vector3 v);
 // Orthonormalize provided vectors
 // Makes vectors normalized and orthogonal to each other
 // Gram-Schmidt function implementation
+
+// Vector3Normalize(*v1);
+
+// Vector3CrossProduct(*v1, *v2)
+
+// Vector3Normalize(vn1);
+
+// Vector3CrossProduct(vn1, *v1)
 void Vector3OrthoNormalize(Vector3* v1, Vector3* v2);
 
 // Transforms a Vector3 by a given Matrix
@@ -262,22 +293,48 @@ Vector3 Vector3Lerp(Vector3 v1, Vector3 v2, float amount);
 
 // I is the original vector
 // N is the normal of the incident plane
-// R = I - (2*N*( DotProduct[ I,N] ))
+// R = I - (2*N*(DotProduct[I, N]))
 Vector3 Vector3Reflect(Vector3 v, Vector3 normal);
 
-// Return min value for each pair of components
+// Get min value for each pair of components
 Vector3 Vector3Min(Vector3 v1, Vector3 v2);
 
-// Return max value for each pair of components
+// Get max value for each pair of components
 Vector3 Vector3Max(Vector3 v1, Vector3 v2);
 
 // Compute barycenter coordinates (u, v, w) for point p with respect to triangle (a, b, c)
 // NOTE: Assumes P is on the plane of the triangle
 
-//Vector v0 = b - a, v1 = c - a, v2 = p - a;
+// Vector3Subtract(b, a)
+// Vector3Subtract(c, a)
+// Vector3Subtract(p, a)
+// Vector3DotProduct(v0, v0)
+// Vector3DotProduct(v0, v1)
+// Vector3DotProduct(v1, v1)
+// Vector3DotProduct(v2, v0)
+// Vector3DotProduct(v2, v1)
 Vector3 Vector3Barycenter(Vector3 p, Vector3 a, Vector3 b, Vector3 c);
 
-// Returns Vector3 as float array
+// Projects a Vector3 from screen space into object space
+// NOTE: We are avoiding calling other raymath functions despite available
+
+// Calculate unproject matrix (multiply view patrix by projection matrix) and invert it
+// MatrixMultiply(view, projection);
+
+// Calculate inverted matrix -> MatrixInvert(matViewProj);
+// Cache the matrix values (speed optimization)
+
+// Calculate the invert determinant (inlined to avoid double-caching)
+
+// Create quaternion from source point
+
+// Multiply quat point by unproject matrix
+// QuaternionTransform(quat, matViewProjInv)
+
+// Normalized world points in vectors
+Vector3 Vector3Unproject(Vector3 source, Matrix projection, Matrix view);
+
+// Get Vector3 as float array
 float3 Vector3ToFloatV(Vector3 v);
 
 //----------------------------------------------------------------------------------
@@ -289,7 +346,7 @@ float3 Vector3ToFloatV(Vector3 v);
 // Cache the matrix values (speed optimization)
 float MatrixDeterminant(Matrix mat);
 
-// Returns the trace of the matrix (sum of the values along the diagonal)
+// Get the trace of the matrix (sum of the values along the diagonal)
 float MatrixTrace(Matrix mat);
 
 // Transposes provided matrix
@@ -303,9 +360,13 @@ Matrix MatrixTranspose(Matrix mat);
 Matrix MatrixInvert(Matrix mat);
 
 // Normalize provided matrix
+
+// Cache the matrix values (speed optimization)
+
+// MatrixDeterminant(mat)
 Matrix MatrixNormalize(Matrix mat);
 
-// Returns identity matrix
+// Get identity matrix
 Matrix MatrixIdentity();
 
 // Add two matrices
@@ -314,36 +375,44 @@ Matrix MatrixAdd(Matrix left, Matrix right);
 // Subtract two matrices (left - right)
 Matrix MatrixSubtract(Matrix left, Matrix right);
 
-// Returns two matrix multiplication
+// Get two matrix multiplication
 // NOTE: When multiplying matrices... the order matters!
 Matrix MatrixMultiply(Matrix left, Matrix right);
 
-// Returns translation matrix
+// Get translation matrix
 Matrix MatrixTranslate(float x, float y, float z);
 
 // Create rotation matrix from axis and angle
 // NOTE: Angle should be provided in radians
 Matrix MatrixRotate(Vector3 axis, float angle);
 
-// Returns x-rotation matrix (angle in radians)
+// Get x-rotation matrix (angle in radians)
+
+// MatrixIdentity()
 Matrix MatrixRotateX(float angle);
 
-// Returns y-rotation matrix (angle in radians)
+// Get y-rotation matrix (angle in radians)
+
+// MatrixIdentity()
 Matrix MatrixRotateY(float angle);
 
-// Returns z-rotation matrix (angle in radians)
+// Get z-rotation matrix (angle in radians)
+
+// MatrixIdentity()
 Matrix MatrixRotateZ(float angle);
 
-// Returns xyz-rotation matrix (angles in radians)
+// Get xyz-rotation matrix (angles in radians)
+
+// MatrixIdentity()
 Matrix MatrixRotateXYZ(Vector3 ang);
 
-// Returns zyx-rotation matrix (angles in radians)
+// Get zyx-rotation matrix (angles in radians)
 Matrix MatrixRotateZYX(Vector3 ang);
 
-// Returns scaling matrix
+// Get scaling matrix
 Matrix MatrixScale(float x, float y, float z);
 
-// Returns perspective projection matrix
+// Get perspective projection matrix
 Matrix MatrixFrustum(
     double left,
     double right,
@@ -352,11 +421,13 @@ Matrix MatrixFrustum(
     double near,
     double far);
 
-// Returns perspective projection matrix
+// Get perspective projection matrix
 // NOTE: Angle should be provided in radians
+
+// MatrixFrustum(-right, right, -top, top, near, far);
 Matrix MatrixPerspective(double fovy, double aspect, double near, double far);
 
-// Returns orthographic projection matrix
+// Get orthographic projection matrix
 Matrix MatrixOrtho(
     double left,
     double right,
@@ -365,10 +436,24 @@ Matrix MatrixOrtho(
     double near,
     double far);
 
-// Returns camera look-at matrix (view matrix)
+// Get camera look-at matrix (view matrix)
+
+// Vector3Subtract(eye, target)
+
+// Vector3Normalize(vz)
+
+// Vector3CrossProduct(up, vz)
+
+// Vector3Normalize(x)
+
+// Vector3CrossProduct(vz, vx)
+
+// Vector3DotProduct(vx, eye)
+// Vector3DotProduct(vy, eye)
+// Vector3DotProduct(vz, eye)
 Matrix MatrixLookAt(Vector3 eye, Vector3 target, Vector3 up);
 
-// Returns float array of matrix data
+// Get float array of matrix data
 float16 MatrixToFloatV(Matrix mat);
 
 //----------------------------------------------------------------------------------
@@ -387,7 +472,7 @@ Quaternion QuaternionSubtract(Quaternion q1, Quaternion q2);
 // Subtract quaternion and float value
 Quaternion QuaternionSubtractValue(Quaternion q, float sub);
 
-// Returns identity quaternion
+// Get identity quaternion
 Quaternion QuaternionIdentity();
 
 // Computes the length of a quaternion
@@ -412,6 +497,10 @@ Quaternion QuaternionDivide(Quaternion q1, Quaternion q2);
 Quaternion QuaternionLerp(Quaternion q1, Quaternion q2, float amount);
 
 // Calculate slerp-optimized interpolation between two quaternions
+
+// QuaternionLerp(q1, q2, amount)
+
+// QuaternionNormalize(q);
 Quaternion QuaternionNlerp(Quaternion q1, Quaternion q2, float amount);
 
 // Calculates spherical linear interpolation between two quaternions
@@ -419,58 +508,52 @@ Quaternion QuaternionSlerp(Quaternion q1, Quaternion q2, float amount);
 
 // Calculate quaternion based on the rotation from one vector to another
 
-// NOTE: Added QuaternioIdentity()
+// Vector3DotProduct(from, to)
+// Vector3CrossProduct(from, to)
 
-// Normalize to essentially nlerp the original and identity to 0.5
-
-// Above lines are equivalent to:
-//Quaternion result = QuaternionNlerp(q, QuaternionIdentity(), 0.5f);
+// QuaternionNormalize(q);
+// NOTE: Normalize to essentially nlerp the original and identity to 0.5
 Quaternion QuaternionFromVector3ToVector3(Vector3 from, Vector3 to);
 
-// Returns a quaternion for a given rotation matrix
+// Get a quaternion for a given rotation matrix
 Quaternion QuaternionFromMatrix(Matrix mat);
 
-// Returns a matrix for a given quaternion
+// Get a matrix for a given quaternion
 
-//, d2=2*(q.w*q.w);
+// MatrixIdentity()
 Matrix QuaternionToMatrix(Quaternion q);
 
-// Returns rotation quaternion for an angle and axis
+// Get rotation quaternion for an angle and axis
 // NOTE: angle must be provided in radians
+
+// Vector3Normalize(axis)
+
+// QuaternionNormalize(q);
 Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle);
 
-// Returns the rotation angle and axis for a given quaternion
+// Get the rotation angle and axis for a given quaternion
+
+// QuaternionNormalize(q);
 
 // This occurs when the angle is zero.
 // Not a problem: just set an arbitrary normalized axis.
 void QuaternionToAxisAngle(Quaternion q, Vector3* outAxis, float* outAngle);
 
-// Returns the quaternion equivalent to Euler angles
+// Get the quaternion equivalent to Euler angles
 // NOTE: Rotation order is ZYX
 Quaternion QuaternionFromEuler(float pitch, float yaw, float roll);
 
-// Return the Euler angles equivalent to quaternion (roll, pitch, yaw)
-// NOTE: Angles are returned in a Vector3 struct in degrees
+// Get the Euler angles equivalent to quaternion (roll, pitch, yaw)
+// NOTE: Angles are returned in a Vector3 struct in radians
 
-// roll (x-axis rotation)
+// Roll (x-axis rotation)
 
-// pitch (y-axis rotation)
+// Pitch (y-axis rotation)
 
-// yaw (z-axis rotation)
+// Yaw (z-axis rotation)
 Vector3 QuaternionToEuler(Quaternion q);
 
 // Transform a quaternion given a transformation matrix
 Quaternion QuaternionTransform(Quaternion q, Matrix mat);
-
-// Projects a Vector3 from screen space into object space
-
-// Calculate unproject matrix (multiply view patrix by projection matrix) and invert it
-
-// Create quaternion from source point
-
-// Multiply quat point by unproject matrix
-
-// Normalized world points in vectors
-Vector3 Vector3Unproject(Vector3 source, Matrix projection, Matrix view);
 
 // RAYMATH_H

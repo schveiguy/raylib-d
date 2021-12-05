@@ -10,20 +10,20 @@ public
 }
 /**********************************************************************************************
 *
-*   raylib - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
+*   raylib v4.0 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
 *
 *   FEATURES:
 *       - NO external dependencies, all required libraries included with raylib
 *       - Multiplatform: Windows, Linux, FreeBSD, OpenBSD, NetBSD, DragonFly,
-*                        MacOS, Haiku, UWP, Android, Raspberry Pi, HTML5.
+*                        MacOS, Haiku, Android, Raspberry Pi, DRM native, HTML5.
 *       - Written in plain C code (C99) in PascalCase/camelCase notation
-*       - Hardware accelerated with OpenGL (1.1, 2.1, 3.3 or ES2 - choose at compile)
+*       - Hardware accelerated with OpenGL (1.1, 2.1, 3.3, 4.3 or ES2 - choose at compile)
 *       - Unique OpenGL abstraction layer (usable as standalone module): [rlgl]
 *       - Multiple Fonts formats supported (TTF, XNA fonts, AngelCode fonts)
 *       - Outstanding texture formats support, including compressed formats (DXT, ETC, ASTC)
 *       - Full 3d support for 3d Shapes, Models, Billboards, Heightmaps and more!
 *       - Flexible Materials system, supporting classic maps and PBR maps
-*       - Animated 3D models supported (skeletal bones animation) (IQM, glTF)
+*       - Animated 3D models supported (skeletal bones animation) (IQM)
 *       - Shaders support, including Model shaders and Postprocessing shaders
 *       - Powerful math module for Vector, Matrix and Quaternion operations: [raymath]
 *       - Audio loading and playing with streaming support (WAV, OGG, MP3, FLAC, XM, MOD)
@@ -31,29 +31,28 @@ public
 *       - Bindings to multiple programming languages available!
 *
 *   NOTES:
-*       One default Font is loaded on InitWindow()->LoadFontDefault() [core, text]
-*       One default Texture2D is loaded on rlglInit() [rlgl] (OpenGL 3.3 or ES2)
-*       One default Shader is loaded on rlglInit()->rlLoadShaderDefault() [rlgl] (OpenGL 3.3 or ES2)
-*       One default RenderBatch is loaded on rlglInit()->rlLoadRenderBatch() [rlgl] (OpenGL 3.3 or ES2)
+*       - One default Font is loaded on InitWindow()->LoadFontDefault() [core, text]
+*       - One default Texture2D is loaded on rlglInit(), 1x1 white pixel R8G8B8A8 [rlgl] (OpenGL 3.3 or ES2)
+*       - One default Shader is loaded on rlglInit()->rlLoadShaderDefault() [rlgl] (OpenGL 3.3 or ES2)
+*       - One default RenderBatch is loaded on rlglInit()->rlLoadRenderBatch() [rlgl] (OpenGL 3.3 or ES2)
 *
 *   DEPENDENCIES (included):
-*       [core] rglfw (Camilla Löwy - github.com/glfw/glfw) for window/context management and input (PLATFORM_DESKTOP)
+*       [rcore] rglfw (Camilla Löwy - github.com/glfw/glfw) for window/context management and input (PLATFORM_DESKTOP)
 *       [rlgl] glad (David Herberth - github.com/Dav1dde/glad) for OpenGL 3.3 extensions loading (PLATFORM_DESKTOP)
-*       [raudio] miniaudio (David Reid - github.com/dr-soft/miniaudio) for audio device/context management
+*       [raudio] miniaudio (David Reid - github.com/mackron/miniaudio) for audio device/context management
 *
 *   OPTIONAL DEPENDENCIES (included):
-*       [core] msf_gif (Miles Fogle) for GIF recording
-*       [core] sinfl (Micha Mettke) for DEFLATE decompression algorythm
-*       [core] sdefl (Micha Mettke) for DEFLATE compression algorythm
-*       [textures] stb_image (Sean Barret) for images loading (BMP, TGA, PNG, JPEG, HDR...)
-*       [textures] stb_image_write (Sean Barret) for image writting (BMP, TGA, PNG, JPG)
-*       [textures] stb_image_resize (Sean Barret) for image resizing algorithms
-*       [textures] stb_perlin (Sean Barret) for Perlin noise image generation
-*       [text] stb_truetype (Sean Barret) for ttf fonts loading
-*       [text] stb_rect_pack (Sean Barret) for rectangles packing
-*       [models] par_shapes (Philip Rideout) for parametric 3d shapes generation
-*       [models] tinyobj_loader_c (Syoyo Fujita) for models loading (OBJ, MTL)
-*       [models] cgltf (Johannes Kuhlmann) for models loading (glTF)
+*       [rcore] msf_gif (Miles Fogle) for GIF recording
+*       [rcore] sinfl (Micha Mettke) for DEFLATE decompression algorythm
+*       [rcore] sdefl (Micha Mettke) for DEFLATE compression algorythm
+*       [rtextures] stb_image (Sean Barret) for images loading (BMP, TGA, PNG, JPEG, HDR...)
+*       [rtextures] stb_image_write (Sean Barret) for image writing (BMP, TGA, PNG, JPG)
+*       [rtextures] stb_image_resize (Sean Barret) for image resizing algorithms
+*       [rtext] stb_truetype (Sean Barret) for ttf fonts loading
+*       [rtext] stb_rect_pack (Sean Barret) for rectangles packing
+*       [rmodels] par_shapes (Philip Rideout) for parametric 3d shapes generation
+*       [rmodels] tinyobj_loader_c (Syoyo Fujita) for models loading (OBJ, MTL)
+*       [rmodels] cgltf (Johannes Kuhlmann) for models loading (glTF)
 *       [raudio] dr_wav (David Reid) for WAV audio file loading
 *       [raudio] dr_flac (David Reid) for FLAC audio file loading
 *       [raudio] dr_mp3 (David Reid) for MP3 audio file loading
@@ -93,13 +92,14 @@ extern (C) @nogc nothrow:
 
 // Required for: va_list - Only used by TraceLogCallback
 
-// Microsoft attibutes to tell compiler that symbols are imported/exported from a .dll
+enum RAYLIB_VERSION = "4.0";
 
-// We are building raylib as a Win32 shared library (.dll)
+// Function specifiers in case library is build/used as a shared library (Windows)
+// NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
 
-// We are using raylib as a Win32 shared library (.dll)
+// We are building the library as a Win32 shared library (.dll)
 
-// We are building or using raylib as a static library // We are building or using raylib as a static library (or Linux shared library)
+// We are using the library as a Win32 shared library (.dll) // Functions defined as 'extern' by default (implicit specifiers)
 
 //----------------------------------------------------------------------------------
 // Some basic Defines
@@ -108,60 +108,76 @@ extern (C) @nogc nothrow:
 enum PI = 3.14159265358979323846f;
 
 enum DEG2RAD = PI / 180.0f;
+
 enum RAD2DEG = 180.0f / PI;
 
 // Allow custom memory allocators
 
 // NOTE: MSVC C++ compiler does not support compound literals (C99 feature)
-// Plain structures in C++ (without constructors) can be initialized from { } initializers.
+// Plain structures in C++ (without constructors) can be initialized with { }
 
 extern (D) auto CLITERAL(T)(auto ref T type)
 {
     return type;
 }
 
+// NOTE: We set some defines with some data types declared by raylib
+// Other modules (raymath, rlgl) also require some of those types, so,
+// to be able to use those other modules as standalone (not depending on raylib)
+// this defines are very useful for internal check and avoid type (re)definitions
+
 // Some Basic Colors
 // NOTE: Custom raylib color palette for amazing visuals on WHITE background // Light Gray // Gray // Dark Gray // Yellow // Gold // Orange // Pink // Red // Maroon // Green // Lime // Dark Green // Sky Blue // Blue // Dark Blue // Purple // Violet // Dark Purple // Beige // Brown // Dark Brown // White // Black // Blank (Transparent) // Magenta // My own White (raylib logo)
-
-// Temporal hacks to avoid breaking old codebases using
-// deprecated raylib implementation or definitions
-alias FormatText = TextFormat;
-alias LoadText = LoadFileText;
-alias GetExtension = GetFileExtension;
-alias GetImageData = LoadImageColors;
-alias FILTER_POINT = TextureFilter.TEXTURE_FILTER_POINT;
-alias FILTER_BILINEAR = TextureFilter.TEXTURE_FILTER_BILINEAR;
-alias MAP_DIFFUSE = MATERIAL_MAP_DIFFUSE;
-alias PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 = PixelFormat.PIXELFORMAT_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
 //----------------------------------------------------------------------------------
 // Structures Definition
 //----------------------------------------------------------------------------------
 // Boolean type
 
-// Vector2 type
+// Vector2, 2 components
 
-// Vector3 type
+// Vector x component
+// Vector y component
 
-// Vector4 type
+// Vector3, 3 components
 
-// Quaternion type, same as Vector4
+// Vector x component
+// Vector y component
+// Vector z component
 
-// Matrix type (OpenGL style 4x4 - right handed, column major)
+// Vector4, 4 components
 
-// Color type, RGBA (32bit)
+// Vector x component
+// Vector y component
+// Vector z component
+// Vector w component
+
+// Quaternion, 4 components (Vector4 alias)
+
+// Matrix, 4x4 components, column major, OpenGL style, right handed
+
+// Matrix first row (4 components)
+// Matrix second row (4 components)
+// Matrix third row (4 components)
+// Matrix fourth row (4 components)
+
+// Color, 4 components, R8G8B8A8 (32bit)
 struct Color
 {
-    ubyte r;
-    ubyte g;
-    ubyte b;
-    ubyte a;
+    ubyte r; // Color red value
+    ubyte g; // Color green value
+    ubyte b; // Color blue value
+    ubyte a; // Color alpha value
 }
 
-// Rectangle type
+// Rectangle, 4 components
 
-// Image type, bpp always RGBA (32bit)
-// NOTE: Data stored in CPU memory (RAM)
+// Rectangle top-left corner position x
+// Rectangle top-left corner position y
+// Rectangle width
+// Rectangle height
+
+// Image, pixel data stored in CPU memory (RAM)
 struct Image
 {
     void* data; // Image raw data
@@ -171,8 +187,7 @@ struct Image
     int format; // Data format (PixelFormat type)
 }
 
-// Texture type
-// NOTE: Data stored in GPU memory
+// Texture, tex data stored in GPU memory (VRAM)
 struct Texture
 {
     uint id; // OpenGL texture id
@@ -182,13 +197,13 @@ struct Texture
     int format; // Data format (PixelFormat type)
 }
 
-// Texture2D type, same as Texture
+// Texture2D, same as Texture
 alias Texture2D = Texture;
 
-// TextureCubemap type, actually, same as Texture
+// TextureCubemap, same as Texture
 alias TextureCubemap = Texture;
 
-// RenderTexture type, for texture rendering
+// RenderTexture, fbo for texture rendering
 struct RenderTexture
 {
     uint id; // OpenGL framebuffer object id
@@ -196,10 +211,10 @@ struct RenderTexture
     Texture depth; // Depth buffer attachment texture
 }
 
-// RenderTexture2D type, same as RenderTexture
+// RenderTexture2D, same as RenderTexture
 alias RenderTexture2D = RenderTexture;
 
-// N-Patch layout info
+// NPatchInfo, n-patch layout info
 struct NPatchInfo
 {
     Rectangle source; // Texture source rectangle
@@ -210,8 +225,8 @@ struct NPatchInfo
     int layout; // Layout of the n-patch: 3x3, 1x3 or 3x1
 }
 
-// Font character info
-struct CharInfo
+// GlyphInfo, font characters glyphs info
+struct GlyphInfo
 {
     int value; // Character value (Unicode)
     int offsetX; // Character offset X when drawing
@@ -220,20 +235,18 @@ struct CharInfo
     Image image; // Character image data
 }
 
-// Font type, includes texture and charSet array data
+// Font, font texture and GlyphInfo array data
 struct Font
 {
     int baseSize; // Base size (default chars height)
-    int charsCount; // Number of characters
-    int charsPadding; // Padding around the chars
-    Texture2D texture; // Characters texture atlas
-    Rectangle* recs; // Characters rectangles in texture
-    CharInfo* chars; // Characters info data
+    int glyphCount; // Number of glyph characters
+    int glyphPadding; // Padding around the glyph characters
+    Texture2D texture; // Texture atlas containing the glyphs
+    Rectangle* recs; // Rectangles in texture for the glyphs
+    GlyphInfo* glyphs; // Glyphs info data
 }
 
-alias SpriteFont = Font; // SpriteFont type fallback, defaults to Font
-
-// Camera type, defines a camera position/orientation in 3d space
+// Camera, defines position/orientation in 3d space
 struct Camera3D
 {
     Vector3 position; // Camera position
@@ -245,7 +258,7 @@ struct Camera3D
 
 alias Camera = Camera3D; // Camera type fallback, defaults to Camera3D
 
-// Camera2D type, defines a 2d camera
+// Camera2D, defines position/orientation in 2d space
 struct Camera2D
 {
     Vector2 offset; // Camera offset (displacement from target)
@@ -254,14 +267,13 @@ struct Camera2D
     float zoom; // Camera zoom (scaling), should be 1.0f by default
 }
 
-// Vertex data definning a mesh
-// NOTE: Data stored in CPU memory (and GPU)
+// Mesh, vertex data and vao/vbo
 struct Mesh
 {
     int vertexCount; // Number of vertices stored in arrays
     int triangleCount; // Number of triangles stored (indexed or not)
 
-    // Default vertex data
+    // Vertex attributes data
     float* vertices; // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
     float* texcoords; // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
     float* texcoords2; // Vertex second texture coordinates (useful for lightmaps) (shader-location = 5)
@@ -273,7 +285,7 @@ struct Mesh
     // Animation vertex data
     float* animVertices; // Animated vertex positions (after bones transformations)
     float* animNormals; // Animated normals (after bones transformations)
-    int* boneIds; // Vertex bone ids, up to 4 bones influence by vertex (skinning)
+    ubyte* boneIds; // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
     float* boneWeights; // Vertex bone weight, up to 4 bones influence by vertex (skinning)
 
     // OpenGL identifiers
@@ -281,14 +293,14 @@ struct Mesh
     uint* vboId; // OpenGL Vertex Buffer Objects id (default vertex data)
 }
 
-// Shader type (generic)
+// Shader
 struct Shader
 {
     uint id; // Shader program id
-    int* locs; // Shader locations array (MAX_SHADER_LOCATIONS)
+    int* locs; // Shader locations array (RL_MAX_SHADER_LOCATIONS)
 }
 
-// Material texture map
+// MaterialMap
 struct MaterialMap
 {
     Texture2D texture; // Material map texture
@@ -296,7 +308,7 @@ struct MaterialMap
     float value; // Material map value
 }
 
-// Material type (generic)
+// Material, includes shader and maps
 struct Material
 {
     Shader shader; // Material shader
@@ -304,7 +316,7 @@ struct Material
     float[4] params; // Material generic parameters (if required)
 }
 
-// Transformation properties
+// Transform, vectex transformation data
 struct Transform
 {
     Vector3 translation; // Translation
@@ -312,14 +324,14 @@ struct Transform
     Vector3 scale; // Scale
 }
 
-// Bone information
+// Bone, skeletal animation bone
 struct BoneInfo
 {
     char[32] name; // Bone name
     int parent; // Bone parent
 }
 
-// Model type
+// Model, meshes, materials and animation data
 struct Model
 {
     Matrix transform; // Local transform matrix
@@ -336,7 +348,7 @@ struct Model
     Transform* bindPose; // Bones base transformation (pose)
 }
 
-// Model animation
+// ModelAnimation
 struct ModelAnimation
 {
     int boneCount; // Number of bones
@@ -345,72 +357,70 @@ struct ModelAnimation
     Transform** framePoses; // Poses array by frame
 }
 
-// Ray type (useful for raycast)
+// Ray, ray for raycasting
 struct Ray
 {
     Vector3 position; // Ray position (origin)
     Vector3 direction; // Ray direction
 }
 
-// Raycast hit information
-struct RayHitInfo
+// RayCollision, ray hit information
+struct RayCollision
 {
     bool hit; // Did the ray hit something?
     float distance; // Distance to nearest hit
-    Vector3 position; // Position of nearest hit
+    Vector3 point; // Point of nearest hit
     Vector3 normal; // Surface normal of hit
 }
 
-// Bounding box type
+// BoundingBox
 struct BoundingBox
 {
     Vector3 min; // Minimum vertex box-corner
     Vector3 max; // Maximum vertex box-corner
 }
 
-// Wave type, defines audio wave data
+// Wave, audio wave data
 struct Wave
 {
-    uint sampleCount; // Total number of samples
+    uint frameCount; // Total number of frames (considering channels)
     uint sampleRate; // Frequency (samples per second)
     uint sampleSize; // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
-    uint channels; // Number of channels (1-mono, 2-stereo)
+    uint channels; // Number of channels (1-mono, 2-stereo, ...)
     void* data; // Buffer data pointer
 }
 
 struct rAudioBuffer;
 
-// Audio stream type
-// NOTE: Useful to create custom audio streams not bound to a specific file
+// AudioStream, custom audio stream
 struct AudioStream
 {
     rAudioBuffer* buffer; // Pointer to internal data used by the audio system
 
     uint sampleRate; // Frequency (samples per second)
     uint sampleSize; // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
-    uint channels; // Number of channels (1-mono, 2-stereo)
+    uint channels; // Number of channels (1-mono, 2-stereo, ...)
 }
 
-// Sound source type
+// Sound
 struct Sound
 {
     AudioStream stream; // Audio stream
-    uint sampleCount; // Total number of samples
+    uint frameCount; // Total number of frames (considering channels)
 }
 
-// Music stream type (audio file streaming from memory)
-// NOTE: Anything longer than ~10 seconds should be streamed
+// Music, audio stream, anything longer than ~10 seconds should be streamed
 struct Music
 {
     AudioStream stream; // Audio stream
-    uint sampleCount; // Total number of samples
+    uint frameCount; // Total number of frames (considering channels)
     bool looping; // Music looping enable
 
     int ctxType; // Type of music context (audio filetype)
     void* ctxData; // Audio context data, depends on type
 }
 
-// Head-Mounted-Display device parameters
+// VrDeviceInfo, Head-Mounted-Display device parameters
 struct VrDeviceInfo
 {
     int hResolution; // Horizontal resolution in pixels
@@ -425,7 +435,7 @@ struct VrDeviceInfo
     float[4] chromaAbCorrection; // Chromatic aberration correction parameters
 }
 
-// VR Stereo rendering configuration for simulator
+// VrStereoConfig, VR stereo rendering configuration for simulator
 struct VrStereoConfig
 {
     Matrix[2] projection; // VR projection matrices (per eye)
@@ -463,15 +473,16 @@ enum ConfigFlags
 }
 
 // Trace log level
+// NOTE: Organized by priority level
 enum TraceLogLevel
 {
     LOG_ALL = 0, // Display all logs
-    LOG_TRACE = 1,
-    LOG_DEBUG = 2,
-    LOG_INFO = 3,
-    LOG_WARNING = 4,
-    LOG_ERROR = 5,
-    LOG_FATAL = 6,
+    LOG_TRACE = 1, // Trace logging, intended for internal use only
+    LOG_DEBUG = 2, // Debug logging, used for internal debugging, it should be disabled on release builds
+    LOG_INFO = 3, // Info logging, used for program execution info
+    LOG_WARNING = 4, // Warning logging, used on recoverable failures
+    LOG_ERROR = 5, // Error logging, used on unrecoverable failures
+    LOG_FATAL = 6, // Fatal logging, used to abort program: exit(EXIT_FAILURE)
     LOG_NONE = 7 // Disable logging
 }
 
@@ -480,143 +491,150 @@ enum TraceLogLevel
 // required keys for alternative layouts
 enum KeyboardKey
 {
-    KEY_NULL = 0,
+    KEY_NULL = 0, // Key: NULL, used for no key pressed
     // Alphanumeric keys
-    KEY_APOSTROPHE = 39,
-    KEY_COMMA = 44,
-    KEY_MINUS = 45,
-    KEY_PERIOD = 46,
-    KEY_SLASH = 47,
-    KEY_ZERO = 48,
-    KEY_ONE = 49,
-    KEY_TWO = 50,
-    KEY_THREE = 51,
-    KEY_FOUR = 52,
-    KEY_FIVE = 53,
-    KEY_SIX = 54,
-    KEY_SEVEN = 55,
-    KEY_EIGHT = 56,
-    KEY_NINE = 57,
-    KEY_SEMICOLON = 59,
-    KEY_EQUAL = 61,
-    KEY_A = 65,
-    KEY_B = 66,
-    KEY_C = 67,
-    KEY_D = 68,
-    KEY_E = 69,
-    KEY_F = 70,
-    KEY_G = 71,
-    KEY_H = 72,
-    KEY_I = 73,
-    KEY_J = 74,
-    KEY_K = 75,
-    KEY_L = 76,
-    KEY_M = 77,
-    KEY_N = 78,
-    KEY_O = 79,
-    KEY_P = 80,
-    KEY_Q = 81,
-    KEY_R = 82,
-    KEY_S = 83,
-    KEY_T = 84,
-    KEY_U = 85,
-    KEY_V = 86,
-    KEY_W = 87,
-    KEY_X = 88,
-    KEY_Y = 89,
-    KEY_Z = 90,
-
+    KEY_APOSTROPHE = 39, // Key: '
+    KEY_COMMA = 44, // Key: ,
+    KEY_MINUS = 45, // Key: -
+    KEY_PERIOD = 46, // Key: .
+    KEY_SLASH = 47, // Key: /
+    KEY_ZERO = 48, // Key: 0
+    KEY_ONE = 49, // Key: 1
+    KEY_TWO = 50, // Key: 2
+    KEY_THREE = 51, // Key: 3
+    KEY_FOUR = 52, // Key: 4
+    KEY_FIVE = 53, // Key: 5
+    KEY_SIX = 54, // Key: 6
+    KEY_SEVEN = 55, // Key: 7
+    KEY_EIGHT = 56, // Key: 8
+    KEY_NINE = 57, // Key: 9
+    KEY_SEMICOLON = 59, // Key: ;
+    KEY_EQUAL = 61, // Key: =
+    KEY_A = 65, // Key: A | a
+    KEY_B = 66, // Key: B | b
+    KEY_C = 67, // Key: C | c
+    KEY_D = 68, // Key: D | d
+    KEY_E = 69, // Key: E | e
+    KEY_F = 70, // Key: F | f
+    KEY_G = 71, // Key: G | g
+    KEY_H = 72, // Key: H | h
+    KEY_I = 73, // Key: I | i
+    KEY_J = 74, // Key: J | j
+    KEY_K = 75, // Key: K | k
+    KEY_L = 76, // Key: L | l
+    KEY_M = 77, // Key: M | m
+    KEY_N = 78, // Key: N | n
+    KEY_O = 79, // Key: O | o
+    KEY_P = 80, // Key: P | p
+    KEY_Q = 81, // Key: Q | q
+    KEY_R = 82, // Key: R | r
+    KEY_S = 83, // Key: S | s
+    KEY_T = 84, // Key: T | t
+    KEY_U = 85, // Key: U | u
+    KEY_V = 86, // Key: V | v
+    KEY_W = 87, // Key: W | w
+    KEY_X = 88, // Key: X | x
+    KEY_Y = 89, // Key: Y | y
+    KEY_Z = 90, // Key: Z | z
+    KEY_LEFT_BRACKET = 91, // Key: [
+    KEY_BACKSLASH = 92, // Key: '\'
+    KEY_RIGHT_BRACKET = 93, // Key: ]
+    KEY_GRAVE = 96, // Key: `
     // Function keys
-    KEY_SPACE = 32,
-    KEY_ESCAPE = 256,
-    KEY_ENTER = 257,
-    KEY_TAB = 258,
-    KEY_BACKSPACE = 259,
-    KEY_INSERT = 260,
-    KEY_DELETE = 261,
-    KEY_RIGHT = 262,
-    KEY_LEFT = 263,
-    KEY_DOWN = 264,
-    KEY_UP = 265,
-    KEY_PAGE_UP = 266,
-    KEY_PAGE_DOWN = 267,
-    KEY_HOME = 268,
-    KEY_END = 269,
-    KEY_CAPS_LOCK = 280,
-    KEY_SCROLL_LOCK = 281,
-    KEY_NUM_LOCK = 282,
-    KEY_PRINT_SCREEN = 283,
-    KEY_PAUSE = 284,
-    KEY_F1 = 290,
-    KEY_F2 = 291,
-    KEY_F3 = 292,
-    KEY_F4 = 293,
-    KEY_F5 = 294,
-    KEY_F6 = 295,
-    KEY_F7 = 296,
-    KEY_F8 = 297,
-    KEY_F9 = 298,
-    KEY_F10 = 299,
-    KEY_F11 = 300,
-    KEY_F12 = 301,
-    KEY_LEFT_SHIFT = 340,
-    KEY_LEFT_CONTROL = 341,
-    KEY_LEFT_ALT = 342,
-    KEY_LEFT_SUPER = 343,
-    KEY_RIGHT_SHIFT = 344,
-    KEY_RIGHT_CONTROL = 345,
-    KEY_RIGHT_ALT = 346,
-    KEY_RIGHT_SUPER = 347,
-    KEY_KB_MENU = 348,
-    KEY_LEFT_BRACKET = 91,
-    KEY_BACKSLASH = 92,
-    KEY_RIGHT_BRACKET = 93,
-    KEY_GRAVE = 96,
-
+    KEY_SPACE = 32, // Key: Space
+    KEY_ESCAPE = 256, // Key: Esc
+    KEY_ENTER = 257, // Key: Enter
+    KEY_TAB = 258, // Key: Tab
+    KEY_BACKSPACE = 259, // Key: Backspace
+    KEY_INSERT = 260, // Key: Ins
+    KEY_DELETE = 261, // Key: Del
+    KEY_RIGHT = 262, // Key: Cursor right
+    KEY_LEFT = 263, // Key: Cursor left
+    KEY_DOWN = 264, // Key: Cursor down
+    KEY_UP = 265, // Key: Cursor up
+    KEY_PAGE_UP = 266, // Key: Page up
+    KEY_PAGE_DOWN = 267, // Key: Page down
+    KEY_HOME = 268, // Key: Home
+    KEY_END = 269, // Key: End
+    KEY_CAPS_LOCK = 280, // Key: Caps lock
+    KEY_SCROLL_LOCK = 281, // Key: Scroll down
+    KEY_NUM_LOCK = 282, // Key: Num lock
+    KEY_PRINT_SCREEN = 283, // Key: Print screen
+    KEY_PAUSE = 284, // Key: Pause
+    KEY_F1 = 290, // Key: F1
+    KEY_F2 = 291, // Key: F2
+    KEY_F3 = 292, // Key: F3
+    KEY_F4 = 293, // Key: F4
+    KEY_F5 = 294, // Key: F5
+    KEY_F6 = 295, // Key: F6
+    KEY_F7 = 296, // Key: F7
+    KEY_F8 = 297, // Key: F8
+    KEY_F9 = 298, // Key: F9
+    KEY_F10 = 299, // Key: F10
+    KEY_F11 = 300, // Key: F11
+    KEY_F12 = 301, // Key: F12
+    KEY_LEFT_SHIFT = 340, // Key: Shift left
+    KEY_LEFT_CONTROL = 341, // Key: Control left
+    KEY_LEFT_ALT = 342, // Key: Alt left
+    KEY_LEFT_SUPER = 343, // Key: Super left
+    KEY_RIGHT_SHIFT = 344, // Key: Shift right
+    KEY_RIGHT_CONTROL = 345, // Key: Control right
+    KEY_RIGHT_ALT = 346, // Key: Alt right
+    KEY_RIGHT_SUPER = 347, // Key: Super right
+    KEY_KB_MENU = 348, // Key: KB menu
     // Keypad keys
-    KEY_KP_0 = 320,
-    KEY_KP_1 = 321,
-    KEY_KP_2 = 322,
-    KEY_KP_3 = 323,
-    KEY_KP_4 = 324,
-    KEY_KP_5 = 325,
-    KEY_KP_6 = 326,
-    KEY_KP_7 = 327,
-    KEY_KP_8 = 328,
-    KEY_KP_9 = 329,
-    KEY_KP_DECIMAL = 330,
-    KEY_KP_DIVIDE = 331,
-    KEY_KP_MULTIPLY = 332,
-    KEY_KP_SUBTRACT = 333,
-    KEY_KP_ADD = 334,
-    KEY_KP_ENTER = 335,
-    KEY_KP_EQUAL = 336,
+    KEY_KP_0 = 320, // Key: Keypad 0
+    KEY_KP_1 = 321, // Key: Keypad 1
+    KEY_KP_2 = 322, // Key: Keypad 2
+    KEY_KP_3 = 323, // Key: Keypad 3
+    KEY_KP_4 = 324, // Key: Keypad 4
+    KEY_KP_5 = 325, // Key: Keypad 5
+    KEY_KP_6 = 326, // Key: Keypad 6
+    KEY_KP_7 = 327, // Key: Keypad 7
+    KEY_KP_8 = 328, // Key: Keypad 8
+    KEY_KP_9 = 329, // Key: Keypad 9
+    KEY_KP_DECIMAL = 330, // Key: Keypad .
+    KEY_KP_DIVIDE = 331, // Key: Keypad /
+    KEY_KP_MULTIPLY = 332, // Key: Keypad *
+    KEY_KP_SUBTRACT = 333, // Key: Keypad -
+    KEY_KP_ADD = 334, // Key: Keypad +
+    KEY_KP_ENTER = 335, // Key: Keypad Enter
+    KEY_KP_EQUAL = 336, // Key: Keypad =
     // Android key buttons
-    KEY_BACK = 4,
-    KEY_MENU = 82,
-    KEY_VOLUME_UP = 24,
-    KEY_VOLUME_DOWN = 25
+    KEY_BACK = 4, // Key: Android back button
+    KEY_MENU = 82, // Key: Android menu button
+    KEY_VOLUME_UP = 24, // Key: Android volume up button
+    KEY_VOLUME_DOWN = 25 // Key: Android volume down button
 }
+
+// Add backwards compatibility support for deprecated names
+enum MOUSE_LEFT_BUTTON = MouseButton.MOUSE_BUTTON_LEFT;
+enum MOUSE_RIGHT_BUTTON = MouseButton.MOUSE_BUTTON_RIGHT;
+enum MOUSE_MIDDLE_BUTTON = MouseButton.MOUSE_BUTTON_MIDDLE;
 
 // Mouse buttons
 enum MouseButton
 {
-    MOUSE_LEFT_BUTTON = 0,
-    MOUSE_RIGHT_BUTTON = 1,
-    MOUSE_MIDDLE_BUTTON = 2
+    MOUSE_BUTTON_LEFT = 0, // Mouse button left
+    MOUSE_BUTTON_RIGHT = 1, // Mouse button right
+    MOUSE_BUTTON_MIDDLE = 2, // Mouse button middle (pressed wheel)
+    MOUSE_BUTTON_SIDE = 3, // Mouse button side (advanced mouse device)
+    MOUSE_BUTTON_EXTRA = 4, // Mouse button extra (advanced mouse device)
+    MOUSE_BUTTON_FORWARD = 5, // Mouse button fordward (advanced mouse device)
+    MOUSE_BUTTON_BACK = 6 // Mouse button back (advanced mouse device)
 }
 
 // Mouse cursor
 enum MouseCursor
 {
-    MOUSE_CURSOR_DEFAULT = 0,
-    MOUSE_CURSOR_ARROW = 1,
-    MOUSE_CURSOR_IBEAM = 2,
-    MOUSE_CURSOR_CROSSHAIR = 3,
-    MOUSE_CURSOR_POINTING_HAND = 4,
-    MOUSE_CURSOR_RESIZE_EW = 5, // The horizontal resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NS = 6, // The vertical resize/move arrow shape
-    MOUSE_CURSOR_RESIZE_NWSE = 7, // The top-left to bottom-right diagonal resize/move arrow shape
+    MOUSE_CURSOR_DEFAULT = 0, // Default pointer shape
+    MOUSE_CURSOR_ARROW = 1, // Arrow shape
+    MOUSE_CURSOR_IBEAM = 2, // Text writing cursor shape
+    MOUSE_CURSOR_CROSSHAIR = 3, // Cross shape
+    MOUSE_CURSOR_POINTING_HAND = 4, // Pointing hand cursor
+    MOUSE_CURSOR_RESIZE_EW = 5, // Horizontal resize/move arrow shape
+    MOUSE_CURSOR_RESIZE_NS = 6, // Vertical resize/move arrow shape
+    MOUSE_CURSOR_RESIZE_NWSE = 7, // Top-left to bottom-right diagonal resize/move arrow shape
     MOUSE_CURSOR_RESIZE_NESW = 8, // The top-right to bottom-left diagonal resize/move arrow shape
     MOUSE_CURSOR_RESIZE_ALL = 9, // The omni-directional resize/move cursor shape
     MOUSE_CURSOR_NOT_ALLOWED = 10 // The operation-not-allowed shape
@@ -625,70 +643,51 @@ enum MouseCursor
 // Gamepad buttons
 enum GamepadButton
 {
-    // This is here just for error checking
-    GAMEPAD_BUTTON_UNKNOWN = 0,
-
-    // This is normally a DPAD
-    GAMEPAD_BUTTON_LEFT_FACE_UP = 1,
-    GAMEPAD_BUTTON_LEFT_FACE_RIGHT = 2,
-    GAMEPAD_BUTTON_LEFT_FACE_DOWN = 3,
-    GAMEPAD_BUTTON_LEFT_FACE_LEFT = 4,
-
-    // This normally corresponds with PlayStation and Xbox controllers
-    // XBOX: [Y,X,A,B]
-    // PS3: [Triangle,Square,Cross,Circle]
-    // No support for 6 button controllers though..
-    GAMEPAD_BUTTON_RIGHT_FACE_UP = 5,
-    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT = 6,
-    GAMEPAD_BUTTON_RIGHT_FACE_DOWN = 7,
-    GAMEPAD_BUTTON_RIGHT_FACE_LEFT = 8,
-
-    // Triggers
-    GAMEPAD_BUTTON_LEFT_TRIGGER_1 = 9,
-    GAMEPAD_BUTTON_LEFT_TRIGGER_2 = 10,
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_1 = 11,
-    GAMEPAD_BUTTON_RIGHT_TRIGGER_2 = 12,
-
-    // These are buttons in the center of the gamepad
-    GAMEPAD_BUTTON_MIDDLE_LEFT = 13, // PS3 Select
-    GAMEPAD_BUTTON_MIDDLE = 14, // PS Button/XBOX Button
-    GAMEPAD_BUTTON_MIDDLE_RIGHT = 15, // PS3 Start
-
-    // These are the joystick press in buttons
-    GAMEPAD_BUTTON_LEFT_THUMB = 16,
-    GAMEPAD_BUTTON_RIGHT_THUMB = 17
+    GAMEPAD_BUTTON_UNKNOWN = 0, // Unknown button, just for error checking
+    GAMEPAD_BUTTON_LEFT_FACE_UP = 1, // Gamepad left DPAD up button
+    GAMEPAD_BUTTON_LEFT_FACE_RIGHT = 2, // Gamepad left DPAD right button
+    GAMEPAD_BUTTON_LEFT_FACE_DOWN = 3, // Gamepad left DPAD down button
+    GAMEPAD_BUTTON_LEFT_FACE_LEFT = 4, // Gamepad left DPAD left button
+    GAMEPAD_BUTTON_RIGHT_FACE_UP = 5, // Gamepad right button up (i.e. PS3: Triangle, Xbox: Y)
+    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT = 6, // Gamepad right button right (i.e. PS3: Square, Xbox: X)
+    GAMEPAD_BUTTON_RIGHT_FACE_DOWN = 7, // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
+    GAMEPAD_BUTTON_RIGHT_FACE_LEFT = 8, // Gamepad right button left (i.e. PS3: Circle, Xbox: B)
+    GAMEPAD_BUTTON_LEFT_TRIGGER_1 = 9, // Gamepad top/back trigger left (first), it could be a trailing button
+    GAMEPAD_BUTTON_LEFT_TRIGGER_2 = 10, // Gamepad top/back trigger left (second), it could be a trailing button
+    GAMEPAD_BUTTON_RIGHT_TRIGGER_1 = 11, // Gamepad top/back trigger right (one), it could be a trailing button
+    GAMEPAD_BUTTON_RIGHT_TRIGGER_2 = 12, // Gamepad top/back trigger right (second), it could be a trailing button
+    GAMEPAD_BUTTON_MIDDLE_LEFT = 13, // Gamepad center buttons, left one (i.e. PS3: Select)
+    GAMEPAD_BUTTON_MIDDLE = 14, // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
+    GAMEPAD_BUTTON_MIDDLE_RIGHT = 15, // Gamepad center buttons, right one (i.e. PS3: Start)
+    GAMEPAD_BUTTON_LEFT_THUMB = 16, // Gamepad joystick pressed button left
+    GAMEPAD_BUTTON_RIGHT_THUMB = 17 // Gamepad joystick pressed button right
 }
 
 // Gamepad axis
 enum GamepadAxis
 {
-    // Left stick
-    GAMEPAD_AXIS_LEFT_X = 0,
-    GAMEPAD_AXIS_LEFT_Y = 1,
-
-    // Right stick
-    GAMEPAD_AXIS_RIGHT_X = 2,
-    GAMEPAD_AXIS_RIGHT_Y = 3,
-
-    // Pressure levels for the back triggers
-    GAMEPAD_AXIS_LEFT_TRIGGER = 4, // [1..-1] (pressure-level)
-    GAMEPAD_AXIS_RIGHT_TRIGGER = 5 // [1..-1] (pressure-level)
+    GAMEPAD_AXIS_LEFT_X = 0, // Gamepad left stick X axis
+    GAMEPAD_AXIS_LEFT_Y = 1, // Gamepad left stick Y axis
+    GAMEPAD_AXIS_RIGHT_X = 2, // Gamepad right stick X axis
+    GAMEPAD_AXIS_RIGHT_Y = 3, // Gamepad right stick Y axis
+    GAMEPAD_AXIS_LEFT_TRIGGER = 4, // Gamepad back trigger left, pressure level: [1..-1]
+    GAMEPAD_AXIS_RIGHT_TRIGGER = 5 // Gamepad back trigger right, pressure level: [1..-1]
 }
 
 // Material map index
 enum MaterialMapIndex
 {
-    MATERIAL_MAP_ALBEDO = 0, // MATERIAL_MAP_DIFFUSE
-    MATERIAL_MAP_METALNESS = 1, // MATERIAL_MAP_SPECULAR
-    MATERIAL_MAP_NORMAL = 2,
-    MATERIAL_MAP_ROUGHNESS = 3,
-    MATERIAL_MAP_OCCLUSION = 4,
-    MATERIAL_MAP_EMISSION = 5,
-    MATERIAL_MAP_HEIGHT = 6,
-    MATERIAL_MAP_BRDG = 7,
-    MATERIAL_MAP_CUBEMAP = 8, // NOTE: Uses GL_TEXTURE_CUBE_MAP
-    MATERIAL_MAP_IRRADIANCE = 9, // NOTE: Uses GL_TEXTURE_CUBE_MAP
-    MATERIAL_MAP_PREFILTER = 10 // NOTE: Uses GL_TEXTURE_CUBE_MAP
+    MATERIAL_MAP_ALBEDO = 0, // Albedo material (same as: MATERIAL_MAP_DIFFUSE)
+    MATERIAL_MAP_METALNESS = 1, // Metalness material (same as: MATERIAL_MAP_SPECULAR)
+    MATERIAL_MAP_NORMAL = 2, // Normal material
+    MATERIAL_MAP_ROUGHNESS = 3, // Roughness material
+    MATERIAL_MAP_OCCLUSION = 4, // Ambient occlusion material
+    MATERIAL_MAP_EMISSION = 5, // Emission material
+    MATERIAL_MAP_HEIGHT = 6, // Heightmap material
+    MATERIAL_MAP_CUBEMAP = 7, // Cubemap material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
+    MATERIAL_MAP_IRRADIANCE = 8, // Irradiance material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
+    MATERIAL_MAP_PREFILTER = 9, // Prefilter material (NOTE: Uses GL_TEXTURE_CUBE_MAP)
+    MATERIAL_MAP_BRDF = 10 // Brdf material
 }
 
 enum MATERIAL_MAP_DIFFUSE = MaterialMapIndex.MATERIAL_MAP_ALBEDO;
@@ -697,32 +696,32 @@ enum MATERIAL_MAP_SPECULAR = MaterialMapIndex.MATERIAL_MAP_METALNESS;
 // Shader location index
 enum ShaderLocationIndex
 {
-    SHADER_LOC_VERTEX_POSITION = 0,
-    SHADER_LOC_VERTEX_TEXCOORD01 = 1,
-    SHADER_LOC_VERTEX_TEXCOORD02 = 2,
-    SHADER_LOC_VERTEX_NORMAL = 3,
-    SHADER_LOC_VERTEX_TANGENT = 4,
-    SHADER_LOC_VERTEX_COLOR = 5,
-    SHADER_LOC_MATRIX_MVP = 6,
-    SHADER_LOC_MATRIX_VIEW = 7,
-    SHADER_LOC_MATRIX_PROJECTION = 8,
-    SHADER_LOC_MATRIX_MODEL = 9,
-    SHADER_LOC_MATRIX_NORMAL = 10,
-    SHADER_LOC_VECTOR_VIEW = 11,
-    SHADER_LOC_COLOR_DIFFUSE = 12,
-    SHADER_LOC_COLOR_SPECULAR = 13,
-    SHADER_LOC_COLOR_AMBIENT = 14,
-    SHADER_LOC_MAP_ALBEDO = 15, // SHADER_LOC_MAP_DIFFUSE
-    SHADER_LOC_MAP_METALNESS = 16, // SHADER_LOC_MAP_SPECULAR
-    SHADER_LOC_MAP_NORMAL = 17,
-    SHADER_LOC_MAP_ROUGHNESS = 18,
-    SHADER_LOC_MAP_OCCLUSION = 19,
-    SHADER_LOC_MAP_EMISSION = 20,
-    SHADER_LOC_MAP_HEIGHT = 21,
-    SHADER_LOC_MAP_CUBEMAP = 22,
-    SHADER_LOC_MAP_IRRADIANCE = 23,
-    SHADER_LOC_MAP_PREFILTER = 24,
-    SHADER_LOC_MAP_BRDF = 25
+    SHADER_LOC_VERTEX_POSITION = 0, // Shader location: vertex attribute: position
+    SHADER_LOC_VERTEX_TEXCOORD01 = 1, // Shader location: vertex attribute: texcoord01
+    SHADER_LOC_VERTEX_TEXCOORD02 = 2, // Shader location: vertex attribute: texcoord02
+    SHADER_LOC_VERTEX_NORMAL = 3, // Shader location: vertex attribute: normal
+    SHADER_LOC_VERTEX_TANGENT = 4, // Shader location: vertex attribute: tangent
+    SHADER_LOC_VERTEX_COLOR = 5, // Shader location: vertex attribute: color
+    SHADER_LOC_MATRIX_MVP = 6, // Shader location: matrix uniform: model-view-projection
+    SHADER_LOC_MATRIX_VIEW = 7, // Shader location: matrix uniform: view (camera transform)
+    SHADER_LOC_MATRIX_PROJECTION = 8, // Shader location: matrix uniform: projection
+    SHADER_LOC_MATRIX_MODEL = 9, // Shader location: matrix uniform: model (transform)
+    SHADER_LOC_MATRIX_NORMAL = 10, // Shader location: matrix uniform: normal
+    SHADER_LOC_VECTOR_VIEW = 11, // Shader location: vector uniform: view
+    SHADER_LOC_COLOR_DIFFUSE = 12, // Shader location: vector uniform: diffuse color
+    SHADER_LOC_COLOR_SPECULAR = 13, // Shader location: vector uniform: specular color
+    SHADER_LOC_COLOR_AMBIENT = 14, // Shader location: vector uniform: ambient color
+    SHADER_LOC_MAP_ALBEDO = 15, // Shader location: sampler2d texture: albedo (same as: SHADER_LOC_MAP_DIFFUSE)
+    SHADER_LOC_MAP_METALNESS = 16, // Shader location: sampler2d texture: metalness (same as: SHADER_LOC_MAP_SPECULAR)
+    SHADER_LOC_MAP_NORMAL = 17, // Shader location: sampler2d texture: normal
+    SHADER_LOC_MAP_ROUGHNESS = 18, // Shader location: sampler2d texture: roughness
+    SHADER_LOC_MAP_OCCLUSION = 19, // Shader location: sampler2d texture: occlusion
+    SHADER_LOC_MAP_EMISSION = 20, // Shader location: sampler2d texture: emission
+    SHADER_LOC_MAP_HEIGHT = 21, // Shader location: sampler2d texture: height
+    SHADER_LOC_MAP_CUBEMAP = 22, // Shader location: samplerCube texture: cubemap
+    SHADER_LOC_MAP_IRRADIANCE = 23, // Shader location: samplerCube texture: irradiance
+    SHADER_LOC_MAP_PREFILTER = 24, // Shader location: samplerCube texture: prefilter
+    SHADER_LOC_MAP_BRDF = 25 // Shader location: sampler2d texture: brdf
 }
 
 enum SHADER_LOC_MAP_DIFFUSE = ShaderLocationIndex.SHADER_LOC_MAP_ALBEDO;
@@ -731,15 +730,24 @@ enum SHADER_LOC_MAP_SPECULAR = ShaderLocationIndex.SHADER_LOC_MAP_METALNESS;
 // Shader uniform data type
 enum ShaderUniformDataType
 {
-    SHADER_UNIFORM_FLOAT = 0,
-    SHADER_UNIFORM_VEC2 = 1,
-    SHADER_UNIFORM_VEC3 = 2,
-    SHADER_UNIFORM_VEC4 = 3,
-    SHADER_UNIFORM_INT = 4,
-    SHADER_UNIFORM_IVEC2 = 5,
-    SHADER_UNIFORM_IVEC3 = 6,
-    SHADER_UNIFORM_IVEC4 = 7,
-    SHADER_UNIFORM_SAMPLER2D = 8
+    SHADER_UNIFORM_FLOAT = 0, // Shader uniform type: float
+    SHADER_UNIFORM_VEC2 = 1, // Shader uniform type: vec2 (2 float)
+    SHADER_UNIFORM_VEC3 = 2, // Shader uniform type: vec3 (3 float)
+    SHADER_UNIFORM_VEC4 = 3, // Shader uniform type: vec4 (4 float)
+    SHADER_UNIFORM_INT = 4, // Shader uniform type: int
+    SHADER_UNIFORM_IVEC2 = 5, // Shader uniform type: ivec2 (2 int)
+    SHADER_UNIFORM_IVEC3 = 6, // Shader uniform type: ivec3 (3 int)
+    SHADER_UNIFORM_IVEC4 = 7, // Shader uniform type: ivec4 (4 int)
+    SHADER_UNIFORM_SAMPLER2D = 8 // Shader uniform type: sampler2d
+}
+
+// Shader attribute data types
+enum ShaderAttributeDataType
+{
+    SHADER_ATTRIB_FLOAT = 0, // Shader attribute type: float
+    SHADER_ATTRIB_VEC2 = 1, // Shader attribute type: vec2 (2 float)
+    SHADER_ATTRIB_VEC3 = 2, // Shader attribute type: vec3 (3 float)
+    SHADER_ATTRIB_VEC4 = 3 // Shader attribute type: vec4 (4 float)
 }
 
 // Pixel formats
@@ -752,7 +760,7 @@ enum PixelFormat
     PIXELFORMAT_UNCOMPRESSED_R8G8B8 = 4, // 24 bpp
     PIXELFORMAT_UNCOMPRESSED_R5G5B5A1 = 5, // 16 bpp (1 bit alpha)
     PIXELFORMAT_UNCOMPRESSED_R4G4B4A4 = 6, // 16 bpp (4 bit alpha)
-    PIXELFORMAT_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 = 7, // 32 bpp
+    PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 = 7, // 32 bpp
     PIXELFORMAT_UNCOMPRESSED_R32 = 8, // 32 bpp (1 channel - float)
     PIXELFORMAT_UNCOMPRESSED_R32G32B32 = 9, // 32*3 bpp (3 channels - float)
     PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 = 10, // 32*4 bpp (4 channels - float)
@@ -821,38 +829,38 @@ enum BlendMode
     BLEND_CUSTOM = 5 // Belnd textures using custom src/dst factors (use rlSetBlendMode())
 }
 
-// Gestures
+// Gesture
 // NOTE: It could be used as flags to enable only some gestures
-enum Gestures
+enum Gesture
 {
-    GESTURE_NONE = 0,
-    GESTURE_TAP = 1,
-    GESTURE_DOUBLETAP = 2,
-    GESTURE_HOLD = 4,
-    GESTURE_DRAG = 8,
-    GESTURE_SWIPE_RIGHT = 16,
-    GESTURE_SWIPE_LEFT = 32,
-    GESTURE_SWIPE_UP = 64,
-    GESTURE_SWIPE_DOWN = 128,
-    GESTURE_PINCH_IN = 256,
-    GESTURE_PINCH_OUT = 512
+    GESTURE_NONE = 0, // No gesture
+    GESTURE_TAP = 1, // Tap gesture
+    GESTURE_DOUBLETAP = 2, // Double tap gesture
+    GESTURE_HOLD = 4, // Hold gesture
+    GESTURE_DRAG = 8, // Drag gesture
+    GESTURE_SWIPE_RIGHT = 16, // Swipe right gesture
+    GESTURE_SWIPE_LEFT = 32, // Swipe left gesture
+    GESTURE_SWIPE_UP = 64, // Swipe up gesture
+    GESTURE_SWIPE_DOWN = 128, // Swipe down gesture
+    GESTURE_PINCH_IN = 256, // Pinch in gesture
+    GESTURE_PINCH_OUT = 512 // Pinch out gesture
 }
 
 // Camera system modes
 enum CameraMode
 {
-    CAMERA_CUSTOM = 0,
-    CAMERA_FREE = 1,
-    CAMERA_ORBITAL = 2,
-    CAMERA_FIRST_PERSON = 3,
-    CAMERA_THIRD_PERSON = 4
+    CAMERA_CUSTOM = 0, // Custom camera
+    CAMERA_FREE = 1, // Free camera
+    CAMERA_ORBITAL = 2, // Orbital camera
+    CAMERA_FIRST_PERSON = 3, // First person camera
+    CAMERA_THIRD_PERSON = 4 // Third person camera
 }
 
 // Camera projection
 enum CameraProjection
 {
-    CAMERA_PERSPECTIVE = 0,
-    CAMERA_ORTHOGRAPHIC = 1
+    CAMERA_PERSPECTIVE = 0, // Perspective projection
+    CAMERA_ORTHOGRAPHIC = 1 // Orthographic projection
 }
 
 // N-patch layout
@@ -871,8 +879,6 @@ alias SaveFileDataCallback = bool function(const(char)* fileName, void* data, ui
 alias LoadFileTextCallback = char* function(const(char)* fileName); // FileIO: Load text data
 alias SaveFileTextCallback = bool function(const(char)* fileName, char* text); // FileIO: Save text data
 
-// Prevents name mangling of functions
-
 //------------------------------------------------------------------------------------
 // Global Variables Definition
 //------------------------------------------------------------------------------------
@@ -881,6 +887,8 @@ alias SaveFileTextCallback = bool function(const(char)* fileName, char* text); /
 //------------------------------------------------------------------------------------
 // Window and Graphics Device Functions (Module: core)
 //------------------------------------------------------------------------------------
+
+// Prevents name mangling of functions
 
 // Window-related functions
 void InitWindow(int width, int height, const(char)* title); // Initialize window and OpenGL context
@@ -923,27 +931,35 @@ const(char)* GetMonitorName(int monitor); // Get the human-readable, UTF-8 encod
 void SetClipboardText(const(char)* text); // Set clipboard text content
 const(char)* GetClipboardText(); // Get clipboard text content
 
+// Custom frame control functions
+// NOTE: Those functions are intended for advance users that want full control over the frame processing
+// By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timming + PollInputEvents()
+// To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
+void SwapScreenBuffer(); // Swap back buffer with front buffer (screen drawing)
+void PollInputEvents(); // Register all input events
+void WaitTime(float ms); // Wait for some milliseconds (halt program execution)
+
 // Cursor-related functions
 void ShowCursor(); // Shows cursor
 void HideCursor(); // Hides cursor
 bool IsCursorHidden(); // Check if cursor is not visible
 void EnableCursor(); // Enables cursor (unlock cursor)
 void DisableCursor(); // Disables cursor (lock cursor)
-bool IsCursorOnScreen(); // Check if cursor is on the current screen.
+bool IsCursorOnScreen(); // Check if cursor is on the screen
 
 // Drawing-related functions
 void ClearBackground(Color color); // Set background color (framebuffer clear color)
 void BeginDrawing(); // Setup canvas (framebuffer) to start drawing
 void EndDrawing(); // End canvas drawing and swap buffers (double buffering)
-void BeginMode2D(Camera2D camera); // Initialize 2D mode with custom camera (2D)
+void BeginMode2D(Camera2D camera); // Begin 2D mode with custom camera (2D)
 void EndMode2D(); // Ends 2D mode with custom camera
-void BeginMode3D(Camera3D camera); // Initializes 3D mode with custom camera (3D)
+void BeginMode3D(Camera3D camera); // Begin 3D mode with custom camera (3D)
 void EndMode3D(); // Ends 3D mode and returns to default 2D orthographic mode
-void BeginTextureMode(RenderTexture2D target); // Initializes render texture for drawing
+void BeginTextureMode(RenderTexture2D target); // Begin drawing to render texture
 void EndTextureMode(); // Ends drawing to render texture
 void BeginShaderMode(Shader shader); // Begin custom shader drawing
 void EndShaderMode(); // End custom shader drawing (use default shader)
-void BeginBlendMode(int mode); // Begin blending mode (alpha, additive, multiplied)
+void BeginBlendMode(int mode); // Begin blending mode (alpha, additive, multiplied, subtract, custom)
 void EndBlendMode(); // End blending mode (reset to default: alpha blending)
 void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
 void EndScissorMode(); // End scissor mode
@@ -967,26 +983,27 @@ void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // S
 void UnloadShader(Shader shader); // Unload shader from GPU memory (VRAM)
 
 // Screen-space-related functions
-Ray GetMouseRay(Vector2 mousePosition, Camera camera); // Returns a ray trace from mouse position
-Matrix GetCameraMatrix(Camera camera); // Returns camera transform matrix (view matrix)
-Matrix GetCameraMatrix2D(Camera2D camera); // Returns camera 2d transform matrix
-Vector2 GetWorldToScreen(Vector3 position, Camera camera); // Returns the screen space position for a 3d world space position
-Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Returns size position for a 3d world space position
-Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera); // Returns the screen space position for a 2d camera world space position
-Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera); // Returns the world space position for a 2d camera screen space position
+Ray GetMouseRay(Vector2 mousePosition, Camera camera); // Get a ray trace from mouse position
+Matrix GetCameraMatrix(Camera camera); // Get camera transform matrix (view matrix)
+Matrix GetCameraMatrix2D(Camera2D camera); // Get camera 2d transform matrix
+Vector2 GetWorldToScreen(Vector3 position, Camera camera); // Get the screen space position for a 3d world space position
+Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
+Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera); // Get the screen space position for a 2d camera world space position
+Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera); // Get the world space position for a 2d camera screen space position
 
 // Timing-related functions
 void SetTargetFPS(int fps); // Set target FPS (maximum)
-int GetFPS(); // Returns current FPS
-float GetFrameTime(); // Returns time in seconds for last frame drawn (delta time)
-double GetTime(); // Returns elapsed time in seconds since InitWindow()
+int GetFPS(); // Get current FPS
+float GetFrameTime(); // Get time in seconds for last frame drawn (delta time)
+double GetTime(); // Get elapsed time in seconds since InitWindow()
 
 // Misc. functions
-int GetRandomValue(int min, int max); // Returns a random value between min and max (both included)
+int GetRandomValue(int min, int max); // Get a random value between min and max (both included)
+void SetRandomSeed(uint seed); // Set the seed for the random number generator
 void TakeScreenshot(const(char)* fileName); // Takes a screenshot of current screen (filename extension defines format)
 void SetConfigFlags(uint flags); // Setup init configuration flags (view FLAGS)
 
-void TraceLog(int logLevel, const(char)* text, ...); // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR)
+void TraceLog(int logLevel, const(char)* text, ...); // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 void SetTraceLogLevel(int logLevel); // Set the current threshold (minimum) log level
 void* MemAlloc(int size); // Internal memory allocator
 void* MemRealloc(void* ptr, int size); // Internal memory reallocator
@@ -1005,12 +1022,12 @@ ubyte* LoadFileData(const(char)* fileName, uint* bytesRead); // Load file data a
 void UnloadFileData(ubyte* data); // Unload file data allocated by LoadFileData()
 bool SaveFileData(const(char)* fileName, void* data, uint bytesToWrite); // Save data to file from byte array (write), returns true on success
 char* LoadFileText(const(char)* fileName); // Load text data from file (read), returns a '\0' terminated string
-void UnloadFileText(ubyte* text); // Unload file text data allocated by LoadFileText()
+void UnloadFileText(char* text); // Unload file text data allocated by LoadFileText()
 bool SaveFileText(const(char)* fileName, char* text); // Save text data to file (write), string must be '\0' terminated, returns true on success
 bool FileExists(const(char)* fileName); // Check if file exists
 bool DirectoryExists(const(char)* dirPath); // Check if a directory path exists
 bool IsFileExtension(const(char)* fileName, const(char)* ext); // Check file extension (including point: .png, .wav)
-const(char)* GetFileExtension(const(char)* fileName); // Get pointer to extension for a filename string (includes dot: ".png")
+const(char)* GetFileExtension(const(char)* fileName); // Get pointer to extension for a filename string (includes dot: '.png')
 const(char)* GetFileName(const(char)* filePath); // Get pointer to filename for a path string
 const(char)* GetFileNameWithoutExt(const(char)* filePath); // Get filename string without extension (uses static string)
 const(char)* GetDirectoryPath(const(char)* filePath); // Get full path for a given fileName with path (uses static string)
@@ -1024,8 +1041,11 @@ char** GetDroppedFiles(int* count); // Get dropped files names (memory should be
 void ClearDroppedFiles(); // Clear dropped files paths buffer (free memory)
 c_long GetFileModTime(const(char)* fileName); // Get file modification time (last write time)
 
+// Compression/Encoding functionality
 ubyte* CompressData(ubyte* data, int dataLength, int* compDataLength); // Compress data (DEFLATE algorithm)
 ubyte* DecompressData(ubyte* compData, int compDataLength, int* dataLength); // Decompress data (DEFLATE algorithm)
+char* EncodeDataBase64(const(ubyte)* data, int dataLength, int* outputLength); // Encode data to Base64 string
+ubyte* DecodeDataBase64(ubyte* data, int* outputLength); // Decode Base64 string data
 
 // Persistent storage management
 bool SaveStorageValue(uint position, int value); // Save integer value to storage file (to defined position), returns true on success
@@ -1038,53 +1058,54 @@ void OpenURL(const(char)* url); // Open URL with default system browser (if avai
 //------------------------------------------------------------------------------------
 
 // Input-related functions: keyboard
-bool IsKeyPressed(int key); // Detect if a key has been pressed once
-bool IsKeyDown(int key); // Detect if a key is being pressed
-bool IsKeyReleased(int key); // Detect if a key has been released once
-bool IsKeyUp(int key); // Detect if a key is NOT being pressed
+bool IsKeyPressed(int key); // Check if a key has been pressed once
+bool IsKeyDown(int key); // Check if a key is being pressed
+bool IsKeyReleased(int key); // Check if a key has been released once
+bool IsKeyUp(int key); // Check if a key is NOT being pressed
 void SetExitKey(int key); // Set a custom key to exit program (default is ESC)
-int GetKeyPressed(); // Get key pressed (keycode), call it multiple times for keys queued
-int GetCharPressed(); // Get char pressed (unicode), call it multiple times for chars queued
+int GetKeyPressed(); // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
+int GetCharPressed(); // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
 
 // Input-related functions: gamepads
-bool IsGamepadAvailable(int gamepad); // Detect if a gamepad is available
-bool IsGamepadName(int gamepad, const(char)* name); // Check gamepad name (if available)
-const(char)* GetGamepadName(int gamepad); // Return gamepad internal name id
-bool IsGamepadButtonPressed(int gamepad, int button); // Detect if a gamepad button has been pressed once
-bool IsGamepadButtonDown(int gamepad, int button); // Detect if a gamepad button is being pressed
-bool IsGamepadButtonReleased(int gamepad, int button); // Detect if a gamepad button has been released once
-bool IsGamepadButtonUp(int gamepad, int button); // Detect if a gamepad button is NOT being pressed
+bool IsGamepadAvailable(int gamepad); // Check if a gamepad is available
+const(char)* GetGamepadName(int gamepad); // Get gamepad internal name id
+bool IsGamepadButtonPressed(int gamepad, int button); // Check if a gamepad button has been pressed once
+bool IsGamepadButtonDown(int gamepad, int button); // Check if a gamepad button is being pressed
+bool IsGamepadButtonReleased(int gamepad, int button); // Check if a gamepad button has been released once
+bool IsGamepadButtonUp(int gamepad, int button); // Check if a gamepad button is NOT being pressed
 int GetGamepadButtonPressed(); // Get the last gamepad button pressed
-int GetGamepadAxisCount(int gamepad); // Return gamepad axis count for a gamepad
-float GetGamepadAxisMovement(int gamepad, int axis); // Return axis movement value for a gamepad axis
+int GetGamepadAxisCount(int gamepad); // Get gamepad axis count for a gamepad
+float GetGamepadAxisMovement(int gamepad, int axis); // Get axis movement value for a gamepad axis
 int SetGamepadMappings(const(char)* mappings); // Set internal gamepad mappings (SDL_GameControllerDB)
 
 // Input-related functions: mouse
-bool IsMouseButtonPressed(int button); // Detect if a mouse button has been pressed once
-bool IsMouseButtonDown(int button); // Detect if a mouse button is being pressed
-bool IsMouseButtonReleased(int button); // Detect if a mouse button has been released once
-bool IsMouseButtonUp(int button); // Detect if a mouse button is NOT being pressed
-int GetMouseX(); // Returns mouse position X
-int GetMouseY(); // Returns mouse position Y
-Vector2 GetMousePosition(); // Returns mouse position XY
+bool IsMouseButtonPressed(int button); // Check if a mouse button has been pressed once
+bool IsMouseButtonDown(int button); // Check if a mouse button is being pressed
+bool IsMouseButtonReleased(int button); // Check if a mouse button has been released once
+bool IsMouseButtonUp(int button); // Check if a mouse button is NOT being pressed
+int GetMouseX(); // Get mouse position X
+int GetMouseY(); // Get mouse position Y
+Vector2 GetMousePosition(); // Get mouse position XY
+Vector2 GetMouseDelta(); // Get mouse delta between frames
 void SetMousePosition(int x, int y); // Set mouse position XY
 void SetMouseOffset(int offsetX, int offsetY); // Set mouse offset
 void SetMouseScale(float scaleX, float scaleY); // Set mouse scaling
-float GetMouseWheelMove(); // Returns mouse wheel movement Y
+float GetMouseWheelMove(); // Get mouse wheel movement Y
 void SetMouseCursor(int cursor); // Set mouse cursor
 
 // Input-related functions: touch
-int GetTouchX(); // Returns touch position X for touch point 0 (relative to screen size)
-int GetTouchY(); // Returns touch position Y for touch point 0 (relative to screen size)
-Vector2 GetTouchPosition(int index); // Returns touch position XY for a touch point index (relative to screen size)
+int GetTouchX(); // Get touch position X for touch point 0 (relative to screen size)
+int GetTouchY(); // Get touch position Y for touch point 0 (relative to screen size)
+Vector2 GetTouchPosition(int index); // Get touch position XY for a touch point index (relative to screen size)
+int GetTouchPointId(int index); // Get touch point identifier for given index
+int GetTouchPointCount(); // Get number of touch points
 
 //------------------------------------------------------------------------------------
-// Gestures and Touch Handling Functions (Module: gestures)
+// Gestures and Touch Handling Functions (Module: rgestures)
 //------------------------------------------------------------------------------------
 void SetGesturesEnabled(uint flags); // Enable a set of gestures using flags
 bool IsGestureDetected(int gesture); // Check if a gesture have been detected
 int GetGestureDetected(); // Get latest detected gesture
-int GetTouchPointsCount(); // Get touch points count
 float GetGestureHoldDuration(); // Get gesture hold time in milliseconds
 Vector2 GetGestureDragVector(); // Get gesture drag vector
 float GetGestureDragAngle(); // Get gesture drag angle
@@ -1092,7 +1113,7 @@ Vector2 GetGesturePinchVector(); // Get gesture pinch delta
 float GetGesturePinchAngle(); // Get gesture pinch angle
 
 //------------------------------------------------------------------------------------
-// Camera System Functions (Module: camera)
+// Camera System Functions (Module: rcamera)
 //------------------------------------------------------------------------------------
 void SetCameraMode(Camera camera, int mode); // Set camera mode (multiple camera modes available)
 void UpdateCamera(Camera* camera); // Update camera position for selected mode
@@ -1108,7 +1129,7 @@ void SetCameraMoveControls(int keyFront, int keyBack, int keyRight, int keyLeft,
 // Set texture and rectangle to be used on shapes drawing
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
-void SetShapesTexture(Texture2D texture, Rectangle source);
+void SetShapesTexture(Texture2D texture, Rectangle source); // Set texture and rectangle to be used on shapes drawing
 
 // Basic shapes drawing functions
 void DrawPixel(int posX, int posY, Color color); // Draw a pixel
@@ -1117,8 +1138,9 @@ void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color colo
 void DrawLineV(Vector2 startPos, Vector2 endPos, Color color); // Draw a line (Vector version)
 void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color); // Draw a line defining thickness
 void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color); // Draw a line using cubic-bezier curves in-out
-void DrawLineBezierQuad(Vector2 startPos, Vector2 endPos, Vector2 controlPos, float thick, Color color); //Draw line using quadratic bezier curves with a control point
-void DrawLineStrip(Vector2* points, int pointsCount, Color color); // Draw lines sequence
+void DrawLineBezierQuad(Vector2 startPos, Vector2 endPos, Vector2 controlPos, float thick, Color color); // Draw line using quadratic bezier curves with a control point
+void DrawLineBezierCubic(Vector2 startPos, Vector2 endPos, Vector2 startControlPos, Vector2 endControlPos, float thick, Color color); // Draw line using cubic bezier curves with 2 control points
+void DrawLineStrip(Vector2* points, int pointCount, Color color); // Draw lines sequence
 void DrawCircle(int centerX, int centerY, float radius, Color color); // Draw a color-filled circle
 void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color); // Draw a piece of a circle
 void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color); // Draw circle sector outline
@@ -1137,15 +1159,16 @@ void DrawRectangleGradientV(int posX, int posY, int width, int height, Color col
 void DrawRectangleGradientH(int posX, int posY, int width, int height, Color color1, Color color2); // Draw a horizontal-gradient-filled rectangle
 void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4); // Draw a gradient-filled rectangle with custom vertex colors
 void DrawRectangleLines(int posX, int posY, int width, int height, Color color); // Draw rectangle outline
-void DrawRectangleLinesEx(Rectangle rec, int lineThick, Color color); // Draw rectangle outline with extended parameters
+void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color); // Draw rectangle outline with extended parameters
 void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color); // Draw rectangle with rounded edges
-void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, int lineThick, Color color); // Draw rectangle with rounded edges outline
+void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, float lineThick, Color color); // Draw rectangle with rounded edges outline
 void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color); // Draw a color-filled triangle (vertex in counter-clockwise order!)
 void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color); // Draw triangle outline (vertex in counter-clockwise order!)
-void DrawTriangleFan(Vector2* points, int pointsCount, Color color); // Draw a triangle fan defined by points (first vertex is the center)
-void DrawTriangleStrip(Vector2* points, int pointsCount, Color color); // Draw a triangle strip defined by points
+void DrawTriangleFan(Vector2* points, int pointCount, Color color); // Draw a triangle fan defined by points (first vertex is the center)
+void DrawTriangleStrip(Vector2* points, int pointCount, Color color); // Draw a triangle strip defined by points
 void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color); // Draw a regular polygon (Vector version)
 void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color); // Draw a polygon outline of n sides
+void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color); // Draw a polygon outline of n sides with extended parameters
 
 // Basic shapes collision detection functions
 bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2); // Check collision between two rectangles
@@ -1155,6 +1178,7 @@ bool CheckCollisionPointRec(Vector2 point, Rectangle rec); // Check if point is 
 bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius); // Check if point is inside circle
 bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3); // Check if point is inside a triangle
 bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2* collisionPoint); // Check the collision between two lines defined by two points each, returns collision point by reference
+bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold); // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
 Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2); // Get collision rectangle for two rectangles collision
 
 //------------------------------------------------------------------------------------
@@ -1166,7 +1190,9 @@ Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2); // Get collision rect
 Image LoadImage(const(char)* fileName); // Load image from file into CPU memory (RAM)
 Image LoadImageRaw(const(char)* fileName, int width, int height, int format, int headerSize); // Load image from RAW file data
 Image LoadImageAnim(const(char)* fileName, int* frames); // Load image sequence from file (frames appended to image.data)
-Image LoadImageFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize); // Load image from memory buffer, fileType refers to extension: i.e. ".png"
+Image LoadImageFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize); // Load image from memory buffer, fileType refers to extension: i.e. '.png'
+Image LoadImageFromTexture(Texture2D texture); // Load image from GPU texture data
+Image LoadImageFromScreen(); // Load image from screen buffer and (screenshot)
 void UnloadImage(Image image); // Unload image from CPU memory (RAM)
 bool ExportImage(Image image, const(char)* fileName); // Export image data to file, returns true on success
 bool ExportImageAsCode(Image image, const(char)* fileName); // Export image as code file defining an array of bytes, returns true on success
@@ -1178,8 +1204,7 @@ Image GenImageGradientH(int width, int height, Color left, Color right); // Gene
 Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer); // Generate image: radial gradient
 Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2); // Generate image: checked
 Image GenImageWhiteNoise(int width, int height, float factor); // Generate image: white noise
-Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale); // Generate image: perlin noise
-Image GenImageCellular(int width, int height, int tileSize); // Generate image: cellular algorithm. Bigger tileSize means bigger cells
+Image GenImageCellular(int width, int height, int tileSize); // Generate image: cellular algorithm, bigger tileSize means bigger cells
 
 // Image manipulation functions
 Image ImageCopy(Image image); // Create an image duplicate (useful for transformations)
@@ -1196,7 +1221,7 @@ void ImageAlphaPremultiply(Image* image); // Premultiply alpha channel
 void ImageResize(Image* image, int newWidth, int newHeight); // Resize image (Bicubic scaling algorithm)
 void ImageResizeNN(Image* image, int newWidth, int newHeight); // Resize image (Nearest-Neighbor scaling algorithm)
 void ImageResizeCanvas(Image* image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill); // Resize canvas and fill with color
-void ImageMipmaps(Image* image); // Generate all mipmap levels for a provided image
+void ImageMipmaps(Image* image); // Compute all mipmap levels for a provided image
 void ImageDither(Image* image, int rBpp, int gBpp, int bBpp, int aBpp); // Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
 void ImageFlipVertical(Image* image); // Flip image vertically
 void ImageFlipHorizontal(Image* image); // Flip image horizontally
@@ -1209,10 +1234,11 @@ void ImageColorContrast(Image* image, float contrast); // Modify image color: co
 void ImageColorBrightness(Image* image, int brightness); // Modify image color: brightness (-255 to 255)
 void ImageColorReplace(Image* image, Color color, Color replace); // Modify image color: replace color
 Color* LoadImageColors(Image image); // Load color data from image as a Color array (RGBA - 32bit)
-Color* LoadImagePalette(Image image, int maxPaletteSize, int* colorsCount); // Load colors palette from image as a Color array (RGBA - 32bit)
+Color* LoadImagePalette(Image image, int maxPaletteSize, int* colorCount); // Load colors palette from image as a Color array (RGBA - 32bit)
 void UnloadImageColors(Color* colors); // Unload color data loaded with LoadImageColors()
 void UnloadImagePalette(Color* colors); // Unload colors palette loaded with LoadImagePalette()
 Rectangle GetImageAlphaBorder(Image image, float threshold); // Get image alpha border rectangle
+Color GetImageColor(Image image, int x, int y); // Get image pixel color at (x, y) position
 
 // Image drawing functions
 // NOTE: Image software-rendering functions (CPU)
@@ -1241,8 +1267,6 @@ void UnloadTexture(Texture2D texture); // Unload texture from GPU memory (VRAM)
 void UnloadRenderTexture(RenderTexture2D target); // Unload render texture from GPU memory (VRAM)
 void UpdateTexture(Texture2D texture, const(void)* pixels); // Update GPU texture with new data
 void UpdateTextureRec(Texture2D texture, Rectangle rec, const(void)* pixels); // Update GPU texture rectangle with new data
-Image GetTextureData(Texture2D texture); // Get pixel data from GPU texture and return an Image
-Image GetScreenData(); // Get pixel data from screen buffer and return an Image (screenshot)
 
 // Texture configuration functions
 void GenTextureMipmaps(Texture2D* texture); // Generate GPU mipmaps for a texture
@@ -1258,18 +1282,18 @@ void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangl
 void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint); // Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
 void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint); // Draw a part of a texture defined by a rectangle with 'pro' parameters
 void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint); // Draws a texture (or part of it) that stretches or shrinks nicely
-void DrawTexturePoly(Texture2D texture, Vector2 center, Vector2* points, Vector2* texcoords, int pointsCount, Color tint); // Draw a textured polygon
+void DrawTexturePoly(Texture2D texture, Vector2 center, Vector2* points, Vector2* texcoords, int pointCount, Color tint); // Draw a textured polygon
 
 // Color/pixel related functions
-Color Fade(Color color, float alpha); // Returns color with alpha applied, alpha goes from 0.0f to 1.0f
-int ColorToInt(Color color); // Returns hexadecimal value for a Color
-Vector4 ColorNormalize(Color color); // Returns Color normalized as float [0..1]
-Color ColorFromNormalized(Vector4 normalized); // Returns Color from normalized values [0..1]
-Vector3 ColorToHSV(Color color); // Returns HSV values for a Color, hue [0..360], saturation/value [0..1]
-Color ColorFromHSV(float hue, float saturation, float value); // Returns a Color from HSV values, hue [0..360], saturation/value [0..1]
-Color ColorAlpha(Color color, float alpha); // Returns color with alpha applied, alpha goes from 0.0f to 1.0f
-Color ColorAlphaBlend(Color dst, Color src, Color tint); // Returns src alpha-blended into dst color with tint
-Color GetColor(int hexValue); // Get Color structure from hexadecimal value
+Color Fade(Color color, float alpha); // Get color with alpha applied, alpha goes from 0.0f to 1.0f
+int ColorToInt(Color color); // Get hexadecimal value for a Color
+Vector4 ColorNormalize(Color color); // Get Color normalized as float [0..1]
+Color ColorFromNormalized(Vector4 normalized); // Get Color from normalized values [0..1]
+Vector3 ColorToHSV(Color color); // Get HSV values for a Color, hue [0..360], saturation/value [0..1]
+Color ColorFromHSV(float hue, float saturation, float value); // Get a Color from HSV values, hue [0..360], saturation/value [0..1]
+Color ColorAlpha(Color color, float alpha); // Get color with alpha applied, alpha goes from 0.0f to 1.0f
+Color ColorAlphaBlend(Color dst, Color src, Color tint); // Get src alpha-blended into dst color with tint
+Color GetColor(uint hexValue); // Get Color structure from hexadecimal value
 Color GetPixelColor(void* srcPtr, int format); // Get Color from a source pixel pointer of certain format
 void SetPixelColor(void* dstPtr, Color color, int format); // Set color formatted into destination pixel pointer
 int GetPixelDataSize(int width, int height, int format); // Get pixel data size in bytes for certain format
@@ -1281,47 +1305,45 @@ int GetPixelDataSize(int width, int height, int format); // Get pixel data size 
 // Font loading/unloading functions
 Font GetFontDefault(); // Get the default Font
 Font LoadFont(const(char)* fileName); // Load font from file into GPU memory (VRAM)
-Font LoadFontEx(const(char)* fileName, int fontSize, int* fontChars, int charsCount); // Load font from file with extended parameters
+Font LoadFontEx(const(char)* fileName, int fontSize, int* fontChars, int glyphCount); // Load font from file with extended parameters
 Font LoadFontFromImage(Image image, Color key, int firstChar); // Load font from Image (XNA style)
-Font LoadFontFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int charsCount); // Load font from memory buffer, fileType refers to extension: i.e. ".ttf"
-CharInfo* LoadFontData(const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int charsCount, int type); // Load font data for further use
-Image GenImageFontAtlas(const(CharInfo)* chars, Rectangle** recs, int charsCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
-void UnloadFontData(CharInfo* chars, int charsCount); // Unload font chars info data (RAM)
+Font LoadFontFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int glyphCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
+GlyphInfo* LoadFontData(const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int glyphCount, int type); // Load font data for further use
+Image GenImageFontAtlas(const(GlyphInfo)* chars, Rectangle** recs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
+void UnloadFontData(GlyphInfo* chars, int glyphCount); // Unload font chars info data (RAM)
 void UnloadFont(Font font); // Unload Font from GPU memory (VRAM)
 
 // Text drawing functions
 void DrawFPS(int posX, int posY); // Draw current FPS
 void DrawText(const(char)* text, int posX, int posY, int fontSize, Color color); // Draw text (using default font)
 void DrawTextEx(Font font, const(char)* text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
-void DrawTextRec(Font font, const(char)* text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint); // Draw text using font inside rectangle limits
-void DrawTextRecEx(
-    Font font,
-    const(char)* text,
-    Rectangle rec,
-    float fontSize,
-    float spacing,
-    bool wordWrap,
-    Color tint,
-    int selectStart,
-    int selectLength,
-    Color selectTint,
-    Color selectBackTint); // Draw text using font inside rectangle limits with support for text selection
+void DrawTextPro(Font font, const(char)* text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
 void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint); // Draw one character (codepoint)
 
-// Text misc. functions
+// Text font info functions
 int MeasureText(const(char)* text, int fontSize); // Measure string width for default font
 Vector2 MeasureTextEx(Font font, const(char)* text, float fontSize, float spacing); // Measure string size for Font
-int GetGlyphIndex(Font font, int codepoint); // Get index position for a unicode character on font
+int GetGlyphIndex(Font font, int codepoint); // Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
+GlyphInfo GetGlyphInfo(Font font, int codepoint); // Get glyph font info data for a codepoint (unicode character), fallback to '?' if not found
+Rectangle GetGlyphAtlasRec(Font font, int codepoint); // Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
 
-// Text strings management functions (no utf8 strings, only byte chars)
+// Text codepoints management functions (unicode characters)
+int* LoadCodepoints(const(char)* text, int* count); // Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
+void UnloadCodepoints(int* codepoints); // Unload codepoints data from memory
+int GetCodepointCount(const(char)* text); // Get total number of codepoints in a UTF-8 encoded string
+int GetCodepoint(const(char)* text, int* bytesProcessed); // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
+const(char)* CodepointToUTF8(int codepoint, int* byteSize); // Encode one codepoint into UTF-8 byte array (array length returned as parameter)
+char* TextCodepointsToUTF8(int* codepoints, int length); // Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
+
+// Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!
 int TextCopy(char* dst, const(char)* src); // Copy one string to another, returns bytes copied
 bool TextIsEqual(const(char)* text1, const(char)* text2); // Check if two text string are equal
 uint TextLength(const(char)* text); // Get text length, checks for '\0' ending
-const(char)* TextFormat(const(char)* text, ...); // Text formatting with variables (sprintf style)
+const(char)* TextFormat(const(char)* text, ...); // Text formatting with variables (sprintf() style)
 const(char)* TextSubtext(const(char)* text, int position, int length); // Get a piece of a text string
-char* TextReplace(char* text, const(char)* replace, const(char)* by); // Replace text string (memory must be freed!)
-char* TextInsert(const(char)* text, const(char)* insert, int position); // Insert text in a position (memory must be freed!)
+char* TextReplace(char* text, const(char)* replace, const(char)* by); // Replace text string (WARNING: memory must be freed!)
+char* TextInsert(const(char)* text, const(char)* insert, int position); // Insert text in a position (WARNING: memory must be freed!)
 const(char)* TextJoin(const(char*)* textList, int count, const(char)* delimiter); // Join text strings with delimiter
 const(char*)* TextSplit(const(char)* text, char delimiter, int* count); // Split text into multiple strings
 void TextAppend(char* text, const(char)* append, int* position); // Append text at specific position and move cursor!
@@ -1330,13 +1352,6 @@ const(char)* TextToUpper(const(char)* text); // Get upper case version of provid
 const(char)* TextToLower(const(char)* text); // Get lower case version of provided string
 const(char)* TextToPascal(const(char)* text); // Get Pascal case notation version of provided string
 int TextToInteger(const(char)* text); // Get integer value from text (negative values not supported)
-char* TextToUtf8(int* codepoints, int length); // Encode text codepoint into utf8 text (memory must be freed!)
-
-// UTF8 text strings management functions
-int* GetCodepoints(const(char)* text, int* count); // Get all codepoints in a string, codepoints count returned by parameters
-int GetCodepointsCount(const(char)* text); // Get total number of characters (codepoints) in a UTF8 encoded string
-int GetNextCodepoint(const(char)* text, int* bytesProcessed); // Returns next codepoint in a UTF8 encoded string; 0x3f('?') is returned on failure
-const(char)* CodepointToUtf8(int codepoint, int* byteLength); // Encode codepoint into utf8 text (char array length returned as parameter)
 
 //------------------------------------------------------------------------------------
 // Basic 3d Shapes Drawing Functions (Module: models)
@@ -1347,17 +1362,20 @@ void DrawLine3D(Vector3 startPos, Vector3 endPos, Color color); // Draw a line i
 void DrawPoint3D(Vector3 position, Color color); // Draw a point in 3D space, actually a small line
 void DrawCircle3D(Vector3 center, float radius, Vector3 rotationAxis, float rotationAngle, Color color); // Draw a circle in 3D world space
 void DrawTriangle3D(Vector3 v1, Vector3 v2, Vector3 v3, Color color); // Draw a color-filled triangle (vertex in counter-clockwise order!)
-void DrawTriangleStrip3D(Vector3* points, int pointsCount, Color color); // Draw a triangle strip defined by points
+void DrawTriangleStrip3D(Vector3* points, int pointCount, Color color); // Draw a triangle strip defined by points
 void DrawCube(Vector3 position, float width, float height, float length, Color color); // Draw cube
 void DrawCubeV(Vector3 position, Vector3 size, Color color); // Draw cube (Vector version)
 void DrawCubeWires(Vector3 position, float width, float height, float length, Color color); // Draw cube wires
 void DrawCubeWiresV(Vector3 position, Vector3 size, Color color); // Draw cube wires (Vector version)
 void DrawCubeTexture(Texture2D texture, Vector3 position, float width, float height, float length, Color color); // Draw cube textured
+void DrawCubeTextureRec(Texture2D texture, Rectangle source, Vector3 position, float width, float height, float length, Color color); // Draw cube with a region of a texture
 void DrawSphere(Vector3 centerPos, float radius, Color color); // Draw sphere
 void DrawSphereEx(Vector3 centerPos, float radius, int rings, int slices, Color color); // Draw sphere with extended parameters
 void DrawSphereWires(Vector3 centerPos, float radius, int rings, int slices, Color color); // Draw sphere wires
 void DrawCylinder(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color); // Draw a cylinder/cone
+void DrawCylinderEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int sides, Color color); // Draw a cylinder with base at startPos and top at endPos
 void DrawCylinderWires(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color); // Draw a cylinder/cone wires
+void DrawCylinderWiresEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int sides, Color color); // Draw a cylinder wires with base at startPos and top at endPos
 void DrawPlane(Vector3 centerPos, Vector2 size, Color color); // Draw a plane XZ
 void DrawRay(Ray ray, Color color); // Draw a ray line
 void DrawGrid(int slices, float spacing); // Draw a grid (centered at (0, 0, 0))
@@ -1366,19 +1384,46 @@ void DrawGrid(int slices, float spacing); // Draw a grid (centered at (0, 0, 0))
 // Model 3d Loading and Drawing Functions (Module: models)
 //------------------------------------------------------------------------------------
 
-// Model loading/unloading functions
+// Model management functions
 Model LoadModel(const(char)* fileName); // Load model from files (meshes and materials)
 Model LoadModelFromMesh(Mesh mesh); // Load model from generated mesh (default material)
 void UnloadModel(Model model); // Unload model (including meshes) from memory (RAM and/or VRAM)
 void UnloadModelKeepMeshes(Model model); // Unload model (but not meshes) from memory (RAM and/or VRAM)
+BoundingBox GetModelBoundingBox(Model model); // Compute model bounding box limits (considers all meshes)
 
-// Mesh loading/unloading functions
+// Model drawing functions
+void DrawModel(Model model, Vector3 position, float scale, Color tint); // Draw a model (with texture if set)
+void DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model with extended parameters
+void DrawModelWires(Model model, Vector3 position, float scale, Color tint); // Draw a model wires (with texture if set)
+void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model wires (with texture if set) with extended parameters
+void DrawBoundingBox(BoundingBox box, Color color); // Draw bounding box (wires)
+void DrawBillboard(Camera camera, Texture2D texture, Vector3 position, float size, Color tint); // Draw a billboard texture
+void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector2 size, Color tint); // Draw a billboard texture defined by source
+void DrawBillboardPro(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector3 up, Vector2 size, Vector2 origin, float rotation, Color tint); // Draw a billboard texture defined by source and rotation
+
+// Mesh management functions
 void UploadMesh(Mesh* mesh, bool dynamic); // Upload mesh vertex data in GPU and provide VAO/VBO ids
 void UpdateMeshBuffer(Mesh mesh, int index, void* data, int dataSize, int offset); // Update mesh vertex data in GPU for a specific buffer index
+void UnloadMesh(Mesh mesh); // Unload mesh data from CPU and GPU
 void DrawMesh(Mesh mesh, Material material, Matrix transform); // Draw a 3d mesh with material and transform
 void DrawMeshInstanced(Mesh mesh, Material material, Matrix* transforms, int instances); // Draw multiple mesh instances with material and different transforms
-void UnloadMesh(Mesh mesh); // Unload mesh data from CPU and GPU
 bool ExportMesh(Mesh mesh, const(char)* fileName); // Export mesh data to file, returns true on success
+BoundingBox GetMeshBoundingBox(Mesh mesh); // Compute mesh bounding box limits
+void GenMeshTangents(Mesh* mesh); // Compute mesh tangents
+void GenMeshBinormals(Mesh* mesh); // Compute mesh binormals
+
+// Mesh generation functions
+Mesh GenMeshPoly(int sides, float radius); // Generate polygonal mesh
+Mesh GenMeshPlane(float width, float length, int resX, int resZ); // Generate plane mesh (with subdivisions)
+Mesh GenMeshCube(float width, float height, float length); // Generate cuboid mesh
+Mesh GenMeshSphere(float radius, int rings, int slices); // Generate sphere mesh (standard sphere)
+Mesh GenMeshHemiSphere(float radius, int rings, int slices); // Generate half-sphere mesh (no bottom cap)
+Mesh GenMeshCylinder(float radius, float height, int slices); // Generate cylinder mesh
+Mesh GenMeshCone(float radius, float height, int slices); // Generate cone/pyramid mesh
+Mesh GenMeshTorus(float radius, float size, int radSeg, int sides); // Generate torus mesh
+Mesh GenMeshKnot(float radius, float size, int radSeg, int sides); // Generate trefoil knot mesh
+Mesh GenMeshHeightmap(Image heightmap, Vector3 size); // Generate heightmap mesh from image data
+Mesh GenMeshCubicmap(Image cubicmap, Vector3 cubeSize); // Generate cubes-based map mesh from image data
 
 // Material loading/unloading functions
 Material* LoadMaterials(const(char)* fileName, int* materialCount); // Load materials from model file
@@ -1388,49 +1433,22 @@ void SetMaterialTexture(Material* material, int mapType, Texture2D texture); // 
 void SetModelMeshMaterial(Model* model, int meshId, int materialId); // Set material for a mesh
 
 // Model animations loading/unloading functions
-ModelAnimation* LoadModelAnimations(const(char)* fileName, int* animsCount); // Load model animations from file
+ModelAnimation* LoadModelAnimations(const(char)* fileName, uint* animCount); // Load model animations from file
 void UpdateModelAnimation(Model model, ModelAnimation anim, int frame); // Update model animation pose
 void UnloadModelAnimation(ModelAnimation anim); // Unload animation data
 void UnloadModelAnimations(ModelAnimation* animations, uint count); // Unload animation array data
 bool IsModelAnimationValid(Model model, ModelAnimation anim); // Check model animation skeleton match
 
-// Mesh generation functions
-Mesh GenMeshPoly(int sides, float radius); // Generate polygonal mesh
-Mesh GenMeshPlane(float width, float length, int resX, int resZ); // Generate plane mesh (with subdivisions)
-Mesh GenMeshCube(float width, float height, float length); // Generate cuboid mesh
-Mesh GenMeshSphere(float radius, int rings, int slices); // Generate sphere mesh (standard sphere)
-Mesh GenMeshHemiSphere(float radius, int rings, int slices); // Generate half-sphere mesh (no bottom cap)
-Mesh GenMeshCylinder(float radius, float height, int slices); // Generate cylinder mesh
-Mesh GenMeshTorus(float radius, float size, int radSeg, int sides); // Generate torus mesh
-Mesh GenMeshKnot(float radius, float size, int radSeg, int sides); // Generate trefoil knot mesh
-Mesh GenMeshHeightmap(Image heightmap, Vector3 size); // Generate heightmap mesh from image data
-Mesh GenMeshCubicmap(Image cubicmap, Vector3 cubeSize); // Generate cubes-based map mesh from image data
-
-// Mesh manipulation functions
-BoundingBox MeshBoundingBox(Mesh mesh); // Compute mesh bounding box limits
-void MeshTangents(Mesh* mesh); // Compute mesh tangents
-void MeshBinormals(Mesh* mesh); // Compute mesh binormals
-
-// Model drawing functions
-void DrawModel(Model model, Vector3 position, float scale, Color tint); // Draw a model (with texture if set)
-void DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model with extended parameters
-void DrawModelWires(Model model, Vector3 position, float scale, Color tint); // Draw a model wires (with texture if set)
-void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint); // Draw a model wires (with texture if set) with extended parameters
-void DrawBoundingBox(BoundingBox box, Color color); // Draw bounding box (wires)
-void DrawBillboard(Camera camera, Texture2D texture, Vector3 center, float size, Color tint); // Draw a billboard texture
-void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source, Vector3 center, float size, Color tint); // Draw a billboard texture defined by source
-
 // Collision detection functions
-bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2); // Detect collision between two spheres
-bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2); // Detect collision between two bounding boxes
-bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius); // Detect collision between box and sphere
-bool CheckCollisionRaySphere(Ray ray, Vector3 center, float radius); // Detect collision between ray and sphere
-bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vector3* collisionPoint); // Detect collision between ray and sphere, returns collision point
-bool CheckCollisionRayBox(Ray ray, BoundingBox box); // Detect collision between ray and box
-RayHitInfo GetCollisionRayMesh(Ray ray, Mesh mesh, Matrix transform); // Get collision info between ray and mesh
-RayHitInfo GetCollisionRayModel(Ray ray, Model model); // Get collision info between ray and model
-RayHitInfo GetCollisionRayTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3); // Get collision info between ray and triangle
-RayHitInfo GetCollisionRayGround(Ray ray, float groundHeight); // Get collision info between ray and ground plane (Y-normal plane)
+bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2); // Check collision between two spheres
+bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2); // Check collision between two bounding boxes
+bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius); // Check collision between box and sphere
+RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius); // Get collision info between ray and sphere
+RayCollision GetRayCollisionBox(Ray ray, BoundingBox box); // Get collision info between ray and box
+RayCollision GetRayCollisionModel(Ray ray, Model model); // Get collision info between ray and model
+RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform); // Get collision info between ray and mesh
+RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3); // Get collision info between ray and triangle
+RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4); // Get collision info between ray and quad
 
 //------------------------------------------------------------------------------------
 // Audio Loading and Playing Functions (Module: audio)
@@ -1444,10 +1462,10 @@ void SetMasterVolume(float volume); // Set master volume (listener)
 
 // Wave/Sound loading/unloading functions
 Wave LoadWave(const(char)* fileName); // Load wave data from file
-Wave LoadWaveFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize); // Load wave from memory buffer, fileType refers to extension: i.e. ".wav"
+Wave LoadWaveFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize); // Load wave from memory buffer, fileType refers to extension: i.e. '.wav'
 Sound LoadSound(const(char)* fileName); // Load sound from file
 Sound LoadSoundFromWave(Wave wave); // Load sound from wave data
-void UpdateSound(Sound sound, const(void)* data, int samplesCount); // Update sound buffer with new data
+void UpdateSound(Sound sound, const(void)* data, int sampleCount); // Update sound buffer with new data
 void UnloadWave(Wave wave); // Unload wave data
 void UnloadSound(Sound sound); // Unload sound
 bool ExportWave(Wave wave, const(char)* fileName); // Export wave data to file, returns true on success
@@ -1475,20 +1493,21 @@ Music LoadMusicStream(const(char)* fileName); // Load music stream from file
 Music LoadMusicStreamFromMemory(const(char)* fileType, ubyte* data, int dataSize); // Load music stream from data
 void UnloadMusicStream(Music music); // Unload music stream
 void PlayMusicStream(Music music); // Start music playing
-bool IsMusicPlaying(Music music); // Check if music is playing
+bool IsMusicStreamPlaying(Music music); // Check if music is playing
 void UpdateMusicStream(Music music); // Updates buffers for music streaming
 void StopMusicStream(Music music); // Stop music playing
 void PauseMusicStream(Music music); // Pause music playing
 void ResumeMusicStream(Music music); // Resume playing paused music
+void SeekMusicStream(Music music, float position); // Seek music to a position (in seconds)
 void SetMusicVolume(Music music, float volume); // Set volume for music (1.0 is max level)
 void SetMusicPitch(Music music, float pitch); // Set pitch for a music (1.0 is base level)
 float GetMusicTimeLength(Music music); // Get music time length (in seconds)
 float GetMusicTimePlayed(Music music); // Get current music time played (in seconds)
 
 // AudioStream management functions
-AudioStream InitAudioStream(uint sampleRate, uint sampleSize, uint channels); // Init audio stream (to stream raw audio pcm data)
-void UpdateAudioStream(AudioStream stream, const(void)* data, int samplesCount); // Update audio stream buffers with data
-void CloseAudioStream(AudioStream stream); // Close audio stream and free memory
+AudioStream LoadAudioStream(uint sampleRate, uint sampleSize, uint channels); // Load audio stream (to stream raw audio pcm data)
+void UnloadAudioStream(AudioStream stream); // Unload audio stream and free memory
+void UpdateAudioStream(AudioStream stream, const(void)* data, int frameCount); // Update audio stream buffers with data
 bool IsAudioStreamProcessed(AudioStream stream); // Check if any audio stream buffers requires refill
 void PlayAudioStream(AudioStream stream); // Play audio stream
 void PauseAudioStream(AudioStream stream); // Pause audio stream
