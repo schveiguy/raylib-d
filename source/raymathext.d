@@ -137,6 +137,13 @@ mixin template Linear()
             enum fragment = [FieldNameTuple!T].map!(field => field ~ op ~ "rhs." ~ field).join(",");
             return mixin("T(" ~ fragment ~ ")");
         }
+
+        ref T opOpAssign(string op)(inout T rhs) if (["+", "-"].canFind(op))
+        {
+            static foreach (field; [FieldNameTuple!T])
+                mixin(field ~ op ~ "= rhs." ~ field ~ ";");
+            return this;
+        }
     }
 
     inout T opBinary(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
@@ -149,6 +156,13 @@ mixin template Linear()
     {
         enum fragment = [FieldNameTuple!T].map!(field => "lhs" ~ op ~ field).join(",");
         return mixin("T(" ~ fragment ~ ")");
+    }
+
+    ref T opOpAssign(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
+    {
+        static foreach (field; [FieldNameTuple!T])
+            mixin(field ~ op ~ "= rhs;");
+        return this;
     }
 }
 
@@ -163,6 +177,12 @@ unittest
     Assert.equal(c, Vector3(4, 6, 18));
     Assert.equal(4.0f - Vector2.zero, Vector2(4, 4));
     Assert.equal(Vector2.one - 3.0f, Vector2(-2, -2));
+    a += 5;
+    Assert.equal(a, Vector3(6, 7, 14));
+    a *= 0.5;
+    Assert.equal(a, Vector3(3, 3.5, 7));
+    a += Vector3(3, 2.5, -1);
+    Assert.equal(a, Vector3(6, 6, 6));
 }
 
 import std.traits : FieldNameTuple;
