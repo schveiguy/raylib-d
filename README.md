@@ -3,7 +3,7 @@
 # raylib-d [![DUB](https://img.shields.io/dub/v/raylib-d?style=for-the-badge)](https://code.dlang.org/packages/raylib-d)
 (static) D bindings for [raylib](https://www.raylib.com/), a simple and easy-to-use library to learn videogames programming.
 
-*Note: this is a resurrected copy of the original raylib-d. The original author, onroundit (Petro Romanovych) deleted his github acccount. Therefore, many things in here are broken, and some of the history is lost for good. I will accpet any PRs that fix broken links or replace original data, but the code history itself is intact.*
+*Note: this is a resurrected copy of the original raylib-d. The original author, onroundit (Petro Romanovych) deleted his github acccount. Therefore, some links in this README are broken, and some of the history is lost for good. I will accept any PRs that fix broken links or replace original data, but the code history itself is intact.*
 
 # Installation
 `dub add raylib-d`
@@ -11,7 +11,11 @@
 ## First, get a copy of Raylib
 You can get the library by compiling it from the [source](https://github.com/raysan5/raylib), download the [official precompiled binaries](https://github.com/raysan5/raylib/releases). The local copies of binaries are no longer available, as that history was lost.
 
-Note: version 3.7.0 of raylib (the latest as of this writing) is supported by raylib-d version 3.1.x. Version 3.0.0 of raylib is supported in version 3.0.x of raylib-d. _These releases are binary incompatible but may link with each other_. If you use the wrong raylib binary with raylib-d, bad things (including memory corruption) may happen due to struct layout differences! Any suggestions on how to identify these problems during compilation are most welcome!
+*WARNING*: Make sure you get the correct copy of the raylib library based on the version of raylib-d! Getting the incorrect version will cause SILENT compatibility errors, including memory corruption.
+
+If you depend on raylib-d vX.Y.Z, then your raylib binary should be vX.Y.0. Note that so far, raylib has never had point releases, but raylib-d may have them. Note that raylib-d version 3.1.0 is matched against raylib version 3.7.0, but should probably never have been tagged that way. There is an equivalent 3.7.0 tag now.
+
+For example, if you depend on raylib-d version `v3.0.x`, then you should download raylib version `3.0.0`. If you depend on raylib-d version `3.7.x`, then you should download raylib version `3.7.0`.
 
 ## In order to link against raylib, add it to your dub.json.
 ```json
