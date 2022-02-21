@@ -5,12 +5,12 @@
 	"authors": [
 		"ONROUNDIT"
 	],
-	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry)",
+	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry), Steven Schveighoffer (@schveiguy)",
 	"configurations": [
         {
             "name": "unittest",
             "dependencies": {
-                "fluent-asserts": "~>0.13.0",
+                "fluent-asserts": "~>0.13.0"
             }
         }
     ],	
