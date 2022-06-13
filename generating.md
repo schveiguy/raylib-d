@@ -7,7 +7,7 @@ Three modules should be regenerated: `raylib`, `raymath` and `rlgl`.
 Run the following command from the `raylib/src` directory. Note: path/to/raylib-d should be the path to the raylib-d repository that you have on your system.
 
 ```
-dstep raylib.h raymath.h rlgl.h -o path/to/raylib-d/source --space-after-function-name=false --skip Vector2 \
+dstep config.h raylib.h raymath.h rlgl.h -o path/to/raylib-d/source --space-after-function-name=false --skip Vector2 \
     --skip Vector3 --skip Vector4 --skip Quaternion --skip Matrix --skip Rectangle --skip RL_MALLOC --skip RL_CALLOC \
     --skip RL_REALLOC --skip RL_FREE
 ```
@@ -15,9 +15,11 @@ dstep raylib.h raymath.h rlgl.h -o path/to/raylib-d/source --space-after-functio
 Note: we're skipping a couple symbols because we define them manually in `raylib_types`. We also skip memory functions
 because they only have effect when compiling Raylib in C.
 
-After you regenerate them, they won't be ready to use yet. We need to add module declarations and imports at the top
-of each module:
+After you regenerate them, they won't be ready to use yet. Before editing, rename the `config.d` file to `raylib_config.d`. "config" is just too common a name to put as a top-level module (Note, next version of raylib-d I will rearrange these modules into a package).
 
+Then we need to add module declarations and imports at the top of each module:
+
+### raylib.d
 ```d
 module raylib;
 
@@ -28,23 +30,36 @@ public
     import raymath;
     import raymathext;
     import raylib_types;
+    import raylib_config;
 }
 ```
-
+### raymath.d
 ```d
 module raymath;
 
 import raylib;
 ```
-
+### rlgl.d
 ```d
 module rlgl;
 
 import raylib;
 ```
+### raylib_config.d
+```d
+module raylib_config;
+```
 
 Additionally, each of those modules will have an automatically generated `extern (C):` line. We need to find it and
 edit it to `extern (C) @nogc nothrow:`.
+
+## Internal definitions
+
+There is one internal definition in raylib_config.d, which determines the default audio format for miniaudio. I can't find any API that uses this in raylib, so comment this line out:
+
+```d
+// enum AUDIO_DEVICE_FORMAT = ma_format_f32; // Device output format (miniaudio: float-32bit)
+```
 
 ## For version 3.7.0 and possibly earlier versions
 

@@ -7,6 +7,7 @@ public
     import raymath;
     import raymathext;
     import raylib_types;
+    import raylib_config;
 }
 /**********************************************************************************************
 *
