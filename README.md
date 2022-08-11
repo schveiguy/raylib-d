@@ -26,6 +26,11 @@ Now we must make raylib visible to the compiler and linker system wide. Simply r
 sudo mv lib/* /usr/local/lib/
 ```
 
+Linux users must also update the linker with this command:
+```
+sudo ldconfig
+```
+
 #### Windows:
 On Windows you must drag and drop all the required library files into the root directory of your project. These are `raylib.dll`, `raylib.lib`, and `raylibdll.lib`.
 
