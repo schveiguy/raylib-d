@@ -1,16 +1,6 @@
-module raylib;
-
-public
-{
-    import rlgl;
-    import easings;
-    import raymath;
-    import raymathext;
-    import raylib_types;
-}
 /**********************************************************************************************
 *
-*   raylib v4.0 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
+*   raylib v4.2 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
 *
 *   FEATURES:
 *       - NO external dependencies, all required libraries included with raylib
@@ -43,8 +33,8 @@ public
 *
 *   OPTIONAL DEPENDENCIES (included):
 *       [rcore] msf_gif (Miles Fogle) for GIF recording
-*       [rcore] sinfl (Micha Mettke) for DEFLATE decompression algorythm
-*       [rcore] sdefl (Micha Mettke) for DEFLATE compression algorythm
+*       [rcore] sinfl (Micha Mettke) for DEFLATE decompression algorithm
+*       [rcore] sdefl (Micha Mettke) for DEFLATE compression algorithm
 *       [rtextures] stb_image (Sean Barret) for images loading (BMP, TGA, PNG, JPEG, HDR...)
 *       [rtextures] stb_image_write (Sean Barret) for image writing (BMP, TGA, PNG, JPG)
 *       [rtextures] stb_image_resize (Sean Barret) for image resizing algorithms
@@ -66,7 +56,7 @@ public
 *   raylib is licensed under an unmodified zlib/libpng license, which is an OSI-certified,
 *   BSD-like license that allows static linking with closed source software:
 *
-*   Copyright (c) 2013-2021 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2013-2022 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -84,6 +74,17 @@ public
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+module raylib;
+
+public
+{
+    import raylib.rlgl;
+    import raylib.reasings;
+    import raylib.raymath;
+    import raylib.raymathext;
+    import raylib.raylib_types;
+    import raylib.binding;
+}
 
 import core.stdc.config;
 import core.stdc.stdarg;
@@ -92,7 +93,7 @@ extern (C) @nogc nothrow:
 
 // Required for: va_list - Only used by TraceLogCallback
 
-enum RAYLIB_VERSION = "4.0";
+enum RAYLIB_VERSION = "4.2";
 
 // Function specifiers in case library is build/used as a shared library (Windows)
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
@@ -112,6 +113,7 @@ enum DEG2RAD = PI / 180.0f;
 enum RAD2DEG = 180.0f / PI;
 
 // Allow custom memory allocators
+// NOTE: Require recompiling raylib sources
 
 // NOTE: MSVC C++ compiler does not support compound literals (C99 feature)
 // Plain structures in C++ (without constructors) can be initialized with { }
@@ -276,7 +278,7 @@ struct Mesh
     // Vertex attributes data
     float* vertices; // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
     float* texcoords; // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
-    float* texcoords2; // Vertex second texture coordinates (useful for lightmaps) (shader-location = 5)
+    float* texcoords2; // Vertex texture second coordinates (UV - 2 components per vertex) (shader-location = 5)
     float* normals; // Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
     float* tangents; // Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
     ubyte* colors; // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
@@ -390,12 +392,16 @@ struct Wave
     void* data; // Buffer data pointer
 }
 
+// Opaque structs declaration
+// NOTE: Actual structs are defined internally in raudio module
 struct rAudioBuffer;
+struct rAudioProcessor;
 
 // AudioStream, custom audio stream
 struct AudioStream
 {
     rAudioBuffer* buffer; // Pointer to internal data used by the audio system
+    rAudioProcessor* processor; // Pointer to internal data processor, useful for audio effects
 
     uint sampleRate; // Frequency (samples per second)
     uint sampleSize; // Bit depth (bits per sample): 8, 16, 32 (24 not supported)
@@ -448,6 +454,14 @@ struct VrStereoConfig
     float[2] scaleIn; // VR distortion scale in
 }
 
+// File path list
+struct FilePathList
+{
+    uint capacity; // Filepaths max entries
+    uint count; // Filepaths entries count
+    char** paths; // Filepaths entries
+}
+
 //----------------------------------------------------------------------------------
 // Enumerators Definition
 //----------------------------------------------------------------------------------
@@ -468,6 +482,7 @@ enum ConfigFlags
     FLAG_WINDOW_ALWAYS_RUN = 0x00000100, // Set to allow windows running while minimized
     FLAG_WINDOW_TRANSPARENT = 0x00000010, // Set to allow transparent framebuffer
     FLAG_WINDOW_HIGHDPI = 0x00002000, // Set to support HighDPI
+    FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000, // Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
     FLAG_MSAA_4X_HINT = 0x00000020, // Set to try enabling MSAA 4X
     FLAG_INTERLACED_HINT = 0x00010000 // Set to try enabling interlaced video format (for V3D)
 }
@@ -787,7 +802,7 @@ enum PixelFormat
 // NOTE 2: Filter is accordingly set for minification and magnification
 enum TextureFilter
 {
-    TEXTURE_FILTER_POINT = 0, // No filter, just pixel aproximation
+    TEXTURE_FILTER_POINT = 0, // No filter, just pixel approximation
     TEXTURE_FILTER_BILINEAR = 1, // Linear filtering
     TEXTURE_FILTER_TRILINEAR = 2, // Trilinear filtering (linear with mipmaps)
     TEXTURE_FILTER_ANISOTROPIC_4X = 3, // Anisotropic filtering 4x
@@ -831,7 +846,8 @@ enum BlendMode
     BLEND_MULTIPLIED = 2, // Blend textures multiplying colors
     BLEND_ADD_COLORS = 3, // Blend textures adding colors (alternative)
     BLEND_SUBTRACT_COLORS = 4, // Blend textures subtracting colors (alternative)
-    BLEND_CUSTOM = 5 // Belnd textures using custom src/dst factors (use rlSetBlendMode())
+    BLEND_ALPHA_PREMULTIPLY = 5, // Blend premultiplied textures considering alpha
+    BLEND_CUSTOM = 6 // Blend textures using custom src/dst factors (use rlSetBlendMode())
 }
 
 // Gesture
@@ -907,7 +923,7 @@ bool IsWindowMaximized(); // Check if window is currently maximized (only PLATFO
 bool IsWindowFocused(); // Check if window is currently focused (only PLATFORM_DESKTOP)
 bool IsWindowResized(); // Check if window has been resized last frame
 bool IsWindowState(uint flag); // Check if one specific window flag is enabled
-void SetWindowState(uint flags); // Set window configuration state using flags
+void SetWindowState(uint flags); // Set window configuration state using flags (only PLATFORM_DESKTOP)
 void ClearWindowState(uint flags); // Clear window configuration state flags
 void ToggleFullscreen(); // Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
 void MaximizeWindow(); // Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
@@ -919,14 +935,17 @@ void SetWindowPosition(int x, int y); // Set window position on screen (only PLA
 void SetWindowMonitor(int monitor); // Set monitor for the current window (fullscreen mode)
 void SetWindowMinSize(int width, int height); // Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
 void SetWindowSize(int width, int height); // Set window dimensions
+void SetWindowOpacity(float opacity); // Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
 void* GetWindowHandle(); // Get native window handle
 int GetScreenWidth(); // Get current screen width
 int GetScreenHeight(); // Get current screen height
+int GetRenderWidth(); // Get current render width (it considers HiDPI)
+int GetRenderHeight(); // Get current render height (it considers HiDPI)
 int GetMonitorCount(); // Get number of connected monitors
 int GetCurrentMonitor(); // Get current connected monitor
 Vector2 GetMonitorPosition(int monitor); // Get specified monitor position
-int GetMonitorWidth(int monitor); // Get specified monitor width (max available by monitor)
-int GetMonitorHeight(int monitor); // Get specified monitor height (max available by monitor)
+int GetMonitorWidth(int monitor); // Get specified monitor width (current video mode used by monitor)
+int GetMonitorHeight(int monitor); // Get specified monitor height (current video mode used by monitor)
 int GetMonitorPhysicalWidth(int monitor); // Get specified monitor physical width in millimetres
 int GetMonitorPhysicalHeight(int monitor); // Get specified monitor physical height in millimetres
 int GetMonitorRefreshRate(int monitor); // Get specified monitor refresh rate
@@ -935,6 +954,8 @@ Vector2 GetWindowScaleDPI(); // Get window scale DPI factor
 const(char)* GetMonitorName(int monitor); // Get the human-readable, UTF-8 encoded name of the primary monitor
 void SetClipboardText(const(char)* text); // Set clipboard text content
 const(char)* GetClipboardText(); // Get clipboard text content
+void EnableEventWaiting(); // Enable waiting for events on EndDrawing(), no automatic event polling
+void DisableEventWaiting(); // Disable waiting for events on EndDrawing(), automatic events polling
 
 // Custom frame control functions
 // NOTE: Those functions are intended for advance users that want full control over the frame processing
@@ -942,7 +963,7 @@ const(char)* GetClipboardText(); // Get clipboard text content
 // To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
 void SwapScreenBuffer(); // Swap back buffer with front buffer (screen drawing)
 void PollInputEvents(); // Register all input events
-void WaitTime(float ms); // Wait for some milliseconds (halt program execution)
+void WaitTime(double seconds); // Wait for some time (halt program execution)
 
 // Cursor-related functions
 void ShowCursor(); // Shows cursor
@@ -992,9 +1013,9 @@ Ray GetMouseRay(Vector2 mousePosition, Camera camera); // Get a ray trace from m
 Matrix GetCameraMatrix(Camera camera); // Get camera transform matrix (view matrix)
 Matrix GetCameraMatrix2D(Camera2D camera); // Get camera 2d transform matrix
 Vector2 GetWorldToScreen(Vector3 position, Camera camera); // Get the screen space position for a 3d world space position
+Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera); // Get the world space position for a 2d camera screen space position
 Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
 Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera); // Get the screen space position for a 2d camera world space position
-Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera); // Get the world space position for a 2d camera screen space position
 
 // Timing-related functions
 void SetTargetFPS(int fps); // Set target FPS (maximum)
@@ -1014,6 +1035,8 @@ void* MemAlloc(int size); // Internal memory allocator
 void* MemRealloc(void* ptr, int size); // Internal memory reallocator
 void MemFree(void* ptr); // Internal memory free
 
+void OpenURL(const(char)* url); // Open URL with default system browser (if available)
+
 // Set custom callbacks
 // WARNING: Callbacks setup is intended for advance users
 void SetTraceLogCallback(TraceLogCallback callback); // Set custom trace log
@@ -1026,37 +1049,36 @@ void SetSaveFileTextCallback(SaveFileTextCallback callback); // Set custom file 
 ubyte* LoadFileData(const(char)* fileName, uint* bytesRead); // Load file data as byte array (read)
 void UnloadFileData(ubyte* data); // Unload file data allocated by LoadFileData()
 bool SaveFileData(const(char)* fileName, void* data, uint bytesToWrite); // Save data to file from byte array (write), returns true on success
+bool ExportDataAsCode(const(char)* data, uint size, const(char)* fileName); // Export data to code (.h), returns true on success
 char* LoadFileText(const(char)* fileName); // Load text data from file (read), returns a '\0' terminated string
 void UnloadFileText(char* text); // Unload file text data allocated by LoadFileText()
 bool SaveFileText(const(char)* fileName, char* text); // Save text data to file (write), string must be '\0' terminated, returns true on success
 bool FileExists(const(char)* fileName); // Check if file exists
 bool DirectoryExists(const(char)* dirPath); // Check if a directory path exists
 bool IsFileExtension(const(char)* fileName, const(char)* ext); // Check file extension (including point: .png, .wav)
+int GetFileLength(const(char)* fileName); // Get file length in bytes (NOTE: GetFileSize() conflicts with windows.h)
 const(char)* GetFileExtension(const(char)* fileName); // Get pointer to extension for a filename string (includes dot: '.png')
 const(char)* GetFileName(const(char)* filePath); // Get pointer to filename for a path string
 const(char)* GetFileNameWithoutExt(const(char)* filePath); // Get filename string without extension (uses static string)
 const(char)* GetDirectoryPath(const(char)* filePath); // Get full path for a given fileName with path (uses static string)
 const(char)* GetPrevDirectoryPath(const(char)* dirPath); // Get previous directory path for a given path (uses static string)
 const(char)* GetWorkingDirectory(); // Get current working directory (uses static string)
-char** GetDirectoryFiles(const(char)* dirPath, int* count); // Get filenames in a directory path (memory should be freed)
-void ClearDirectoryFiles(); // Clear directory files paths buffers (free memory)
+const(char)* GetApplicationDirectory(); // Get the directory if the running application (uses static string)
 bool ChangeDirectory(const(char)* dir); // Change working directory, return true on success
+bool IsPathFile(const(char)* path); // Check if a given path is a file or a directory
+FilePathList LoadDirectoryFiles(const(char)* dirPath); // Load directory filepaths
+FilePathList LoadDirectoryFilesEx(const(char)* basePath, const(char)* filter, bool scanSubdirs); // Load directory filepaths with extension filtering and recursive directory scan
+void UnloadDirectoryFiles(FilePathList files); // Unload filepaths
 bool IsFileDropped(); // Check if a file has been dropped into window
-char** GetDroppedFiles(int* count); // Get dropped files names (memory should be freed)
-void ClearDroppedFiles(); // Clear dropped files paths buffer (free memory)
+FilePathList LoadDroppedFiles(); // Load dropped filepaths
+void UnloadDroppedFiles(FilePathList files); // Unload dropped filepaths
 c_long GetFileModTime(const(char)* fileName); // Get file modification time (last write time)
 
 // Compression/Encoding functionality
-ubyte* CompressData(ubyte* data, int dataLength, int* compDataLength); // Compress data (DEFLATE algorithm)
-ubyte* DecompressData(ubyte* compData, int compDataLength, int* dataLength); // Decompress data (DEFLATE algorithm)
-char* EncodeDataBase64(const(ubyte)* data, int dataLength, int* outputLength); // Encode data to Base64 string
-ubyte* DecodeDataBase64(ubyte* data, int* outputLength); // Decode Base64 string data
-
-// Persistent storage management
-bool SaveStorageValue(uint position, int value); // Save integer value to storage file (to defined position), returns true on success
-int LoadStorageValue(uint position); // Load integer value from storage file (from defined position)
-
-void OpenURL(const(char)* url); // Open URL with default system browser (if available)
+ubyte* CompressData(const(ubyte)* data, int dataSize, int* compDataSize); // Compress data (DEFLATE algorithm), memory must be MemFree()
+ubyte* DecompressData(const(ubyte)* compData, int compDataSize, int* dataSize); // Decompress data (DEFLATE algorithm), memory must be MemFree()
+char* EncodeDataBase64(const(ubyte)* data, int dataSize, int* outputSize); // Encode data to Base64 string, memory must be MemFree()
+ubyte* DecodeDataBase64(const(ubyte)* data, int* outputSize); // Decode Base64 string data, memory must be MemFree()
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)
@@ -1095,7 +1117,8 @@ Vector2 GetMouseDelta(); // Get mouse delta between frames
 void SetMousePosition(int x, int y); // Set mouse position XY
 void SetMouseOffset(int offsetX, int offsetY); // Set mouse offset
 void SetMouseScale(float scaleX, float scaleY); // Set mouse scaling
-float GetMouseWheelMove(); // Get mouse wheel movement Y
+float GetMouseWheelMove(); // Get mouse wheel movement for X or Y, whichever is larger
+Vector2 GetMouseWheelMoveV(); // Get mouse wheel movement for both X and Y
 void SetMouseCursor(int cursor); // Set mouse cursor
 
 // Input-related functions: touch
@@ -1310,13 +1333,14 @@ int GetPixelDataSize(int width, int height, int format); // Get pixel data size 
 // Font loading/unloading functions
 Font GetFontDefault(); // Get the default Font
 Font LoadFont(const(char)* fileName); // Load font from file into GPU memory (VRAM)
-Font LoadFontEx(const(char)* fileName, int fontSize, int* fontChars, int glyphCount); // Load font from file with extended parameters
+Font LoadFontEx(const(char)* fileName, int fontSize, int* fontChars, int glyphCount); // Load font from file with extended parameters, use NULL for fontChars and 0 for glyphCount to load the default character set
 Font LoadFontFromImage(Image image, Color key, int firstChar); // Load font from Image (XNA style)
 Font LoadFontFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int glyphCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
 GlyphInfo* LoadFontData(const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int glyphCount, int type); // Load font data for further use
 Image GenImageFontAtlas(const(GlyphInfo)* chars, Rectangle** recs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
 void UnloadFontData(GlyphInfo* chars, int glyphCount); // Unload font chars info data (RAM)
-void UnloadFont(Font font); // Unload Font from GPU memory (VRAM)
+void UnloadFont(Font font); // Unload font from GPU memory (VRAM)
+bool ExportFontAsCode(Font font, const(char)* fileName); // Export font as code file, returns true on success
 
 // Text drawing functions
 void DrawFPS(int posX, int posY); // Draw current FPS
@@ -1324,6 +1348,7 @@ void DrawText(const(char)* text, int posX, int posY, int fontSize, Color color);
 void DrawTextEx(Font font, const(char)* text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
 void DrawTextPro(Font font, const(char)* text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
 void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint); // Draw one character (codepoint)
+void DrawTextCodepoints(Font font, const(int)* codepoints, int count, Vector2 position, float fontSize, float spacing, Color tint); // Draw multiple character (codepoint)
 
 // Text font info functions
 int MeasureText(const(char)* text, int fontSize); // Measure string width for default font
@@ -1338,7 +1363,7 @@ void UnloadCodepoints(int* codepoints); // Unload codepoints data from memory
 int GetCodepointCount(const(char)* text); // Get total number of codepoints in a UTF-8 encoded string
 int GetCodepoint(const(char)* text, int* bytesProcessed); // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
 const(char)* CodepointToUTF8(int codepoint, int* byteSize); // Encode one codepoint into UTF-8 byte array (array length returned as parameter)
-char* TextCodepointsToUTF8(int* codepoints, int length); // Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
+char* TextCodepointsToUTF8(const(int)* codepoints, int length); // Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
 
 // Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!
@@ -1408,14 +1433,13 @@ void DrawBillboardPro(Camera camera, Texture2D texture, Rectangle source, Vector
 
 // Mesh management functions
 void UploadMesh(Mesh* mesh, bool dynamic); // Upload mesh vertex data in GPU and provide VAO/VBO ids
-void UpdateMeshBuffer(Mesh mesh, int index, void* data, int dataSize, int offset); // Update mesh vertex data in GPU for a specific buffer index
+void UpdateMeshBuffer(Mesh mesh, int index, const(void)* data, int dataSize, int offset); // Update mesh vertex data in GPU for a specific buffer index
 void UnloadMesh(Mesh mesh); // Unload mesh data from CPU and GPU
 void DrawMesh(Mesh mesh, Material material, Matrix transform); // Draw a 3d mesh with material and transform
-void DrawMeshInstanced(Mesh mesh, Material material, Matrix* transforms, int instances); // Draw multiple mesh instances with material and different transforms
+void DrawMeshInstanced(Mesh mesh, Material material, const(Matrix)* transforms, int instances); // Draw multiple mesh instances with material and different transforms
 bool ExportMesh(Mesh mesh, const(char)* fileName); // Export mesh data to file, returns true on success
 BoundingBox GetMeshBoundingBox(Mesh mesh); // Compute mesh bounding box limits
 void GenMeshTangents(Mesh* mesh); // Compute mesh tangents
-void GenMeshBinormals(Mesh* mesh); // Compute mesh binormals
 
 // Mesh generation functions
 Mesh GenMeshPoly(int sides, float radius); // Generate polygonal mesh
@@ -1450,7 +1474,6 @@ bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2); // Check collision
 bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius); // Check collision between box and sphere
 RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius); // Get collision info between ray and sphere
 RayCollision GetRayCollisionBox(Ray ray, BoundingBox box); // Get collision info between ray and box
-RayCollision GetRayCollisionModel(Ray ray, Model model); // Get collision info between ray and model
 RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform); // Get collision info between ray and mesh
 RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3); // Get collision info between ray and triangle
 RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4); // Get collision info between ray and quad
@@ -1458,6 +1481,7 @@ RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Ve
 //------------------------------------------------------------------------------------
 // Audio Loading and Playing Functions (Module: audio)
 //------------------------------------------------------------------------------------
+alias AudioCallback = void function(void* bufferData, uint frames);
 
 // Audio device management functions
 void InitAudioDevice(); // Initialize audio device and context
@@ -1487,15 +1511,16 @@ int GetSoundsPlaying(); // Get number of sounds playing in the multichannel
 bool IsSoundPlaying(Sound sound); // Check if a sound is currently playing
 void SetSoundVolume(Sound sound, float volume); // Set volume for a sound (1.0 is max level)
 void SetSoundPitch(Sound sound, float pitch); // Set pitch for a sound (1.0 is base level)
-void WaveFormat(Wave* wave, int sampleRate, int sampleSize, int channels); // Convert wave data to desired format
+void SetSoundPan(Sound sound, float pan); // Set pan for a sound (0.5 is center)
 Wave WaveCopy(Wave wave); // Copy a wave to a new wave
 void WaveCrop(Wave* wave, int initSample, int finalSample); // Crop a wave to defined samples range
-float* LoadWaveSamples(Wave wave); // Load samples data from wave as a floats array
+void WaveFormat(Wave* wave, int sampleRate, int sampleSize, int channels); // Convert wave data to desired format
+float* LoadWaveSamples(Wave wave); // Load samples data from wave as a 32bit float data array
 void UnloadWaveSamples(float* samples); // Unload samples data loaded with LoadWaveSamples()
 
 // Music management functions
 Music LoadMusicStream(const(char)* fileName); // Load music stream from file
-Music LoadMusicStreamFromMemory(const(char)* fileType, ubyte* data, int dataSize); // Load music stream from data
+Music LoadMusicStreamFromMemory(const(char)* fileType, const(ubyte)* data, int dataSize); // Load music stream from data
 void UnloadMusicStream(Music music); // Unload music stream
 void PlayMusicStream(Music music); // Start music playing
 bool IsMusicStreamPlaying(Music music); // Check if music is playing
@@ -1506,6 +1531,7 @@ void ResumeMusicStream(Music music); // Resume playing paused music
 void SeekMusicStream(Music music, float position); // Seek music to a position (in seconds)
 void SetMusicVolume(Music music, float volume); // Set volume for music (1.0 is max level)
 void SetMusicPitch(Music music, float pitch); // Set pitch for a music (1.0 is base level)
+void SetMusicPan(Music music, float pan); // Set pan for a music (0.5 is center)
 float GetMusicTimeLength(Music music); // Get music time length (in seconds)
 float GetMusicTimePlayed(Music music); // Get current music time played (in seconds)
 
@@ -1521,6 +1547,11 @@ bool IsAudioStreamPlaying(AudioStream stream); // Check if audio stream is playi
 void StopAudioStream(AudioStream stream); // Stop audio stream
 void SetAudioStreamVolume(AudioStream stream, float volume); // Set volume for audio stream (1.0 is max level)
 void SetAudioStreamPitch(AudioStream stream, float pitch); // Set pitch for audio stream (1.0 is base level)
+void SetAudioStreamPan(AudioStream stream, float pan); // Set pan for audio stream (0.5 is centered)
 void SetAudioStreamBufferSizeDefault(int size); // Default size for new audio streams
+void SetAudioStreamCallback(AudioStream stream, AudioCallback callback); // Audio thread callback to request new data
+
+void AttachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Attach audio stream processor to stream
+void DetachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Detach audio stream processor from stream
 
 // RAYLIB_H

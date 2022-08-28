@@ -1,3 +1,5 @@
+deprecated("raygui is not up to date and will be removed in a future version of raylib-d")
+module raygui;
 /*******************************************************************************************
 *
 *   raygui v2.7 - A simple and easy-to-use immediate-mode gui library
