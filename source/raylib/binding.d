@@ -15,9 +15,11 @@ private extern(C) extern __gshared const(char)* raylibVersion;
  *
  * If the binding is not valid, then the program will exit with a -1 error code.
  *
- * This is a template to avoid requiring linking libraylib for unittests.
+ * The function is not included when running raylib unittests, so there are no
+ * linker errors. (raylib-d unittests do not test the C binding)
  */
-void validateRaylibBinding()() @nogc nothrow {
+version(raylib_test) {} else
+void validateRaylibBinding() @nogc nothrow {
     import core.stdc.stdio;
     import core.stdc.stdlib;
     import core.stdc.string;
