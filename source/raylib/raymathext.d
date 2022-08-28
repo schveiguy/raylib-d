@@ -1,4 +1,4 @@
-module raymathext;
+module raylib.raymathext;
 
 import raylib;
 import std.math;
@@ -66,11 +66,6 @@ struct Rotor3
 }
 
 alias Matrix4 = Matrix;
-
-version (unittest)
-{
-    import fluent.asserts;
-}
 
 mixin template Linear()
 {
@@ -168,21 +163,21 @@ mixin template Linear()
 
 unittest
 {
-    Assert.equal(Vector2.init, Vector2.zero);
-    Assert.equal(Vector2(), Vector2.zero);
-    Assert.equal(-Vector2(1, 2), Vector2(-1, -2));
+    assert(Vector2.init == Vector2.zero);
+    assert(Vector2() == Vector2.zero);
+    assert(-Vector2(1, 2) == Vector2(-1, -2));
     auto a = Vector3(1, 2, 9);
     immutable b = Vector3(3, 4, 9);
     Vector3 c = a + b;
-    Assert.equal(c, Vector3(4, 6, 18));
-    Assert.equal(4.0f - Vector2.zero, Vector2(4, 4));
-    Assert.equal(Vector2.one - 3.0f, Vector2(-2, -2));
+    assert(c == Vector3(4, 6, 18));
+    assert(4.0f - Vector2.zero == Vector2(4, 4));
+    assert(Vector2.one - 3.0f == Vector2(-2, -2));
     a += 5;
-    Assert.equal(a, Vector3(6, 7, 14));
+    assert(a == Vector3(6, 7, 14));
     a *= 0.5;
-    Assert.equal(a, Vector3(3, 3.5, 7));
+    assert(a == Vector3(3, 3.5, 7));
     a += Vector3(3, 2.5, -1);
-    Assert.equal(a, Vector3(6, 6, 6));
+    assert(a == Vector3(6, 6, 6));
 }
 
 import std.traits : FieldNameTuple;
@@ -214,18 +209,18 @@ float dot(T)(T lhs, T rhs)
 
 unittest
 {
-    Assert.equal(Vector2(3, 4).length, 5);
+    assert(Vector2(3, 4).length == 5);
     const a = Vector2(-3, 4);
-    Assert.equal(a.normal, Vector2(-3. / 5., 4. / 5.));
+    assert(a.normal == Vector2(-3. / 5., 4. / 5.));
     immutable b = Vector2(9, 8);
-    Assert.equal(b.distance(Vector2(-3, 3)), 13);
-    Assert.equal(Vector3(2, 3, 4).dot(Vector3(4, 5, 6)), 47);
-    Assert.equal(Vector2.one.length, sqrt(2.0f));
+    assert(b.distance(Vector2(-3, 3)) == 13);
+    assert(Vector3(2, 3, 4).dot(Vector3(4, 5, 6)) == 47);
+    assert(Vector2.one.length == sqrt(2.0f));
 }
 
 unittest
 {
-    Assert.equal(Rotor3(1, 2, 3, 4), Rotor3(1, Bivector3(2, 3, 4)));
+    assert(Rotor3(1, 2, 3, 4) == Rotor3(1, Bivector3(2, 3, 4)));
 }
 
 /// Mix `amount` of `lhs` with `1-amount` of `rhs`

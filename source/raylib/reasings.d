@@ -78,7 +78,7 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
-module reasings;
+module raylib.reasings;
 
 extern (C) nothrow @nogc:
 pragma(inline, true): // NOTE: By default, compile functions as static inline

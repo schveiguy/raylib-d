@@ -1,14 +1,3 @@
-module raylib;
-
-public
-{
-    import rlgl;
-    import reasings;
-    import raymath;
-    import raymathext;
-    import raylib_types;
-}
-
 /**********************************************************************************************
 *
 *   raylib v4.2 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
@@ -85,6 +74,18 @@ public
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+module raylib;
+
+public
+{
+    import raylib.rlgl;
+    import raylib.reasings;
+    import raylib.raymath;
+    import raylib.raymathext;
+    import raylib.raylib_types;
+    import raylib.binding;
+}
+
 import core.stdc.config;
 import core.stdc.stdarg;
 

@@ -1,5 +1,5 @@
 /// This module defines basic types from Raylib with local modifications to make them easier to use.
-module raylib_types;
+module raylib.raylib_types;
 
 import raylib;
 
