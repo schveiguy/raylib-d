@@ -21,14 +21,14 @@ import raylib;
 *     - Functions are always self-contained, no function use another raymath function inside,
 *       required code is directly re-implemented inside
 *     - Functions input parameters are always received by value (2 unavoidable exceptions)
-*     - Functions use always a "result" anmed variable for return
+*     - Functions use always a "result" variable for return
 *     - Functions are always defined inline
 *     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
 *
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2015-2021 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2015-2022 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -66,6 +66,8 @@ extern (C) @nogc nothrow:
 //----------------------------------------------------------------------------------
 
 enum PI = 3.14159265358979323846f;
+
+enum EPSILON = 0.000001f;
 
 enum DEG2RAD = PI / 180.0f;
 
@@ -115,7 +117,7 @@ struct float16
     float[16] v;
 }
 
-// Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), fminf(), fmaxf(), fabs()
+// Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), floor(), fminf(), fmaxf(), fabs()
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Utils math
@@ -137,6 +139,12 @@ float Remap(
     float inputEnd,
     float outputStart,
     float outputEnd);
+
+// Wrap input value from min to max
+float Wrap(float value, float min, float max);
+
+// Check whether two given floats are almost equal
+int FloatEquals(float x, float y);
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vector2 math
@@ -172,7 +180,10 @@ float Vector2DotProduct(Vector2 v1, Vector2 v2);
 // Calculate distance between two vectors
 float Vector2Distance(Vector2 v1, Vector2 v2);
 
-// Calculate angle from two vectors in X-axis
+// Calculate square distance between two vectors
+float Vector2DistanceSqr(Vector2 v1, Vector2 v2);
+
+// Calculate angle from two vectors
 float Vector2Angle(Vector2 v1, Vector2 v2);
 
 // Scale vector (multiply by value)
@@ -190,6 +201,9 @@ Vector2 Vector2Divide(Vector2 v1, Vector2 v2);
 // Normalize provided vector
 Vector2 Vector2Normalize(Vector2 v);
 
+// Transforms a Vector2 by a given Matrix
+Vector2 Vector2Transform(Vector2 v, Matrix mat);
+
 // Calculate linear interpolation between two vectors
 Vector2 Vector2Lerp(Vector2 v1, Vector2 v2, float amount);
 
@@ -203,6 +217,19 @@ Vector2 Vector2Rotate(Vector2 v, float angle);
 
 // Move Vector towards target
 Vector2 Vector2MoveTowards(Vector2 v, Vector2 target, float maxDistance);
+
+// Invert the given vector
+Vector2 Vector2Invert(Vector2 v);
+
+// Clamp the components of the vector between
+// min and max values specified by the given vectors
+Vector2 Vector2Clamp(Vector2 v, Vector2 min, Vector2 max);
+
+// Clamp the magnitude of the vector between two min and max values
+Vector2 Vector2ClampValue(Vector2 v, float min, float max);
+
+// Check whether two given vectors are almost equal
+int Vector2Equals(Vector2 p, Vector2 q);
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vector3 math
@@ -252,11 +279,11 @@ float Vector3DotProduct(Vector3 v1, Vector3 v2);
 // Calculate distance between two vectors
 float Vector3Distance(Vector3 v1, Vector3 v2);
 
-// Calculate angle between two vectors in XY and XZ
+// Calculate square distance between two vectors
+float Vector3DistanceSqr(Vector3 v1, Vector3 v2);
 
-// Angle in XZ
-// Angle in XY
-Vector2 Vector3Angle(Vector3 v1, Vector3 v2);
+// Calculate angle between two vectors
+float Vector3Angle(Vector3 v1, Vector3 v2);
 
 // Negate provided vector (invert direction)
 Vector3 Vector3Negate(Vector3 v);
@@ -285,6 +312,22 @@ Vector3 Vector3Transform(Vector3 v, Matrix mat);
 
 // Transform a vector by quaternion rotation
 Vector3 Vector3RotateByQuaternion(Vector3 v, Quaternion q);
+
+// Rotates a vector around an axis
+
+// Using Euler-Rodrigues Formula
+// Ref.: https://en.wikipedia.org/w/index.php?title=Euler%E2%80%93Rodrigues_formula
+
+// Vector3Normalize(axis);
+
+// Vector3CrossProduct(w, v)
+
+// Vector3CrossProduct(w, wv)
+
+// Vector3Scale(wv, 2 * a)
+
+// Vector3Scale(wwv, 2)
+Vector3 Vector3RotateByAxisAngle(Vector3 v, Vector3 axis, float angle);
 
 // Calculate linear interpolation between two vectors
 Vector3 Vector3Lerp(Vector3 v1, Vector3 v2, float amount);
@@ -337,6 +380,27 @@ Vector3 Vector3Unproject(Vector3 source, Matrix projection, Matrix view);
 // Get Vector3 as float array
 float3 Vector3ToFloatV(Vector3 v);
 
+// Invert the given vector
+Vector3 Vector3Invert(Vector3 v);
+
+// Clamp the components of the vector between
+// min and max values specified by the given vectors
+Vector3 Vector3Clamp(Vector3 v, Vector3 min, Vector3 max);
+
+// Clamp the magnitude of the vector between two values
+Vector3 Vector3ClampValue(Vector3 v, float min, float max);
+
+// Check whether two given vectors are almost equal
+int Vector3Equals(Vector3 p, Vector3 q);
+
+// Compute the direction of a refracted ray where v specifies the
+// normalized direction of the incoming ray, n specifies the
+// normalized normal vector of the interface of two optical media,
+// and r specifies the ratio of the refractive index of the medium
+// from where the ray comes to the refractive index of the medium
+// on the other side of the surface
+Vector3 Vector3Refract(Vector3 v, Vector3 n, float r);
+
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Matrix math
 //----------------------------------------------------------------------------------
@@ -359,13 +423,6 @@ Matrix MatrixTranspose(Matrix mat);
 // Calculate the invert determinant (inlined to avoid double-caching)
 Matrix MatrixInvert(Matrix mat);
 
-// Normalize provided matrix
-
-// Cache the matrix values (speed optimization)
-
-// MatrixDeterminant(mat)
-Matrix MatrixNormalize(Matrix mat);
-
 // Get identity matrix
 Matrix MatrixIdentity();
 
@@ -386,28 +443,33 @@ Matrix MatrixTranslate(float x, float y, float z);
 // NOTE: Angle should be provided in radians
 Matrix MatrixRotate(Vector3 axis, float angle);
 
-// Get x-rotation matrix (angle in radians)
+// Get x-rotation matrix
+// NOTE: Angle must be provided in radians
 
 // MatrixIdentity()
 Matrix MatrixRotateX(float angle);
 
-// Get y-rotation matrix (angle in radians)
+// Get y-rotation matrix
+// NOTE: Angle must be provided in radians
 
 // MatrixIdentity()
 Matrix MatrixRotateY(float angle);
 
-// Get z-rotation matrix (angle in radians)
+// Get z-rotation matrix
+// NOTE: Angle must be provided in radians
 
 // MatrixIdentity()
 Matrix MatrixRotateZ(float angle);
 
-// Get xyz-rotation matrix (angles in radians)
+// Get xyz-rotation matrix
+// NOTE: Angle must be provided in radians
 
 // MatrixIdentity()
-Matrix MatrixRotateXYZ(Vector3 ang);
+Matrix MatrixRotateXYZ(Vector3 angle);
 
-// Get zyx-rotation matrix (angles in radians)
-Matrix MatrixRotateZYX(Vector3 ang);
+// Get zyx-rotation matrix
+// NOTE: Angle must be provided in radians
+Matrix MatrixRotateZYX(Vector3 angle);
 
 // Get scaling matrix
 Matrix MatrixScale(float x, float y, float z);
@@ -422,7 +484,7 @@ Matrix MatrixFrustum(
     double far);
 
 // Get perspective projection matrix
-// NOTE: Angle should be provided in radians
+// NOTE: Fovy angle must be provided in radians
 
 // MatrixFrustum(-right, right, -top, top, near, far);
 Matrix MatrixPerspective(double fovy, double aspect, double near, double far);
@@ -524,7 +586,7 @@ Quaternion QuaternionFromMatrix(Matrix mat);
 Matrix QuaternionToMatrix(Quaternion q);
 
 // Get rotation quaternion for an angle and axis
-// NOTE: angle must be provided in radians
+// NOTE: Angle must be provided in radians
 
 // Vector3Normalize(axis)
 
@@ -555,5 +617,8 @@ Vector3 QuaternionToEuler(Quaternion q);
 
 // Transform a quaternion given a transformation matrix
 Quaternion QuaternionTransform(Quaternion q, Matrix mat);
+
+// Check whether two given quaternions are almost equal
+int QuaternionEquals(Quaternion p, Quaternion q);
 
 // RAYMATH_H

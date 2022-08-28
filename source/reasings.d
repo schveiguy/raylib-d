@@ -1,6 +1,6 @@
 /*******************************************************************************************
 *
-*   raylib easings (header only file)
+*   reasings - raylib easings library, based on Robert Penner library
 *
 *   Useful easing functions for values animation
 *
@@ -60,7 +60,7 @@
 *   OF THE POSSIBILITY OF SUCH DAMAGE.
 *   ---------------------------------------------------------------------------------
 *
-*   Copyright (c) 2015 Ramon Santamaria
+*   Copyright (c) 2015-2022 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -78,8 +78,9 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+module reasings;
 
-extern (C):
+extern (C) nothrow @nogc:
 pragma(inline, true): // NOTE: By default, compile functions as static inline
 
 import core.stdc.math; // Required for: sinf(), cosf(), sqrt(), pow()

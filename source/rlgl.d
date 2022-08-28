@@ -88,7 +88,7 @@ import raylib;
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2014-2021 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014-2022 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -357,7 +357,7 @@ enum rlPixelFormat
 // NOTE 2: Filter is accordingly set for minification and magnification
 enum rlTextureFilter
 {
-    RL_TEXTURE_FILTER_POINT = 0, // No filter, just pixel aproximation
+    RL_TEXTURE_FILTER_POINT = 0, // No filter, just pixel approximation
     RL_TEXTURE_FILTER_BILINEAR = 1, // Linear filtering
     RL_TEXTURE_FILTER_TRILINEAR = 2, // Trilinear filtering (linear with mipmaps)
     RL_TEXTURE_FILTER_ANISOTROPIC_4X = 3, // Anisotropic filtering 4x
@@ -373,7 +373,8 @@ enum rlBlendMode
     RL_BLEND_MULTIPLIED = 2, // Blend textures multiplying colors
     RL_BLEND_ADD_COLORS = 3, // Blend textures adding colors (alternative)
     RL_BLEND_SUBTRACT_COLORS = 4, // Blend textures subtracting colors (alternative)
-    RL_BLEND_CUSTOM = 5 // Belnd textures using custom src/dst factors (use SetBlendModeCustom())
+    RL_BLEND_ALPHA_PREMULTIPLY = 5, // Blend premultiplied textures considering alpha
+    RL_BLEND_CUSTOM = 6 // Blend textures using custom src/dst factors (use rlSetBlendFactors())
 }
 
 // Shader location point type
@@ -537,7 +538,9 @@ void rlglInit(int width, int height); // Initialize rlgl (buffers, shaders, text
 void rlglClose(); // De-inititialize rlgl (buffers, shaders, textures)
 void rlLoadExtensions(void* loader); // Load OpenGL extensions (loader function required)
 int rlGetVersion(); // Get current OpenGL version
+void rlSetFramebufferWidth(int width); // Set current framebuffer width
 int rlGetFramebufferWidth(); // Get default framebuffer width
+void rlSetFramebufferHeight(int height); // Set current framebuffer height
 int rlGetFramebufferHeight(); // Get default framebuffer height
 
 uint rlGetTextureIdDefault(); // Get default texture id
@@ -559,25 +562,26 @@ void rlSetTexture(uint id); // Set current texture for render batch and check bu
 
 // Vertex buffers management
 uint rlLoadVertexArray(); // Load vertex array (vao) if supported
-uint rlLoadVertexBuffer(void* buffer, int size, bool dynamic); // Load a vertex buffer attribute
-uint rlLoadVertexBufferElement(void* buffer, int size, bool dynamic); // Load a new attributes element buffer
-void rlUpdateVertexBuffer(uint bufferId, void* data, int dataSize, int offset); // Update GPU buffer with new data
+uint rlLoadVertexBuffer(const(void)* buffer, int size, bool dynamic); // Load a vertex buffer attribute
+uint rlLoadVertexBufferElement(const(void)* buffer, int size, bool dynamic); // Load a new attributes element buffer
+void rlUpdateVertexBuffer(uint bufferId, const(void)* data, int dataSize, int offset); // Update GPU buffer with new data
+void rlUpdateVertexBufferElements(uint id, const(void)* data, int dataSize, int offset); // Update vertex buffer elements with new data
 void rlUnloadVertexArray(uint vaoId);
 void rlUnloadVertexBuffer(uint vboId);
-void rlSetVertexAttribute(uint index, int compSize, int type, bool normalized, int stride, void* pointer);
+void rlSetVertexAttribute(uint index, int compSize, int type, bool normalized, int stride, const(void)* pointer);
 void rlSetVertexAttributeDivisor(uint index, int divisor);
 void rlSetVertexAttributeDefault(int locIndex, const(void)* value, int attribType, int count); // Set vertex attribute default value
 void rlDrawVertexArray(int offset, int count);
-void rlDrawVertexArrayElements(int offset, int count, void* buffer);
+void rlDrawVertexArrayElements(int offset, int count, const(void)* buffer);
 void rlDrawVertexArrayInstanced(int offset, int count, int instances);
-void rlDrawVertexArrayElementsInstanced(int offset, int count, void* buffer, int instances);
+void rlDrawVertexArrayElementsInstanced(int offset, int count, const(void)* buffer, int instances);
 
 // Textures management
-uint rlLoadTexture(void* data, int width, int height, int format, int mipmapCount); // Load texture in GPU
+uint rlLoadTexture(const(void)* data, int width, int height, int format, int mipmapCount); // Load texture in GPU
 uint rlLoadTextureDepth(int width, int height, bool useRenderBuffer); // Load depth texture/renderbuffer (to be attached to fbo)
-uint rlLoadTextureCubemap(void* data, int size, int format); // Load texture cubemap
+uint rlLoadTextureCubemap(const(void)* data, int size, int format); // Load texture cubemap
 void rlUpdateTexture(uint id, int offsetX, int offsetY, int width, int height, int format, const(void)* data); // Update GPU texture with new data
-void rlGetGlTextureFormats(int format, int* glInternalFormat, int* glFormat, int* glType); // Get OpenGL internal formats
+void rlGetGlTextureFormats(int format, uint* glInternalFormat, uint* glFormat, uint* glType); // Get OpenGL internal formats
 const(char)* rlGetPixelFormatName(uint format); // Get name string for pixel format
 void rlUnloadTexture(uint id); // Unload texture from GPU memory
 void rlGenTextureMipmaps(uint id, int width, int height, int format, int* mipmaps); // Generate mipmap data for selected texture
@@ -741,8 +745,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Blending destination factor
 // Blending equation
 
-// Default framebuffer width
-// Default framebuffer height
+// Current framebuffer width
+// Current framebuffer height
 
 // Renderer state
 
@@ -845,6 +849,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // response to it is platform/compiler dependant
 
 // Set the viewport area (transformation from normalized device coordinates to window coordinates)
+// NOTE: We store current viewport dimensions
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vertex level operations
@@ -935,6 +940,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Set texture parameters (wrap mode/filter mode)
 
+// Reset anisotropy filter, in case it was set
+
 // Enable shader program
 
 // Disable shader program
@@ -1011,6 +1018,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Check and log OpenGL error codes
 
 // Set blend mode
+
+// NOTE: Using GL blend src/dst factors and GL equation configured with rlSetBlendFactors()
 
 // Set blending mode factor and equation
 
@@ -1171,13 +1180,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Show some OpenGL GPU capabilities
 
-/*
-// Following capabilities are only supported by OpenGL 4.3 or greater
-glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &capability);
-TRACELOG(RL_LOG_INFO, "    GL_MAX_VERTEX_ATTRIB_BINDINGS: %i", capability);
-glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, &capability);
-TRACELOG(RL_LOG_INFO, "    GL_MAX_UNIFORM_LOCATIONS: %i", capability);
-*/
+// GRAPHICS_API_OPENGL_43
 // RLGL_SHOW_GL_DETAILS_INFO
 
 // Show some basic info about GL supported features
@@ -1189,6 +1192,10 @@ TRACELOG(RL_LOG_INFO, "    GL_MAX_UNIFORM_LOCATIONS: %i", capability);
 // Get current OpenGL version
 
 // NOTE: Force OpenGL 3.3 on OSX
+
+// Set current framebuffer width
+
+// Set current framebuffer height
 
 // Get default framebuffer width
 
@@ -1352,6 +1359,8 @@ TRACELOG(RL_LOG_INFO, "    GL_MAX_UNIFORM_LOCATIONS: %i", capability);
 
 // Unbind shader program
 
+// Restore viewport to default measures
+
 //------------------------------------------------------------------------------------------------------------
 
 // Reset batch buffers
@@ -1489,10 +1498,8 @@ TRACELOG(RL_LOG_INFO, "    GL_MAX_UNIFORM_LOCATIONS: %i", capability);
 
 // Once mipmaps have been generated and data has been uploaded to GPU VRAM, we can discard RAM data
 
-//glHint(GL_GENERATE_MIPMAP_HINT, GL_DONT_CARE);   // Hint for mipmaps generation algorythm: GL_FASTEST, GL_NICEST, GL_DONT_CARE
+//glHint(GL_GENERATE_MIPMAP_HINT, GL_DONT_CARE);   // Hint for mipmaps generation algorithm: GL_FASTEST, GL_NICEST, GL_DONT_CARE
 // Generate mipmaps automatically
-
-// Activate Trilinear filtering for mipmaps
 
 // Read texture pixel data
 
@@ -1618,16 +1625,48 @@ TRACELOG(RL_LOG_INFO, "    GL_MAX_UNIFORM_LOCATIONS: %i", capability);
 // Load shader from code strings
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
 
-// Detach shader before deletion to make sure memory is freed
+// Compile vertex shader (if provided)
 
-// Detach shader before deletion to make sure memory is freed
+// In case no vertex shader was provided or compilation failed, we use default vertex shader
 
-// Get available shader uniforms
-// NOTE: This information is useful for debug...
+// Compile fragment shader (if provided)
 
-// Assume no variable names longer than 256
+// In case no fragment shader was provided or compilation failed, we use default fragment shader
 
-// Get the name of the uniforms
+// In case vertex and fragment shader are the default ones, no need to recompile, we can just assign the default shader program id
+
+// One of or both shader are new, we need to compile a new shader program
+
+// We can detach and delete vertex/fragment shaders (if not default ones)
+// NOTE: We detach shader before deletion to make sure memory is freed
+
+// In case shader program loading failed, we assign default shader
+
+// In case shader loading fails, we return the default shader
+
+/*
+else
+{
+    // Get available shader uniforms
+    // NOTE: This information is useful for debug...
+    int uniformCount = -1;
+    glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+    for (int i = 0; i < uniformCount; i++)
+    {
+        int namelen = -1;
+        int num = -1;
+        char name[256] = { 0 };     // Assume no variable names longer than 256
+        GLenum type = GL_ZERO;
+
+        // Get the name of the uniforms
+        glGetActiveUniform(id, i, sizeof(name) - 1, &namelen, &num, &type, name);
+
+        name[namelen] = 0;
+        TRACELOGD("SHADER: [ID %i] Active uniform (%s) set at location: %i", id, name, glGetUniformLocation(id, name));
+    }
+}
+*/
 
 // Compile custom shader and return shader id
 
@@ -1802,7 +1841,8 @@ TRACELOG(RL_LOG_INFO, "    GL_MAX_UNIFORM_LOCATIONS: %i", capability);
 
 // Precision required for OpenGL ES2 (WebGL)
 
-// NOTE: Compiled vertex/fragment shaders are kept for re-use
+// NOTE: Compiled vertex/fragment shaders are not deleted,
+// they are kept for re-use as default shaders in case some shader loading fails
 // Compile default vertex shader
 // Compile default fragment shader
 
