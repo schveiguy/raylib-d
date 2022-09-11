@@ -6,7 +6,8 @@ module raylib.binding;
 import raylib;
 
 // stored inside raylib to validate the binding
-private extern(C) extern __gshared const(char)* raylibVersion;
+// NOTE: should be private, but D doesn't allow private export symbols
+/*private*/ extern(C) extern export __gshared const(char*) raylibVersion;
 
 /**
  * Call this function before using any raylib functions to validate the binding
