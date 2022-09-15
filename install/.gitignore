@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/install
+install.so
+install.dylib
+install.dll
+install.a
+install.lib
+install-test-*
+*.exe
+*.o
+*.obj
+*.lst

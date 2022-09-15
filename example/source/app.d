@@ -5,6 +5,7 @@ import raylib;
 void main()
 {
   writeln("Starting a raylib example.");
+  validateRaylibBinding();
 
   SetTargetFPS(60);
   InitWindow(800, 640, "Hello, World!");
