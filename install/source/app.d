@@ -5,7 +5,6 @@ import std.compiler;
 import std.system;
 import std.format;
 import std.conv;
-import argparse;
 import std.process;
 import iopipe.json.serialize;
 import iopipe.json.parser;
@@ -32,15 +31,10 @@ else version(CppRuntime_Clang)
 	enum CRT="llvm";
 else
 	static assert(false, "Unsupported runtime");
-@(Command("install").Description("Install the raylib-d binary C libraries to a location that can be used for linking"))
-struct Args {
-	@(NamedArgument().Description("Copy libraries to the local directory"))
-	bool local;
-}
 
 enum baseDir = buildPath("install", "lib", os.to!string, arch.to!string, CRT.to!string);
 
-int realMain(Args args)
+int main()
 {
     writeln("raylib-d library installation");
     // look at the dub.selections.json file
@@ -81,9 +75,23 @@ int realMain(Args args)
     try {
         auto path = getRaylibPath(dubConfig.output.dup);
         auto libpath = buildPath(path, baseDir);
+        writeln("Copying library files from ", libpath);
         foreach(ent; dirEntries(libpath, SpanMode.shallow))
         {
-            copy(ent.name, buildPath(".", ent.name.baseName));
+            auto newLoc = buildPath(".", ent.name.baseName);
+            version(Posix)
+            {
+                if(ent.isSymlink)
+                {
+                    // recreate the symlink
+                    auto origln = readLink(ent.name);
+                    writefln("Creating symlink %s -> %s", newLoc, origln);
+                    symlink(origln, newLoc);
+                    continue;
+                }
+            }
+            writeln("Installing library file ", newLoc);
+            copy(ent.name, newLoc, PreserveAttributes.yes);
         }
     } catch(Exception ex) {
         stderr.writeln("Error: ", ex.msg);
@@ -91,5 +99,3 @@ int realMain(Args args)
     }
     return 0;
 }
-
-mixin CLI!Args.main!realMain;

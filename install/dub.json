@@ -4,7 +4,6 @@
 	],
 	"copyright": "Copyright © 2022, Steven Schveighoffer",
 	"dependencies": {
-		"argparse": "~>1.1.1",
 		"jsoniopipe": "~>0.1.4"
 	},
 	"description": "Install raylib binary files",
