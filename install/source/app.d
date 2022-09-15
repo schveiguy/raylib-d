@@ -38,11 +38,11 @@ int main()
 {
     writeln("raylib-d library installation");
     // look at the dub.selections.json file
-    auto dubConfig = execute(["dub", "describe"]);
+    auto dubConfig = execute(["dub", "describe"], null, Config.stderrPassThrough);
     string raylibdPath;
     if(dubConfig.status != 0)
     {
-        stderr.writeln("Error executing dub describe: ", dubConfig.output);
+        stderr.writeln("Error executing dub describe");
         return dubConfig.status;
     }
     char[] getRaylibPath(char[] jsonStr)
