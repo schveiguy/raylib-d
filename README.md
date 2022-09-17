@@ -85,7 +85,7 @@ The following directives should work for all systems, for the case where the lib
 "lflags-osx" : ["-rpath", "@executable_path/"],
 ```
 
-The `lflags-posix` and lflags-osx lines are unnecessary if your library is copied to `/usr/lcoal/lib`
+The `lflags-posix` and `lflags-osx` lines are unnecessary if your library is copied to `/usr/lcoal/lib`
 
 The `-rpath` flags allow the system to load the library from the local directory without using environment variables.
 
