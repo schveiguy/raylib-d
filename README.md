@@ -20,15 +20,84 @@ Adding dependency raylib-d ~>4.2.0
 Or you can add the dependency through the interactive prompts when creating your project with `dub init`
 
 ## Get a copy of Raylib
-You can get the library by compiling it from the [source](https://github.com/raysan5/raylib), or download the [official precompiled binaries](https://github.com/raysan5/raylib/releases).
+You will need a copy of the raylib binary C library to link against, in order to run a raylib-d program. There are 3 ways to get this. Please read ALL the instructions before picking which mechanism you want to use.
+
+1. (beta) Use the raylib-d:install utility to copy the appropriate pre-built library.
+2. Download the precompiled binary from the official github account for raylib.
+3. Compile the library from source
+
+### *NEW* Method 1: install appropriate raylib library with helper tool
+
+In version 4.2.1 of raylib-d, a new subproject `raylib-d:install` is included, along with pre-built binary libraries of raylib. This greatly simplifies the process of obtaining pre-built libraries. Note that this is a *work in progress* and not every binary distribution is included. As of this writing, only Windows x86_64 dlls, and MacOS x86_64/arm64 dylib are included. More will be added as time goes on. I only intend to use *shared libraries*, and not static libs for this feature.
+
+To run this, run this command from your project directory, and it will copy all the appropriate library files to your project directory:
+
+```sh
+> dub run raylib-d:install
+```
+
+If you do not have one of these systems, or want to use static linking, please use a different method.
+
+### Method 2: Download official binaries
+
+Download the [official precompiled binaries](https://github.com/raysan5/raylib/releases) from raylib's github page. Find the appropriate download archive for your version of raylib and your OS/arch. Copy or move the files out of the `lib` subdirectory into your project directory.
+
+Notes for Windows users:
+* The raylib dll linker file will be named `raylibdll.lib`. It is recommended to copy this file, but *rename it to `raylib.lib`*. The `raylib.lib` file included in the zipfile is for static linking, which is not recommended.
+* Version 4.2.0 of raylib had a [build issue](https://github.com/raysan5/raylib/issues/2671) where it did not export a needed symbol for raylib-d 4.2.x, and therefore the downloaded version *will not link* with raylib-d. If you are using raylib 4.2.0, use Method 1.
+
+### Method 3: Compile raylib from source
+
+You can get the library from the [source](https://github.com/raysan5/raylib), and build it according to those instructions. Make sure to checkout the version tagged, and *not* the master branch. `raylib` is under continuous development, and the binding does not take into account any possible changes to API that may have occurred. You may get linker errors (or worse, memory corruption) if you use the master version, or wrong tagged version of raylib! Due to the way C functions are linked, there is no protection against this.
+
+See notes on Method 2 for Windows users.
+
+## Optional: relocate libraries (Linux/MacOS)
+
+On Posix systems (non-windows), you have the option of moving the library files to the appropriate directory instead of your project directory. On most systems, this would be `/usr/local/lib`.
+
+To do this, use the `sudo` command:
+
+```sh
+> sudo mv libraylib* /usr/local/lib
+```
+
+On Linux, you should also reload the library cache:
+
+```sh
+> sudo ldconfig
+```
+
+This aids in running your executable, as the library can be found easily by the dynamic loader.
+
+See the linking instructions for ways to avoid this step. This step is never necessary for Windows, and there is no "global" location to use.
+
+## Linking instructions in dub.json
+
+You must include the linker flags to link against the raylib library in your dub.json file. This is done using the `"libs"` directive.
+
+The following directives should work for all systems, for the case where the library is in the project directory.
+
+```json
+"dependencies": { "raylib-d": "~>4.2.0" },
+"libs": [ "raylib" ],
+"lflags-posix" : ["-L."],
+"lflags-osx" : ["-rpath", "@executable_path/"],
+```
+
+The `lflags-posix` and lflags-osx lines are unnecessary if your library is copied to `/usr/lcoal/lib`
+
+The `lflags-osx` line is unnecessary allows the system to load the library from the local directory. This allows running the executable directly without using environment variables.
+
+*Note: I have not tested on Linux, which also has rpath options. If someone wants to test and tell me the correct way to do this, I'll include it*
+
+## Using the correct library
 
 *WARNING*: Make sure you get the correct copy of the raylib library based on the version of raylib-d! Getting the incorrect version will cause SILENT compatibility errors, including memory corruption. It is extremely important to match these together.
 
 If you depend on raylib-d vX.Y.Z, then your raylib binary should be vX.Y.0. Note that so far, raylib has never had point releases, but raylib-d may have them. Note that raylib-d version 3.1.0 is matched against raylib version 3.7.0, but should probably never have been tagged that way. There is an equivalent 3.7.0 tag now.
 
 For example, if you depend on raylib-d version `v3.0.x`, then you should download raylib version `3.0.0`. If you depend on raylib-d version `3.7.x`, then you should download raylib version `3.7.0`.
-
-### Runtime validation of binding
 
 Starting with version 4.2.0, raylib-d includes a new module `raylib.binding`,
 which at the moment contains one function: `validateRaylibBinding`. @raysan5
@@ -39,42 +108,17 @@ version, but link against another, you can call this function and it will exit
 the program with an error code if the binding is incorrect. This is better than
 creating memory corruption errors!
 
-If you link against an earlier verison of raylib, it should fail to link if
-this symbol doesn't exist.
+As noted earlier, this did not properly get exported for the pre-built Windows dll for 4.2.0. Therefore, you *must* use installation method 1 above to link with raylib-d 4.2.x.
 
-### Linux/Mac:
+## Running your program
 
-You must make raylib visible to the linker. `cd` into the extracted raylib folder (e.g. `raylib-4.2.0_macos`).
+In order to run your program, you will need to ensure the raylib dynamic library is available for loading. This is different based on the OS:
 
-Now we must make raylib visible to the compiler and linker system wide. Simply run the following.
-```
-sudo mv lib/* /usr/local/lib/
-```
+* On Windows, you simply need the `raylib.dll` file to be located in the same directory as your executable, or in the PATH.
+* On MacOS, if you used the `-rpath` option as specified above, you can run the executable as long as the appropriate `dylib` is located in the same directory as your executable. Alternatively, it can be located in `/usr/local/lib`. If you do not use the `-rpath` option, you can export the environment variable `DYLD_LIBRARY_PATH` to point at the path where your library resides and it will be loaded.
+* On Linux, you must either copy the library to a common path like `/usr/local/lib` or use the environment variable `LD_LIBRARY_PATH` to point at the raylib dynamic library.
 
-Linux users must also update the linker with this command:
-```
-sudo ldconfig
-```
-
-### Windows:
-On Windows you must drag and drop all the required library files into the root directory of your project. These are `raylib.dll`, `raylib.lib`, and `raylibdll.lib`.
-
-## In order to link against raylib, add it to your dub.json.
-
-
-Starting with `4.0.0`, raylib on windows includes 2 windows linker files, `raylib.lib` for static linking (not recommended) and `raylibdll.lib` for dynamic linking. Even though the dll is called `raylib.dll`, use the `raylibdll` for the linker file to link dynamically.
-
-You can link against all oses correctly by using os-specific `libs` keys.
-
-Using version 4.2.0 as an example:
-
-```json
-"dependencies": { "raylib-d": "~>4.2.0" },
-"libs-posix": [ "raylib" ],
-"libs-windows": [ "raylibdll" ],
-```
-
-# Example
+# Example Program
 ```D
 import raylib;
 
