@@ -50,7 +50,7 @@ Notes for Windows users:
 
 You can get the library from the [source](https://github.com/raysan5/raylib), and build it according to those instructions. Make sure to checkout the version tagged, and *not* the master branch. `raylib` is under continuous development, and the binding does not take into account any possible changes to API that may have occurred. You may get linker errors (or worse, memory corruption) if you use the master version, or wrong tagged version of raylib! Due to the way C functions are linked, there is no protection against this.
 
-See notes on Method 2 for Windows users.
+The Windows notes from Method 2 apply here as well.
 
 ## Optional: relocate libraries (Linux/MacOS)
 
@@ -87,7 +87,7 @@ The following directives should work for all systems, for the case where the lib
 
 The `lflags-posix` and lflags-osx lines are unnecessary if your library is copied to `/usr/lcoal/lib`
 
-The `lflags-osx` line is unnecessary allows the system to load the library from the local directory. This allows running the executable directly without using environment variables.
+The `-rpath` flags allow the system to load the library from the local directory without using environment variables.
 
 *Note: I have not tested on Linux, which also has rpath options. If someone wants to test and tell me the correct way to do this, I'll include it*
 
