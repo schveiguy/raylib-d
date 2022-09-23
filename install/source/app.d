@@ -6,6 +6,7 @@ import std.system;
 import std.format;
 import std.conv;
 import std.process;
+import std.string;
 import iopipe.json.serialize;
 import iopipe.json.parser;
 import std.exception;
@@ -78,13 +79,22 @@ int main()
         writeln("Copying library files from ", libpath);
         foreach(ent; dirEntries(libpath, SpanMode.shallow))
         {
-            auto newLoc = buildPath(".", ent.name.baseName);
+            auto newLoc = buildPath(".", ent.name.baseName(".lnk"));
             version(Posix)
             {
                 if(ent.isSymlink)
                 {
                     // recreate the symlink
                     auto origln = readLink(ent.name);
+                    writefln("Creating symlink %s -> %s", newLoc, origln);
+                    symlink(origln, newLoc);
+                    continue;
+                }
+                else if(ent.name.endsWith(".lnk"))
+                {
+                    // dub workaround. This is really a symlink but wasn't
+                    // properly downloaded by dub.
+                    auto origln = cast(char[])read(ent.name);
                     writefln("Creating symlink %s -> %s", newLoc, origln);
                     symlink(origln, newLoc);
                     continue;
