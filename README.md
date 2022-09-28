@@ -54,12 +54,12 @@ The Windows notes from Method 2 apply here as well.
 
 ## Optional: relocate libraries (Linux/MacOS)
 
-On Posix systems (non-windows), you have the option of moving the library files to the appropriate directory instead of your project directory. On most systems, this would be `/usr/local/lib`.
+On Posix systems (non-windows), you have the option of moving the library files to the appropriate directory instead of your project directory. On most systems, this would be `/usr/lib/`.
 
-To do this, use the `sudo` command:
+To do this, cd to the directory you unzipped raylib to. Next use the `sudo` command like so:
 
 ```sh
-> sudo mv libraylib* /usr/local/lib
+> sudo mv lib/* /usr/lib/
 ```
 
 On Linux, you should also reload the library cache:
