@@ -51,4 +51,13 @@ edit it to `extern (C) @nogc nothrow:`.
 
 This should be enough. Run `dub test` and see if it compiles.
 
+## Generating raygui
+
+Using [ctod], I have completely ported raygui.h to D. This was not as swift a process as creating the C header bindings for raylib, and is fairly untested. However, the old raygui modules was completely out of date, so this should be a much needed update.
+
+The changes are fairly involved, and mostly involve fixing the compiler errors that occur when trying to build the example program.
+
+Unlike the old raygui.d, this does not need a binding library -- it's included in the raylib-d build directly.
+
 [dstep]: https://github.com/jacob-carlborg/dstep
+[ctod]: https://github.com/dkorpel/ctod

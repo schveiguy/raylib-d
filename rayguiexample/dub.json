@@ -1,0 +1,17 @@
+{
+	"authors": [
+		"Ramon Santamaria"
+	],
+        "dependencies" : {
+            "raylib-d" : {
+                "path" : "../"
+            }
+        },
+	"description": "D port of raygui example controls_test_suite",
+	"license": "zlib",
+	"name": "rayguiexample",
+        "libs": ["raylib"],
+        "lflags-posix": ["-L."],
+        "lflags-osx": ["-rpath", "@executable_path/"]
+
+}
