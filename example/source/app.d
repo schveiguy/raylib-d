@@ -1,5 +1,4 @@
 import std.stdio;
-
 import raylib;
 
 void main()
@@ -7,8 +6,8 @@ void main()
   writeln("Starting a raylib example.");
   validateRaylibBinding();
 
-  SetTargetFPS(60);
   InitWindow(800, 640, "Hello, World!");
+  SetTargetFPS(60);
   scope (exit)
     CloseWindow(); // see https://dlang.org/spec/statement.html#scope-guard-statement
 
