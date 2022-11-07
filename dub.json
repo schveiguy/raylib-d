@@ -11,7 +11,10 @@
             },
             {
                 "name": "unittest",
-                "versions" : ["raylib_test"]
+                "versions" : ["raylib_test"],
+                "libs" : ["raylib"],
+                "lflags-posix": ["-L."],
+                "lflags-osx": ["-rpath", "@executable_path/"]
             }
         ],
 	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry), Steven Schveighoffer (@schveiguy)",

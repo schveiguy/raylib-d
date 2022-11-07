@@ -1,6 +1,6 @@
 module raygui;
 
-private string enumMixin(Enum)() if(is(Enum == enum)) {
+enum enumMixin(Enum) = {
     assert(__ctfe);
     string result;
     foreach(m; __traits(allMembers, Enum))
@@ -8,7 +8,7 @@ private string enumMixin(Enum)() if(is(Enum == enum)) {
         result ~= "alias " ~ m ~ " = " ~ Enum.stringof ~ "." ~ m ~ ";";
     }
     return result;
-}
+}();
 @nogc nothrow extern(C) __gshared:
 
 private template HasVersion(string versionId) {
