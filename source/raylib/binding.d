@@ -25,7 +25,8 @@ void validateRaylibBinding() @nogc nothrow {
     import core.stdc.stdlib;
     import core.stdc.string;
     auto rlv = raylibVersion[0 .. strlen(raylibVersion)];
-    if(rlv != RAYLIB_VERSION)
+    //if(rlv != RAYLIB_VERSION)
+    if(strcmp(raylibVersion, RAYLIB_VERSION) != 0)
     {
         printf("FATAL ERROR: Raylib binding expected version %.*s, library version is %.*s\n",
                cast(int)RAYLIB_VERSION.length, RAYLIB_VERSION.ptr,
