@@ -13,7 +13,7 @@ Use `dub add` to add raylib-d to the dependency list of an existing project:
 
 ```sh
 > dub add raylib-d
-Adding dependency raylib-d ~>4.2.0
+Adding dependency raylib-d ~>4.2.3
 >
 ```
 
@@ -28,15 +28,24 @@ You will need a copy of the raylib binary C library to link against, in order to
 
 ### *NEW* Method 1: install appropriate raylib library with helper tool
 
-In version 4.2.1 of raylib-d, a new subproject `raylib-d:install` is included, along with pre-built binary libraries of raylib. This greatly simplifies the process of obtaining pre-built libraries. Note that this is a *work in progress* and not every binary distribution is included. As of this writing, only Windows x86_64 dlls, and MacOS x86_64/arm64 dylib are included. More will be added as time goes on. I only intend to use *shared libraries*, and not static libs for this feature.
+In version 4.2.1 of raylib-d, a new subproject `raylib-d:install` is included, along with pre-built binary libraries of raylib. This greatly simplifies the process of obtaining pre-built libraries. Note that this is a *work in progress* and not every binary distribution is included.
 
 To run this, run this command from your project directory, and it will copy all the appropriate library files to your project directory:
 
 ```sh
+> dub upgrade
 > dub run raylib-d:install
 ```
+The following OS/arch combinations are included:
+
+* Windows - x86_64
+* Linux -x86_64 *Note: 4.2.4 and above!*
+* MacOS - x86_64
+* MacOS - arm64
 
 If you do not have one of these systems, or want to use static linking, please use a different method.
+
+If other platforms are desired, please let me know in the issues. As of now, I am only supporting libraries that I built myself or that are included in the official distribution.
 
 ### Method 2: Download official binaries
 
@@ -83,13 +92,12 @@ The following directives should work for all systems, for the case where the lib
 "libs": [ "raylib" ],
 "lflags-posix" : ["-L."],
 "lflags-osx" : ["-rpath", "@executable_path/"],
+"lflags-linux" : ["-rpath=$$ORIGIN"],
 ```
 
-The `lflags-posix` and `lflags-osx` lines are unnecessary if your library is copied to `/usr/local/lib`
+The OS-specific `lflags` lines are unnecessary if your library is copied to `/usr/local/lib`
 
-The `-rpath` flags allow the system to load the library from the local directory without using environment variables.
-
-*Note: I have not tested on Linux, which also has rpath options. If someone wants to test and tell me the correct way to do this, I'll include it*
+The `-rpath` flag allows the system to load the library from the local directory without using environment variables.
 
 ## Using the correct library
 
@@ -116,7 +124,7 @@ In order to run your program, you will need to ensure the raylib dynamic library
 
 * On Windows, you simply need the `raylib.dll` file to be located in the same directory as your executable, or in the PATH.
 * On MacOS, if you used the `-rpath` option as specified above, you can run the executable as long as the appropriate `dylib` is located in the same directory as your executable. Alternatively, it can be located in `/usr/local/lib`. If you do not use the `-rpath` option, you can export the environment variable `DYLD_LIBRARY_PATH` to point at the path where your library resides and it will be loaded.
-* On Linux, you must either copy the library to a common path like `/usr/local/lib` or use the environment variable `LD_LIBRARY_PATH` to point at the raylib dynamic library.
+* On Linux, the same instructions as MacOS apply, except that if you want to use the environment variable it is `LD_LIBRARY_PATH`.
 
 # Example Program
 ```D
@@ -138,6 +146,10 @@ void main()
     CloseWindow();
 }
 ```
+
+# BetterC support (Experimental)
+
+[BetterC](https://dlang.org/spec/betterc.html) support has been added for the raylib-d binding. This should work just as well as the original binding, but be usable with the `betterC` compilation option. No specific configuration is necessary.
 
 # Docs/Cheatsheet
 
