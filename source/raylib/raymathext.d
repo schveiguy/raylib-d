@@ -1,7 +1,8 @@
 module raylib.raymathext;
 
 import raylib;
-import std.math;
+import core.stdc.math;
+import std.traits : FieldNameTuple;
 
 pragma(inline, true):
 
@@ -69,28 +70,40 @@ alias Matrix4 = Matrix;
 
 mixin template Linear()
 {
-    import std.algorithm : canFind, map;
-    import std.range : join;
-    import std.traits : FieldNameTuple;
-
     private static alias T = typeof(this);
+    private import std.traits : FieldNameTuple;
 
     static T zero()
     {
-        enum fragment = [FieldNameTuple!T].map!(field => "0.").join(",");
-        return mixin("T(" ~ fragment ~ ")");
+        enum fragment = {
+            string result;
+            static foreach(i; 0 .. T.tupleof.length)
+                result ~= "0,";
+            return result;
+        }();
+        return mixin("T(", fragment, ")");
     }
 
     static T one()
     {
-        enum fragment = [FieldNameTuple!T].map!(field => "1.").join(",");
-        return mixin("T(" ~ fragment ~ ")");
+        enum fragment = {
+            string result;
+            static foreach(i; 0 .. T.tupleof.length)
+                result ~= "1,";
+            return result;
+        }();
+        return mixin("T(", fragment, ")");
     }
 
-    inout T opUnary(string op)() if (["+", "-"].canFind(op))
+    inout T opUnary(string op)() if (op == "+" || op == "-")
     {
-        enum fragment = [FieldNameTuple!T].map!(field => op ~ field).join(",");
-        return mixin("T(" ~ fragment ~ ")");
+        enum fragment = {
+            string result;
+            static foreach(fn; FieldNameTuple!T)
+                result ~= op ~ fn ~ ",";
+            return result;
+        }();
+        return mixin("T(", fragment, ")");
     }
 
     static if (is(T == Rotor3))
@@ -127,36 +140,51 @@ mixin template Linear()
     }
     else
     {
-        inout T opBinary(string op)(inout T rhs) if (["+", "-"].canFind(op))
+        inout T opBinary(string op)(inout T rhs) if (op == "+" || op == "-")
         {
-            enum fragment = [FieldNameTuple!T].map!(field => field ~ op ~ "rhs." ~ field).join(",");
-            return mixin("T(" ~ fragment ~ ")");
+            enum fragment = {
+                string result;
+                foreach(fn; FieldNameTuple!T)
+                    result ~= fn ~ op ~ "rhs." ~ fn ~ ",";
+                return result;
+            }();
+            return mixin("T(", fragment, ")");
         }
 
-        ref T opOpAssign(string op)(inout T rhs) if (["+", "-"].canFind(op))
+        ref T opOpAssign(string op)(inout T rhs) if (op == "+" || op == "-")
         {
-            static foreach (field; [FieldNameTuple!T])
-                mixin(field ~ op ~ "= rhs." ~ field ~ ";");
+            foreach (field; FieldNameTuple!T)
+                mixin(field, op,  "= rhs.", field, ";");
             return this;
         }
     }
 
-    inout T opBinary(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
+    inout T opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/")
     {
-        enum fragment = [FieldNameTuple!T].map!(field => field ~ op ~ "rhs").join(",");
-        return mixin("T(" ~ fragment ~ ")");
+        enum fragment = {
+            string result;
+            foreach(fn; FieldNameTuple!T)
+                result ~= fn ~ op ~ "rhs,";
+            return result;
+        }();
+        return mixin("T(", fragment, ")");
     }
 
-    inout T opBinaryRight(string op)(inout float lhs) if (["+", "-", "*", "/"].canFind(op))
+    inout T opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/")
     {
-        enum fragment = [FieldNameTuple!T].map!(field => "lhs" ~ op ~ field).join(",");
-        return mixin("T(" ~ fragment ~ ")");
+        enum fragment = {
+            string result;
+            foreach(fn; FieldNameTuple!T)
+                result ~= "lhs" ~ op ~ fn ~ ",";
+            return result;
+        }();
+        return mixin("T(", fragment, ")");
     }
 
-    ref T opOpAssign(string op)(inout float rhs) if (["+", "-", "*", "/"].canFind(op))
+    ref T opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/")
     {
-        static foreach (field; [FieldNameTuple!T])
-            mixin(field ~ op ~ "= rhs;");
+        foreach (field; FieldNameTuple!T)
+            mixin(field, op, "= rhs;");
         return this;
     }
 }
@@ -180,14 +208,18 @@ unittest
     assert(a == Vector3(6, 6, 6));
 }
 
-import std.traits : FieldNameTuple;
-import std.algorithm : map;
-import std.range : join;
+//import std.algorithm : map;
+//import std.range : join;
 
 float length(T)(T v)
 {
-    enum fragment = [FieldNameTuple!T].map!(field => "v." ~ field ~ "*" ~ "v." ~ field).join("+");
-    return mixin("sqrt(" ~ fragment ~ ")");
+    enum fragment = () {
+        string result;
+        foreach(string fn; FieldNameTuple!T)
+            result ~= fn ~ "*" ~ fn ~ "+";
+        return result[0 .. $-1]; // trim off last +
+    }();
+    with(v) return mixin("sqrt(", fragment, ")");
 }
 
 T normal(T)(T v)
@@ -202,8 +234,12 @@ float distance(T)(T lhs, T rhs)
 
 float dot(T)(T lhs, T rhs)
 {
-    enum fragment = [FieldNameTuple!T].map!(field => "lhs." ~ field ~ "*" ~ "rhs." ~ field).join(
-                "+");
+    enum fragment = {
+        string result;
+        foreach(fn; FieldNameTuple!T)
+            result ~= "lhs." ~ fn ~ "*" ~ "rhs." ~ fn ~ "+";
+        return result[0 .. $-1]; // trim off last +
+    }();
     return mixin(fragment);
 }
 
@@ -215,7 +251,7 @@ unittest
     immutable b = Vector2(9, 8);
     assert(b.distance(Vector2(-3, 3)) == 13);
     assert(Vector3(2, 3, 4).dot(Vector3(4, 5, 6)) == 47);
-    assert(Vector2.one.length == sqrt(2.0f));
+    assert(Vector2.one.length == cast(float)sqrt(2.0f));
 }
 
 unittest

@@ -12,6 +12,7 @@
 	"name": "rayguiexample",
         "libs": ["raylib"],
         "lflags-posix": ["-L."],
-        "lflags-osx": ["-rpath", "@executable_path/"]
+        "lflags-osx": ["-rpath", "@executable_path/"],
+        "buildOptions": ["betterC"]
 
 }
