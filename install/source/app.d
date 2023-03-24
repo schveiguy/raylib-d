@@ -165,7 +165,6 @@ void extractArchive(char[] path)
     import iopipe.refc;
     import iopipe.zip;
     import iopipe.valve;
-    //import arsd.archive;
 
     auto archivePath = buildPath(path, "install", "lib.tgz");
     auto expectedPrefix = "lib/" ~ osStr ~ "/";
@@ -240,13 +239,7 @@ void extractArchive(char[] path)
                     if(ft == TarFileType.symLink)
                     {
                         mkdirRecurse(dirName(fp));
-                        // must use C symlink, because phobos is dumb and
-                        // insists that the target must exist.
-                        import core.sys.posix.unistd : symlink;
-                        currentSymlinkText ~= '\0';
-                        fp ~= '\0';
-                        if(symlink(currentSymlinkText.ptr, fp.ptr) != 0)
-                            throw new Exception("Error creating symlink");
+                        symlink(currentSymlinkText, fp);
                     }
                 }
                 if(ft == TarFileType.normal)
@@ -315,16 +308,13 @@ int main()
     try {
         auto path = getRaylibPath(dubConfig.output.dup);
         // check to see if the `lib` directory exists, and if not, see if we can extract it from a tarball
+        writeln("Detected raylib dependency path as ", path);
         auto libpath = buildPath(path, baseDir);
         if(!exists(libpath))
         {
-            // see if there is a txz
-            if(exists(buildPath(path, "install", "lib.tgz")))
-            {
-                writeln("Extracting archive");
-                // extract the data, but only for the given OS
-                extractArchive(path);
-            }
+            // extract the data, but only for the detected OS
+            writeln("Extracting archive");
+            extractArchive(path);
         }
         writeln("Copying library files from ", libpath);
         foreach(ent; dirEntries(libpath, SpanMode.shallow))
@@ -354,7 +344,7 @@ int main()
             copy(ent.name, newLoc, PreserveAttributes.yes);
         }
     } catch(Exception ex) {
-        stderr.writeln("Error: ", ex);
+        stderr.writeln("Error: ", ex.msg);
         return 1;
     }
     return 0;
