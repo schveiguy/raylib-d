@@ -28,7 +28,7 @@ import raylib;
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2015-2022 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2015-2023 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -183,8 +183,23 @@ float Vector2Distance(Vector2 v1, Vector2 v2);
 // Calculate square distance between two vectors
 float Vector2DistanceSqr(Vector2 v1, Vector2 v2);
 
-// Calculate angle from two vectors
+// Calculate angle between two vectors
+// NOTE: Angle is calculated from origin point (0, 0)
 float Vector2Angle(Vector2 v1, Vector2 v2);
+
+// Calculate angle defined by a two vectors line
+// NOTE: Parameters need to be normalized
+// Current implementation should be aligned with glm::angle
+
+// Dot product
+
+// Clamp
+
+// Alternative implementation, more costly
+//float v1Length = sqrtf((start.x*start.x) + (start.y*start.y));
+//float v2Length = sqrtf((end.x*end.x) + (end.y*end.y));
+//float result = -acosf((start.x*end.x + start.y*end.y)/(v1Length*v2Length));
+float Vector2LineAngle(Vector2 start, Vector2 end);
 
 // Scale vector (multiply by value)
 Vector2 Vector2Scale(Vector2 v, float scale);
@@ -361,7 +376,7 @@ Vector3 Vector3Barycenter(Vector3 p, Vector3 a, Vector3 b, Vector3 c);
 // Projects a Vector3 from screen space into object space
 // NOTE: We are avoiding calling other raymath functions despite available
 
-// Calculate unproject matrix (multiply view patrix by projection matrix) and invert it
+// Calculate unprojected matrix (multiply view matrix by projection matrix) and invert it
 // MatrixMultiply(view, projection);
 
 // Calculate inverted matrix -> MatrixInvert(matViewProj);
@@ -371,7 +386,7 @@ Vector3 Vector3Barycenter(Vector3 p, Vector3 a, Vector3 b, Vector3 c);
 
 // Create quaternion from source point
 
-// Multiply quat point by unproject matrix
+// Multiply quat point by unprojecte matrix
 // QuaternionTransform(quat, matViewProjInv)
 
 // Normalized world points in vectors

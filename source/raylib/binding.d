@@ -7,7 +7,7 @@ import raylib;
 
 // stored inside raylib to validate the binding
 // NOTE: should be private, but D doesn't allow private export symbols
-/*private*/ extern(C) extern export __gshared const(char*) raylibVersion;
+/*private*/ extern(C) extern export __gshared const(char*) raylib_version;
 
 /**
  * Call this function before using any raylib functions to validate the binding
@@ -24,9 +24,9 @@ void validateRaylibBinding() @nogc nothrow {
     import core.stdc.stdio;
     import core.stdc.stdlib;
     import core.stdc.string;
-    auto rlv = raylibVersion[0 .. strlen(raylibVersion)];
+    auto rlv = raylib_version[0 .. strlen(raylib_version)];
     //if(rlv != RAYLIB_VERSION)
-    if(strcmp(raylibVersion, RAYLIB_VERSION) != 0)
+    if(strcmp(raylib_version, RAYLIB_VERSION) != 0)
     {
         printf("FATAL ERROR: Raylib binding expected version %.*s, library version is %.*s\n",
                cast(int)RAYLIB_VERSION.length, RAYLIB_VERSION.ptr,
