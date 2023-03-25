@@ -12,7 +12,8 @@ import iopipe.json.parser;
 import std.exception;
 import iopipe.traits;
 
-// copied from arsd.archive
+// tar support copied from arsd.archive:  https://github.com/adamdruppe/arsd
+// Written by Adam D. Ruppe
 /++
 	A header of a file in the archive. This represents the
 	binary format of the header block.
@@ -75,9 +76,6 @@ enum TarFileType {
 	directory = 5, ///
 	fifo = 6 ///
 }
-
-
-
 
 /++
 	Low level tar file processor. You must pass it a
@@ -158,34 +156,37 @@ enum osStr = os.to!string;
 
 enum baseDir = buildPath("install", "lib", osStr, arch, CRT);
 
+auto writeTo(C, S)(C chain, S sink)
+{
+    import iopipe.bufpipe;
+    import iopipe.valve;
+    return chain.push!(c => c.outputPipe(sink));
+}
+
 void extractArchive(char[] path)
 {
     import std.io : File, mode;
     import iopipe.bufpipe;
     import iopipe.refc;
     import iopipe.zip;
-    import iopipe.valve;
 
     auto archivePath = buildPath(path, "install", "lib.tgz");
     auto expectedPrefix = "lib/" ~ osStr ~ "/";
-    enforce(exists(archivePath), "No lib archive found while attempting to install raylib libraries!");
+    enforce(exists(archivePath), "No lib archive found at " ~ archivePath ~ "!");
 
     // the input file
     auto inputFile = File(archivePath, mode!"rb").refCounted.bufd.unzip;
-
-    // for tar
-    TarFileHeader tfh;
-    long size;
 
     bool doOutput;
 
     // open a file using iopipe
     auto openOutputFile(string fname)
     {
-        return bufd.push!(c => c.outputPipe(File(fname, mode!"wb").refCounted));
+        return bufd.writeTo(File(fname, mode!"wb").refCounted);
     }
     typeof(openOutputFile("")) currentFile;
     string currentSymlinkText;
+
     void handleTar(TarFileHeader *header, bool isNewFile, bool fileFinished, ubyte[] data)
     {
         auto ft = header.type;
@@ -214,12 +215,11 @@ void extractArchive(char[] path)
                 currentFile = openOutputFile(newFilePath);
             }
         }
+
         if(doOutput)
         {
             if(ft == TarFileType.symLink)
-            {
                 currentSymlinkText ~= cast(char[])data;
-            }
             else
             {
                 currentFile.ensureElems(data.length);
@@ -228,6 +228,7 @@ void extractArchive(char[] path)
                 currentFile.release(data.length);
             }
         }
+
         if(fileFinished)
         {
             if(doOutput)
@@ -256,6 +257,11 @@ void extractArchive(char[] path)
             }
         }
     }
+
+    // for tar
+    TarFileHeader tfh;
+    long size;
+
     while(inputFile.extend(0) > 0)
     {
         while(inputFile.window.length >= 512)
@@ -310,42 +316,68 @@ int main()
         // check to see if the `lib` directory exists, and if not, see if we can extract it from a tarball
         writeln("Detected raylib dependency path as ", path);
         auto libpath = buildPath(path, baseDir);
+        writeln("Copying library files from ", libpath);
         if(!exists(libpath))
         {
             // extract the data, but only for the detected OS
-            writeln("Extracting archive");
+            writeln("Library path does not exist, trying archive");
             extractArchive(path);
         }
-        writeln("Copying library files from ", libpath);
         foreach(ent; dirEntries(libpath, SpanMode.shallow))
         {
             auto newLoc = buildPath(".", ent.name.baseName(".lnk"));
+            if(exists(newLoc))
+            {
+                writeln("Skipping existing file ", newLoc);
+                continue;
+            }
             version(Posix)
             {
+                void makeLink(string origln)
+                {
+                    writefln("Creating symlink %s -> %s", newLoc, origln);
+                    symlink(origln, newLoc);
+                }
                 if(ent.isSymlink)
                 {
                     // recreate the symlink
-                    auto origln = readLink(ent.name);
-                    writefln("Creating symlink %s -> %s", newLoc, origln);
-                    symlink(origln, newLoc);
+                    makeLink(readLink(ent.name));
                     continue;
                 }
                 else if(ent.name.endsWith(".lnk"))
                 {
                     // dub workaround. This is really a symlink but wasn't
                     // properly downloaded by dub.
-                    auto origln = cast(char[])read(ent.name);
-                    writefln("Creating symlink %s -> %s", newLoc, origln);
-                    symlink(origln, newLoc);
+                    makeLink(readText(ent.name));
                     continue;
                 }
             }
-            writeln("Installing library file ", newLoc);
+            writefln("Installing library file %s", newLoc);
             copy(ent.name, newLoc, PreserveAttributes.yes);
         }
     } catch(Exception ex) {
         stderr.writeln("Error: ", ex.msg);
         return 1;
+    }
+
+    // display what to put in the json or sdl file
+    if(exists("dub.json"))
+    {
+        writeln(
+`If not already present, the following directives in dub.json will link the installed raylib library:
+    "libs": [ "raylib" ],
+    "lflags-posix" : ["-L."],
+    "lflags-osx" : ["-rpath", "@executable_path/"],
+    "lflags-linux" : ["-rpath=$$ORIGIN"]`);
+    }
+    else if(exists("dub.sdl"))
+    {
+        writeln(
+`If not already present, the following directives in dub.sdl will link the installed raylib library:
+    libs "raylib"
+    lflags "-rpath" "@executable_path/" platform="osx"
+    lflags "-L." platform="posix"
+    lflags "-rpath=$$ORIGIN" platform="linux"`);
     }
     return 0;
 }
