@@ -4,6 +4,7 @@ __dummy.html
 docs/
 /draylib
 /install/install
+/install/raylib-d_install
 /install/lib/**
 *.so
 *.dylib
