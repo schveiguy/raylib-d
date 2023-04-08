@@ -18,3 +18,4 @@ raylib-d-test-*
 *.obj
 *.lst
 docs.md
+.DS_Store

@@ -1,0 +1,9 @@
+{
+	"name": "core_2d_camera_mouse_zoom",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

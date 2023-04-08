@@ -1,0 +1,9 @@
+{
+	"name": "core_input_gamepad",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

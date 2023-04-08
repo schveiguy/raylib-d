@@ -1,0 +1,9 @@
+{
+	"name": "core_custom_frame_control",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}
