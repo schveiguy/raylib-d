@@ -1,0 +1,9 @@
+{
+	"name": "shapes_logo_raylib_anim",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

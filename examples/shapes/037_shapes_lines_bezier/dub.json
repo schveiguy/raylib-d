@@ -1,0 +1,9 @@
+{
+	"name": "shapes_lines_bezier",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

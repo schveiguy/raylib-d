@@ -1,0 +1,9 @@
+{
+	"name": "shapes_following_eyes",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

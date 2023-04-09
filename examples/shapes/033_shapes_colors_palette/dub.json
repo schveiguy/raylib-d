@@ -1,0 +1,9 @@
+{
+	"name": "shapes_colors_palette",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

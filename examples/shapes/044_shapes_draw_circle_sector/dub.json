@@ -1,0 +1,9 @@
+{
+	"name": "shapes_draw_circle_sector",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}

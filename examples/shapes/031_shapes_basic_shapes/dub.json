@@ -1,0 +1,9 @@
+{
+	"name": "shapes_basic_shapes",
+	"description": "RayLib example.",
+	"license": "Zlib",
+	"dependencies": {
+		"raylib-d": {"path": "../../../"}
+	},
+	"libs": [ "raylib" ]
+}
