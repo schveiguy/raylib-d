@@ -147,6 +147,12 @@ void main()
 }
 ```
 
+# Port of raylib examples
+
+@D-a-n-i-l-o has been kind enough to port a large amount of the raylib examples from the C library to D (maybe all of them at this point!)
+
+Please see his [repository](https://github.com/D-a-n-i-l-o/raylib-d_examples) for more information.
+
 # BetterC support (Experimental)
 
 [BetterC](https://dlang.org/spec/betterc.html) support has been added for the raylib-d binding. This should work just as well as the original binding, but be usable with the `betterC` compilation option. No specific configuration is necessary.

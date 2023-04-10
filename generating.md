@@ -2,14 +2,20 @@
 
 In order to update `raylib-d` to work with a newer version of `raylib`, the headers must be regenerated with [dstep].
 
-Three modules should be regenerated: `raylib`, `raymath` and `rlgl`.
+Four modules should be regenerated: `raylib`, `raymath`, `rlgl`, and `rcamera`.
+
+`rcamera.h` is an odd one, because it depends on raylib types, but does not include `raylib.h` directly. So dstep has trouble with it. In order to properly generate the binding, you must add the following to the file, inside the header. I prefer to do it in an `#else` clause after the `#ifdef RCAMERA_STANDALONE`:
+
+```c
+#include "raylib.h"
+```
 
 Run the following command from the `raylib/src` directory. Note: path/to/raylib-d should be the path to the raylib-d repository that you have on your system.
 
 ```
-dstep raylib.h raymath.h rlgl.h -o path/to/raylib-d/source/raylib --space-after-function-name=false --skip Vector2 \
-    --skip Vector3 --skip Vector4 --skip Quaternion --skip Matrix --skip Rectangle --skip RL_MALLOC --skip RL_CALLOC \
-    --skip RL_REALLOC --skip RL_FREE
+dstep raylib.h raymath.h rlgl.h rcamera.h -o path/to/raylib-d/source/raylib --space-after-function-name=false \
+    --skip Vector2 --skip Vector3 --skip Vector4 --skip Quaternion --skip Matrix --skip Rectangle \
+    --skip RL_MALLOC --skip RL_CALLOC --skip RL_REALLOC --skip RL_FREE
 ```
 
 Note: we're skipping a couple symbols because we define them manually in `raylib_types`. We also skip memory functions
