@@ -4338,7 +4338,6 @@ private const(char)* CodepointToUTF8(int codepoint, int* byteSize) {
 
     return utf8;
 }
-}      // RAYGUI_STANDALONE
 
 // Get next codepoint in a UTF-8 encoded text, scanning until '\0' is found
 // When a invalid UTF-8 byte is encountered we exit as soon as possible and a '?'(0x3f) codepoint is returned
@@ -4378,5 +4377,6 @@ private int GetCodepointNext(const(char)* text, int* codepointSize) {
 
     return codepoint;
 }
+}      // RAYGUI_STANDALONE
 
 //! #endif      // RAYGUI_IMPLEMENTATION
