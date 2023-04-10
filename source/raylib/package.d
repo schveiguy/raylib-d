@@ -82,6 +82,7 @@ public
     import raylib.rlgl;
     import raylib.reasings;
     import raylib.raymath;
+    import raylib.rcamera;
     import raylib.raymathext;
     import raylib.raylib_types;
     import raylib.binding;
