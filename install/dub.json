@@ -1,14 +1,14 @@
 {
-	"authors": [
-		"Steven Schveighoffer"
-	],
-	"copyright": "Copyright © 2022, Steven Schveighoffer",
-	"dependencies": {
-		"jsoniopipe": "~>0.1.4",
-                "iopipe": "~>0.2.4",
-                "io": "~>0.3.4"
-	},
-	"description": "Install raylib binary files",
-	"license": "boost-1.0",
-	"name": "install"
+    "authors": [
+        "Steven Schveighoffer"
+    ],
+    "copyright": "Copyright © 2022-2023, Steven Schveighoffer",
+    "dependencies": {
+        "jsoniopipe": "~>0.2.5",
+        "iopipe": "~>0.2.4",
+        "io": "~>0.3.4"
+    },
+    "description": "Install raylib binary files",
+    "license": "boost-1.0",
+    "name": "install"
 }

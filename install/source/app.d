@@ -9,6 +9,7 @@ import std.process;
 import std.string;
 import iopipe.json.serialize;
 import iopipe.json.parser;
+import iopipe.json.dom : JSONValue;
 import std.exception;
 import iopipe.traits;
 
@@ -307,7 +308,7 @@ int main()
             }
             tokens.rewind;
             tokens.endCache;
-            nt = tokens.skipItem.token;
+            nt = tokens.skipItem;
         }
         throw new Exception("Could not find raylib-d dependency for current project!");
     }
@@ -363,12 +364,56 @@ int main()
     // display what to put in the json or sdl file
     if(exists("dub.json"))
     {
-        writeln(
-`If not already present, the following directives in dub.json will link the installed raylib library:
+        import std.io : File, mode;
+        import iopipe.bufpipe;
+        import iopipe.refc;
+        import iopipe.textpipe;
+        import std.algorithm : canFind;
+        // json, we can handle. Read the file and check for the correct flags
+        static struct DubFile {
+            @optional:
+            string[] libs;
+            @alternateName("lflags-posix") string[] lflagsPosix;
+            @alternateName("lflags-osx") string[] lflagsOsx;
+            @alternateName("lflags-linux") string[] lflagsLinux;
+            @extras JSONValue!string _extras;
+        }
+        auto dubfile = File("dub.json", mode!"rb").refCounted.bufd.assumeText.deserialize!DubFile;
+        // check to see that all the proper things are present
+        bool hasLib = dubfile.libs.canFind("raylib");
+        bool hasPosixFlags = dubfile.lflagsPosix.canFind("-L.");
+        bool hasOsxFlags = dubfile.lflagsOsx.canFind(["-rpath", "@executable_path/"]);
+        bool hasLinuxFlags = dubfile.lflagsLinux.canFind("-rpath=$$ORIGIN");
+        if(!hasLib || !hasPosixFlags || !hasOsxFlags || !hasLinuxFlags)
+        {
+            writeln(
+`Proper dub linker directives missing, the following directives in dub.json will link the installed raylib library:
     "libs": [ "raylib" ],
     "lflags-posix" : ["-L."],
     "lflags-osx" : ["-rpath", "@executable_path/"],
     "lflags-linux" : ["-rpath=$$ORIGIN"]`);
+
+            // ask the user if they want to update the dub.json file with the
+            // correct directives.
+            write("Automatically add these directives to your dub.json file? [Y/n] ");
+            stdout.flush();
+            auto result = readln().strip;
+            if(result == "Y" || result == "y" || result == "")
+            {
+                // add the correct directives
+                if(!hasLib)
+                    dubfile.libs ~= "raylib";
+                if(!hasPosixFlags)
+                    dubfile.lflagsPosix ~= "-L.";
+                if(!hasOsxFlags)
+                    dubfile.lflagsOsx ~= ["-rpath", "@executable_path/"];
+                if(!hasLinuxFlags)
+                    dubfile.lflagsLinux ~= "-rpath=$$ORIGIN";
+                // rewrite the file
+                std.file.write("dub.json", serialize(dubfile));
+                writeln("dub.json file updated!");
+            }
+        }
     }
     else if(exists("dub.sdl"))
     {
