@@ -309,6 +309,8 @@ int main()
             tokens.rewind;
             tokens.endCache;
             nt = tokens.skipItem;
+            // skip whatever the next token is, it's either a comma, or the array end.
+            cast(void)tokens.next;
         }
         throw new Exception("Could not find raylib-d dependency for current project!");
     }
