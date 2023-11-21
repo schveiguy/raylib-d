@@ -5,25 +5,30 @@ import raylib;
 *
 *   raymath v1.5 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
 *
-*   CONFIGURATION:
-*
-*   #define RAYMATH_IMPLEMENTATION
-*       Generates the implementation of the library into the included file.
-*       If not defined, the library is in header only mode and can be included in other headers
-*       or source files without problems. But only ONE file should hold the implementation.
-*
-*   #define RAYMATH_STATIC_INLINE
-*       Define static inline functions code, so #include header suffices for use.
-*       This may use up lots of memory.
-*
 *   CONVENTIONS:
-*
+*     - Matrix structure is defined as row-major (memory layout) but parameters naming AND all
+*       math operations performed by the library consider the structure as it was column-major
+*       It is like transposed versions of the matrices are used for all the maths
+*       It benefits some functions making them cache-friendly and also avoids matrix
+*       transpositions sometimes required by OpenGL
+*       Example: In memory order, row0 is [m0 m4 m8 m12] but in semantic math row0 is [m0 m1 m2 m3]
 *     - Functions are always self-contained, no function use another raymath function inside,
 *       required code is directly re-implemented inside
 *     - Functions input parameters are always received by value (2 unavoidable exceptions)
 *     - Functions use always a "result" variable for return
 *     - Functions are always defined inline
 *     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
+*     - No compound literals used to make sure libray is compatible with C++
+*
+*   CONFIGURATION:
+*       #define RAYMATH_IMPLEMENTATION
+*           Generates the implementation of the library into the included file.
+*           If not defined, the library is in header only mode and can be included in other headers
+*           or source files without problems. But only ONE file should hold the implementation.
+*
+*       #define RAYMATH_STATIC_INLINE
+*           Define static inline functions code, so #include header suffices for use.
+*           This may use up lots of memory.
 *
 *
 *   LICENSE: zlib/libpng
@@ -191,14 +196,7 @@ float Vector2Angle(Vector2 v1, Vector2 v2);
 // NOTE: Parameters need to be normalized
 // Current implementation should be aligned with glm::angle
 
-// Dot product
-
-// Clamp
-
-// Alternative implementation, more costly
-//float v1Length = sqrtf((start.x*start.x) + (start.y*start.y));
-//float v2Length = sqrtf((end.x*end.x) + (end.y*end.y));
-//float result = -acosf((start.x*end.x + start.y*end.y)/(v1Length*v2Length));
+// TODO(10/9/2023): Currently angles move clockwise, determine if this is wanted behavior
 float Vector2LineAngle(Vector2 start, Vector2 end);
 
 // Scale vector (multiply by value)
@@ -309,6 +307,12 @@ Vector3 Vector3Divide(Vector3 v1, Vector3 v2);
 // Normalize provided vector
 Vector3 Vector3Normalize(Vector3 v);
 
+//Calculate the projection of the vector v1 on to v2
+Vector3 Vector3Project(Vector3 v1, Vector3 v2);
+
+//Calculate the rejection of the vector v1 on to v2
+Vector3 Vector3Reject(Vector3 v1, Vector3 v2);
+
 // Orthonormalize provided vectors
 // Makes vectors normalized and orthogonal to each other
 // Gram-Schmidt function implementation
@@ -339,7 +343,7 @@ Vector3 Vector3RotateByQuaternion(Vector3 v, Quaternion q);
 
 // Vector3CrossProduct(w, wv)
 
-// Vector3Scale(wv, 2 * a)
+// Vector3Scale(wv, 2*a)
 
 // Vector3Scale(wwv, 2)
 Vector3 Vector3RotateByAxisAngle(Vector3 v, Vector3 axis, float angle);
@@ -408,12 +412,11 @@ Vector3 Vector3ClampValue(Vector3 v, float min, float max);
 // Check whether two given vectors are almost equal
 int Vector3Equals(Vector3 p, Vector3 q);
 
-// Compute the direction of a refracted ray where v specifies the
-// normalized direction of the incoming ray, n specifies the
-// normalized normal vector of the interface of two optical media,
-// and r specifies the ratio of the refractive index of the medium
-// from where the ray comes to the refractive index of the medium
-// on the other side of the surface
+// Compute the direction of a refracted ray
+// v: normalized direction of the incoming ray
+// n: normalized normal vector of the interface of two optical media
+// r: ratio of the refractive index of the medium from where the ray comes
+//    to the refractive index of the medium on the other side of the surface
 Vector3 Vector3Refract(Vector3 v, Vector3 n, float r);
 
 //----------------------------------------------------------------------------------
@@ -502,7 +505,11 @@ Matrix MatrixFrustum(
 // NOTE: Fovy angle must be provided in radians
 
 // MatrixFrustum(-right, right, -top, top, near, far);
-Matrix MatrixPerspective(double fovy, double aspect, double near, double far);
+Matrix MatrixPerspective(
+    double fovY,
+    double aspect,
+    double nearPlane,
+    double farPlane);
 
 // Get orthographic projection matrix
 Matrix MatrixOrtho(
@@ -510,8 +517,8 @@ Matrix MatrixOrtho(
     double right,
     double bottom,
     double top,
-    double near,
-    double far);
+    double nearPlane,
+    double farPlane);
 
 // Get camera look-at matrix (view matrix)
 

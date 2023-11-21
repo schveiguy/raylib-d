@@ -52,6 +52,12 @@ module raylib.rlgl;
 import raylib;
 ```
 
+```d
+module raylib.rcamera;
+
+import raylib;
+```
+
 Additionally, each of those modules will have an automatically generated `extern (C):` line. We need to find it and
 edit it to `extern (C) @nogc nothrow:`.
 

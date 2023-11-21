@@ -1,6 +1,6 @@
 /**********************************************************************************************
 *
-*   raylib v4.5 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
+*   raylib v5.0 - A simple and easy-to-use library to enjoy videogames programming (www.raylib.com)
 *
 *   FEATURES:
 *       - NO external dependencies, all required libraries included with raylib
@@ -82,8 +82,8 @@ public
     import raylib.rlgl;
     import raylib.reasings;
     import raylib.raymath;
-    import raylib.rcamera;
     import raylib.raymathext;
+    import raylib.rcamera;
     import raylib.raylib_types;
     import raylib.binding;
 }
@@ -95,10 +95,10 @@ extern (C) @nogc nothrow:
 
 // Required for: va_list - Only used by TraceLogCallback
 
-enum RAYLIB_VERSION_MAJOR = 4;
-enum RAYLIB_VERSION_MINOR = 5;
+enum RAYLIB_VERSION_MAJOR = 5;
+enum RAYLIB_VERSION_MINOR = 0;
 enum RAYLIB_VERSION_PATCH = 0;
-enum RAYLIB_VERSION = "4.5";
+enum RAYLIB_VERSION = "5.0";
 
 // Function specifiers in case library is build/used as a shared library (Windows)
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
@@ -122,11 +122,16 @@ enum RAD2DEG = 180.0f / PI;
 
 // NOTE: MSVC C++ compiler does not support compound literals (C99 feature)
 // Plain structures in C++ (without constructors) can be initialized with { }
+// This is called aggregate initialization (C++11 feature)
 
 extern (D) auto CLITERAL(T)(auto ref T type)
 {
     return type;
 }
+
+// Some compilers (mostly macos clang) default to C++98,
+// where aggregate initialization can't be used
+// So, give a more clear error stating how to fix this
 
 // NOTE: We set some defines with some data types declared by raylib
 // Other modules (raymath, rlgl) also require some of those types, so,
@@ -362,6 +367,7 @@ struct ModelAnimation
     int frameCount; // Number of animation frames
     BoneInfo* bones; // Bones information (skeleton)
     Transform** framePoses; // Poses array by frame
+    char[32] name; // Animation name
 }
 
 // Ray, ray for raycasting
@@ -467,6 +473,22 @@ struct FilePathList
     char** paths; // Filepaths entries
 }
 
+// Automation event
+struct AutomationEvent
+{
+    uint frame; // Event frame
+    uint type; // Event type (AutomationEventType)
+    int[4] params; // Event parameters (if required)
+}
+
+// Automation event list
+struct AutomationEventList
+{
+    uint capacity; // Events max entries (MAX_AUTOMATION_EVENTS)
+    uint count; // Events entries count
+    AutomationEvent* events; // Events entries
+}
+
 //----------------------------------------------------------------------------------
 // Enumerators Definition
 //----------------------------------------------------------------------------------
@@ -488,6 +510,7 @@ enum ConfigFlags
     FLAG_WINDOW_TRANSPARENT = 0x00000010, // Set to allow transparent framebuffer
     FLAG_WINDOW_HIGHDPI = 0x00002000, // Set to support HighDPI
     FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000, // Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
+    FLAG_BORDERLESS_WINDOWED_MODE = 0x00008000, // Set to run program in borderless windowed mode
     FLAG_MSAA_4X_HINT = 0x00000020, // Set to try enabling MSAA 4X
     FLAG_INTERLACED_HINT = 0x00010000 // Set to try enabling interlaced video format (for V3D)
 }
@@ -784,17 +807,20 @@ enum PixelFormat
     PIXELFORMAT_UNCOMPRESSED_R32 = 8, // 32 bpp (1 channel - float)
     PIXELFORMAT_UNCOMPRESSED_R32G32B32 = 9, // 32*3 bpp (3 channels - float)
     PIXELFORMAT_UNCOMPRESSED_R32G32B32A32 = 10, // 32*4 bpp (4 channels - float)
-    PIXELFORMAT_COMPRESSED_DXT1_RGB = 11, // 4 bpp (no alpha)
-    PIXELFORMAT_COMPRESSED_DXT1_RGBA = 12, // 4 bpp (1 bit alpha)
-    PIXELFORMAT_COMPRESSED_DXT3_RGBA = 13, // 8 bpp
-    PIXELFORMAT_COMPRESSED_DXT5_RGBA = 14, // 8 bpp
-    PIXELFORMAT_COMPRESSED_ETC1_RGB = 15, // 4 bpp
-    PIXELFORMAT_COMPRESSED_ETC2_RGB = 16, // 4 bpp
-    PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA = 17, // 8 bpp
-    PIXELFORMAT_COMPRESSED_PVRT_RGB = 18, // 4 bpp
-    PIXELFORMAT_COMPRESSED_PVRT_RGBA = 19, // 4 bpp
-    PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA = 20, // 8 bpp
-    PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA = 21 // 2 bpp
+    PIXELFORMAT_UNCOMPRESSED_R16 = 11, // 16 bpp (1 channel - half float)
+    PIXELFORMAT_UNCOMPRESSED_R16G16B16 = 12, // 16*3 bpp (3 channels - half float)
+    PIXELFORMAT_UNCOMPRESSED_R16G16B16A16 = 13, // 16*4 bpp (4 channels - half float)
+    PIXELFORMAT_COMPRESSED_DXT1_RGB = 14, // 4 bpp (no alpha)
+    PIXELFORMAT_COMPRESSED_DXT1_RGBA = 15, // 4 bpp (1 bit alpha)
+    PIXELFORMAT_COMPRESSED_DXT3_RGBA = 16, // 8 bpp
+    PIXELFORMAT_COMPRESSED_DXT5_RGBA = 17, // 8 bpp
+    PIXELFORMAT_COMPRESSED_ETC1_RGB = 18, // 4 bpp
+    PIXELFORMAT_COMPRESSED_ETC2_RGB = 19, // 4 bpp
+    PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA = 20, // 8 bpp
+    PIXELFORMAT_COMPRESSED_PVRT_RGB = 21, // 4 bpp
+    PIXELFORMAT_COMPRESSED_PVRT_RGBA = 22, // 4 bpp
+    PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA = 23, // 8 bpp
+    PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA = 24 // 2 bpp
 }
 
 // Texture parameters: filter mode
@@ -896,8 +922,8 @@ enum NPatchLayout
 // Callbacks to hook some internal functions
 // WARNING: These callbacks are intended for advance users
 alias TraceLogCallback = void function(int logLevel, const(char)* text, va_list args); // Logging: Redirect trace log messages
-alias LoadFileDataCallback = ubyte* function(const(char)* fileName, uint* bytesRead); // FileIO: Load binary data
-alias SaveFileDataCallback = bool function(const(char)* fileName, void* data, uint bytesToWrite); // FileIO: Save binary data
+alias LoadFileDataCallback = ubyte* function(const(char)* fileName, int* dataSize); // FileIO: Load binary data
+alias SaveFileDataCallback = bool function(const(char)* fileName, void* data, int dataSize); // FileIO: Save binary data
 alias LoadFileTextCallback = char* function(const(char)* fileName); // FileIO: Load text data
 alias SaveFileTextCallback = bool function(const(char)* fileName, char* text); // FileIO: Save text data
 
@@ -914,8 +940,8 @@ alias SaveFileTextCallback = bool function(const(char)* fileName, char* text); /
 
 // Window-related functions
 void InitWindow(int width, int height, const(char)* title); // Initialize window and OpenGL context
-bool WindowShouldClose(); // Check if KEY_ESCAPE pressed or Close icon pressed
 void CloseWindow(); // Close window and unload OpenGL context
+bool WindowShouldClose(); // Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
 bool IsWindowReady(); // Check if window has been initialized successfully
 bool IsWindowFullscreen(); // Check if window is currently fullscreen
 bool IsWindowHidden(); // Check if window is currently hidden (only PLATFORM_DESKTOP)
@@ -927,17 +953,20 @@ bool IsWindowState(uint flag); // Check if one specific window flag is enabled
 void SetWindowState(uint flags); // Set window configuration state using flags (only PLATFORM_DESKTOP)
 void ClearWindowState(uint flags); // Clear window configuration state flags
 void ToggleFullscreen(); // Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
+void ToggleBorderlessWindowed(); // Toggle window state: borderless windowed (only PLATFORM_DESKTOP)
 void MaximizeWindow(); // Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
 void MinimizeWindow(); // Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
 void RestoreWindow(); // Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
 void SetWindowIcon(Image image); // Set icon for window (single image, RGBA 32bit, only PLATFORM_DESKTOP)
 void SetWindowIcons(Image* images, int count); // Set icon for window (multiple images, RGBA 32bit, only PLATFORM_DESKTOP)
-void SetWindowTitle(const(char)* title); // Set title for window (only PLATFORM_DESKTOP)
+void SetWindowTitle(const(char)* title); // Set title for window (only PLATFORM_DESKTOP and PLATFORM_WEB)
 void SetWindowPosition(int x, int y); // Set window position on screen (only PLATFORM_DESKTOP)
-void SetWindowMonitor(int monitor); // Set monitor for the current window (fullscreen mode)
+void SetWindowMonitor(int monitor); // Set monitor for the current window
 void SetWindowMinSize(int width, int height); // Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
+void SetWindowMaxSize(int width, int height); // Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
 void SetWindowSize(int width, int height); // Set window dimensions
 void SetWindowOpacity(float opacity); // Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
+void SetWindowFocused(); // Set window focused (only PLATFORM_DESKTOP)
 void* GetWindowHandle(); // Get native window handle
 int GetScreenWidth(); // Get current screen width
 int GetScreenHeight(); // Get current screen height
@@ -953,19 +982,11 @@ int GetMonitorPhysicalHeight(int monitor); // Get specified monitor physical hei
 int GetMonitorRefreshRate(int monitor); // Get specified monitor refresh rate
 Vector2 GetWindowPosition(); // Get window position XY on monitor
 Vector2 GetWindowScaleDPI(); // Get window scale DPI factor
-const(char)* GetMonitorName(int monitor); // Get the human-readable, UTF-8 encoded name of the primary monitor
+const(char)* GetMonitorName(int monitor); // Get the human-readable, UTF-8 encoded name of the specified monitor
 void SetClipboardText(const(char)* text); // Set clipboard text content
 const(char)* GetClipboardText(); // Get clipboard text content
 void EnableEventWaiting(); // Enable waiting for events on EndDrawing(), no automatic event polling
 void DisableEventWaiting(); // Disable waiting for events on EndDrawing(), automatic events polling
-
-// Custom frame control functions
-// NOTE: Those functions are intended for advance users that want full control over the frame processing
-// By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
-// To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
-void SwapScreenBuffer(); // Swap back buffer with front buffer (screen drawing)
-void PollInputEvents(); // Register all input events
-void WaitTime(double seconds); // Wait for some time (halt program execution)
 
 // Cursor-related functions
 void ShowCursor(); // Shows cursor
@@ -1022,23 +1043,36 @@ Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera); // Get the screen
 
 // Timing-related functions
 void SetTargetFPS(int fps); // Set target FPS (maximum)
-int GetFPS(); // Get current FPS
 float GetFrameTime(); // Get time in seconds for last frame drawn (delta time)
 double GetTime(); // Get elapsed time in seconds since InitWindow()
+int GetFPS(); // Get current FPS
+
+// Custom frame control functions
+// NOTE: Those functions are intended for advance users that want full control over the frame processing
+// By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timing + PollInputEvents()
+// To avoid that behaviour and control frame processes manually, enable in config.h: SUPPORT_CUSTOM_FRAME_CONTROL
+void SwapScreenBuffer(); // Swap back buffer with front buffer (screen drawing)
+void PollInputEvents(); // Register all input events
+void WaitTime(double seconds); // Wait for some time (halt program execution)
+
+// Random values generation functions
+void SetRandomSeed(uint seed); // Set the seed for the random number generator
+int GetRandomValue(int min, int max); // Get a random value between min and max (both included)
+int* LoadRandomSequence(uint count, int min, int max); // Load random values sequence, no values repeated
+void UnloadRandomSequence(int* sequence); // Unload random values sequence
 
 // Misc. functions
-int GetRandomValue(int min, int max); // Get a random value between min and max (both included)
-void SetRandomSeed(uint seed); // Set the seed for the random number generator
 void TakeScreenshot(const(char)* fileName); // Takes a screenshot of current screen (filename extension defines format)
 void SetConfigFlags(uint flags); // Setup init configuration flags (view FLAGS)
+void OpenURL(const(char)* url); // Open URL with default system browser (if available)
 
+// NOTE: Following functions implemented in module [utils]
+//------------------------------------------------------------------
 void TraceLog(int logLevel, const(char)* text, ...); // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 void SetTraceLogLevel(int logLevel); // Set the current threshold (minimum) log level
 void* MemAlloc(uint size); // Internal memory allocator
 void* MemRealloc(void* ptr, uint size); // Internal memory reallocator
 void MemFree(void* ptr); // Internal memory free
-
-void OpenURL(const(char)* url); // Open URL with default system browser (if available)
 
 // Set custom callbacks
 // WARNING: Callbacks setup is intended for advance users
@@ -1049,13 +1083,16 @@ void SetLoadFileTextCallback(LoadFileTextCallback callback); // Set custom file 
 void SetSaveFileTextCallback(SaveFileTextCallback callback); // Set custom file text data saver
 
 // Files management functions
-ubyte* LoadFileData(const(char)* fileName, uint* bytesRead); // Load file data as byte array (read)
+ubyte* LoadFileData(const(char)* fileName, int* dataSize); // Load file data as byte array (read)
 void UnloadFileData(ubyte* data); // Unload file data allocated by LoadFileData()
-bool SaveFileData(const(char)* fileName, void* data, uint bytesToWrite); // Save data to file from byte array (write), returns true on success
-bool ExportDataAsCode(const(ubyte)* data, uint size, const(char)* fileName); // Export data to code (.h), returns true on success
+bool SaveFileData(const(char)* fileName, void* data, int dataSize); // Save data to file from byte array (write), returns true on success
+bool ExportDataAsCode(const(ubyte)* data, int dataSize, const(char)* fileName); // Export data to code (.h), returns true on success
 char* LoadFileText(const(char)* fileName); // Load text data from file (read), returns a '\0' terminated string
 void UnloadFileText(char* text); // Unload file text data allocated by LoadFileText()
 bool SaveFileText(const(char)* fileName, char* text); // Save text data to file (write), string must be '\0' terminated, returns true on success
+//------------------------------------------------------------------
+
+// File system functions
 bool FileExists(const(char)* fileName); // Check if file exists
 bool DirectoryExists(const(char)* dirPath); // Check if a directory path exists
 bool IsFileExtension(const(char)* fileName, const(char)* ext); // Check file extension (including point: .png, .wav)
@@ -1066,7 +1103,7 @@ const(char)* GetFileNameWithoutExt(const(char)* filePath); // Get filename strin
 const(char)* GetDirectoryPath(const(char)* filePath); // Get full path for a given fileName with path (uses static string)
 const(char)* GetPrevDirectoryPath(const(char)* dirPath); // Get previous directory path for a given path (uses static string)
 const(char)* GetWorkingDirectory(); // Get current working directory (uses static string)
-const(char)* GetApplicationDirectory(); // Get the directory if the running application (uses static string)
+const(char)* GetApplicationDirectory(); // Get the directory of the running application (uses static string)
 bool ChangeDirectory(const(char)* dir); // Change working directory, return true on success
 bool IsPathFile(const(char)* path); // Check if a given path is a file or a directory
 FilePathList LoadDirectoryFiles(const(char)* dirPath); // Load directory filepaths
@@ -1083,18 +1120,29 @@ ubyte* DecompressData(const(ubyte)* compData, int compDataSize, int* dataSize); 
 char* EncodeDataBase64(const(ubyte)* data, int dataSize, int* outputSize); // Encode data to Base64 string, memory must be MemFree()
 ubyte* DecodeDataBase64(const(ubyte)* data, int* outputSize); // Decode Base64 string data, memory must be MemFree()
 
+// Automation events functionality
+AutomationEventList LoadAutomationEventList(const(char)* fileName); // Load automation events list from file, NULL for empty list, capacity = MAX_AUTOMATION_EVENTS
+void UnloadAutomationEventList(AutomationEventList* list); // Unload automation events list from file
+bool ExportAutomationEventList(AutomationEventList list, const(char)* fileName); // Export automation events list as text file
+void SetAutomationEventList(AutomationEventList* list); // Set automation event list to record to
+void SetAutomationEventBaseFrame(int frame); // Set automation event internal base frame to start recording
+void StartAutomationEventRecording(); // Start recording automation events (AutomationEventList must be set)
+void StopAutomationEventRecording(); // Stop recording automation events
+void PlayAutomationEvent(AutomationEvent event); // Play a recorded automation event
+
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)
 //------------------------------------------------------------------------------------
 
 // Input-related functions: keyboard
 bool IsKeyPressed(int key); // Check if a key has been pressed once
+bool IsKeyPressedRepeat(int key); // Check if a key has been pressed again (Only PLATFORM_DESKTOP)
 bool IsKeyDown(int key); // Check if a key is being pressed
 bool IsKeyReleased(int key); // Check if a key has been released once
 bool IsKeyUp(int key); // Check if a key is NOT being pressed
-void SetExitKey(int key); // Set a custom key to exit program (default is ESC)
 int GetKeyPressed(); // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
 int GetCharPressed(); // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
+void SetExitKey(int key); // Set a custom key to exit program (default is ESC)
 
 // Input-related functions: gamepads
 bool IsGamepadAvailable(int gamepad); // Check if a gamepad is available
@@ -1135,7 +1183,7 @@ int GetTouchPointCount(); // Get number of touch points
 // Gestures and Touch Handling Functions (Module: rgestures)
 //------------------------------------------------------------------------------------
 void SetGesturesEnabled(uint flags); // Enable a set of gestures using flags
-bool IsGestureDetected(int gesture); // Check if a gesture have been detected
+bool IsGestureDetected(uint gesture); // Check if a gesture have been detected
 int GetGestureDetected(); // Get latest detected gesture
 float GetGestureHoldDuration(); // Get gesture hold time in milliseconds
 Vector2 GetGestureDragVector(); // Get gesture drag vector
@@ -1161,18 +1209,17 @@ void SetShapesTexture(Texture2D texture, Rectangle source); // Set texture and r
 void DrawPixel(int posX, int posY, Color color); // Draw a pixel
 void DrawPixelV(Vector2 position, Color color); // Draw a pixel (Vector version)
 void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color); // Draw a line
-void DrawLineV(Vector2 startPos, Vector2 endPos, Color color); // Draw a line (Vector version)
-void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color); // Draw a line defining thickness
-void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color); // Draw a line using cubic-bezier curves in-out
-void DrawLineBezierQuad(Vector2 startPos, Vector2 endPos, Vector2 controlPos, float thick, Color color); // Draw line using quadratic bezier curves with a control point
-void DrawLineBezierCubic(Vector2 startPos, Vector2 endPos, Vector2 startControlPos, Vector2 endControlPos, float thick, Color color); // Draw line using cubic bezier curves with 2 control points
-void DrawLineStrip(Vector2* points, int pointCount, Color color); // Draw lines sequence
+void DrawLineV(Vector2 startPos, Vector2 endPos, Color color); // Draw a line (using gl lines)
+void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color); // Draw a line (using triangles/quads)
+void DrawLineStrip(Vector2* points, int pointCount, Color color); // Draw lines sequence (using gl lines)
+void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color); // Draw line segment cubic-bezier in-out interpolation
 void DrawCircle(int centerX, int centerY, float radius, Color color); // Draw a color-filled circle
 void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color); // Draw a piece of a circle
 void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color); // Draw circle sector outline
 void DrawCircleGradient(int centerX, int centerY, float radius, Color color1, Color color2); // Draw a gradient-filled circle
 void DrawCircleV(Vector2 center, float radius, Color color); // Draw a color-filled circle (Vector version)
 void DrawCircleLines(int centerX, int centerY, float radius, Color color); // Draw circle outline
+void DrawCircleLinesV(Vector2 center, float radius, Color color); // Draw circle outline (Vector version)
 void DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color); // Draw ellipse
 void DrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, Color color); // Draw ellipse outline
 void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color); // Draw ring
@@ -1196,6 +1243,25 @@ void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color col
 void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color); // Draw a polygon outline of n sides
 void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color); // Draw a polygon outline of n sides with extended parameters
 
+// Splines drawing functions
+void DrawSplineLinear(Vector2* points, int pointCount, float thick, Color color); // Draw spline: Linear, minimum 2 points
+void DrawSplineBasis(Vector2* points, int pointCount, float thick, Color color); // Draw spline: B-Spline, minimum 4 points
+void DrawSplineCatmullRom(Vector2* points, int pointCount, float thick, Color color); // Draw spline: Catmull-Rom, minimum 4 points
+void DrawSplineBezierQuadratic(Vector2* points, int pointCount, float thick, Color color); // Draw spline: Quadratic Bezier, minimum 3 points (1 control point): [p1, c2, p3, c4...]
+void DrawSplineBezierCubic(Vector2* points, int pointCount, float thick, Color color); // Draw spline: Cubic Bezier, minimum 4 points (2 control points): [p1, c2, c3, p4, c5, c6...]
+void DrawSplineSegmentLinear(Vector2 p1, Vector2 p2, float thick, Color color); // Draw spline segment: Linear, 2 points
+void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color); // Draw spline segment: B-Spline, 4 points
+void DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color); // Draw spline segment: Catmull-Rom, 4 points
+void DrawSplineSegmentBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float thick, Color color); // Draw spline segment: Quadratic Bezier, 2 points, 1 control point
+void DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float thick, Color color); // Draw spline segment: Cubic Bezier, 2 points, 2 control points
+
+// Spline segment point evaluation functions, for a given t [0.0f .. 1.0f]
+Vector2 GetSplinePointLinear(Vector2 startPos, Vector2 endPos, float t); // Get (evaluate) spline point: Linear
+Vector2 GetSplinePointBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t); // Get (evaluate) spline point: B-Spline
+Vector2 GetSplinePointCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t); // Get (evaluate) spline point: Catmull-Rom
+Vector2 GetSplinePointBezierQuad(Vector2 p1, Vector2 c2, Vector2 p3, float t); // Get (evaluate) spline point: Quadratic Bezier
+Vector2 GetSplinePointBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float t); // Get (evaluate) spline point: Cubic Bezier
+
 // Basic shapes collision detection functions
 bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2); // Check collision between two rectangles
 bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2); // Check collision between two circles
@@ -1216,6 +1282,7 @@ Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2); // Get collision rect
 // NOTE: These functions do not require GPU access
 Image LoadImage(const(char)* fileName); // Load image from file into CPU memory (RAM)
 Image LoadImageRaw(const(char)* fileName, int width, int height, int format, int headerSize); // Load image from RAW file data
+Image LoadImageSvg(const(char)* fileNameOrString, int width, int height); // Load image from SVG file data or string with specified size
 Image LoadImageAnim(const(char)* fileName, int* frames); // Load image sequence from file (frames appended to image.data)
 Image LoadImageFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize); // Load image from memory buffer, fileType refers to extension: i.e. '.png'
 Image LoadImageFromTexture(Texture2D texture); // Load image from GPU texture data
@@ -1223,13 +1290,14 @@ Image LoadImageFromScreen(); // Load image from screen buffer and (screenshot)
 bool IsImageReady(Image image); // Check if an image is ready
 void UnloadImage(Image image); // Unload image from CPU memory (RAM)
 bool ExportImage(Image image, const(char)* fileName); // Export image data to file, returns true on success
+ubyte* ExportImageToMemory(Image image, const(char)* fileType, int* fileSize); // Export image to memory buffer
 bool ExportImageAsCode(Image image, const(char)* fileName); // Export image as code file defining an array of bytes, returns true on success
 
 // Image generation functions
 Image GenImageColor(int width, int height, Color color); // Generate image: plain color
-Image GenImageGradientV(int width, int height, Color top, Color bottom); // Generate image: vertical gradient
-Image GenImageGradientH(int width, int height, Color left, Color right); // Generate image: horizontal gradient
+Image GenImageGradientLinear(int width, int height, int direction, Color start, Color end); // Generate image: linear gradient, direction in degrees [0..360], 0=Vertical gradient
 Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer); // Generate image: radial gradient
+Image GenImageGradientSquare(int width, int height, float density, Color inner, Color outer); // Generate image: square gradient
 Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2); // Generate image: checked
 Image GenImageWhiteNoise(int width, int height, float factor); // Generate image: white noise
 Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale); // Generate image: perlin noise
@@ -1256,6 +1324,7 @@ void ImageMipmaps(Image* image); // Compute all mipmap levels for a provided ima
 void ImageDither(Image* image, int rBpp, int gBpp, int bBpp, int aBpp); // Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
 void ImageFlipVertical(Image* image); // Flip image vertically
 void ImageFlipHorizontal(Image* image); // Flip image horizontally
+void ImageRotate(Image* image, int degrees); // Rotate image by input angle in degrees (-359 to 359)
 void ImageRotateCW(Image* image); // Rotate image clockwise 90deg
 void ImageRotateCCW(Image* image); // Rotate image counter-clockwise 90deg
 void ImageColorTint(Image* image, Color color); // Modify image color: tint
@@ -1340,13 +1409,13 @@ int GetPixelDataSize(int width, int height, int format); // Get pixel data size 
 // Font loading/unloading functions
 Font GetFontDefault(); // Get the default Font
 Font LoadFont(const(char)* fileName); // Load font from file into GPU memory (VRAM)
-Font LoadFontEx(const(char)* fileName, int fontSize, int* fontChars, int glyphCount); // Load font from file with extended parameters, use NULL for fontChars and 0 for glyphCount to load the default character set
+Font LoadFontEx(const(char)* fileName, int fontSize, int* codepoints, int codepointCount); // Load font from file with extended parameters, use NULL for codepoints and 0 for codepointCount to load the default character set
 Font LoadFontFromImage(Image image, Color key, int firstChar); // Load font from Image (XNA style)
-Font LoadFontFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int glyphCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
+Font LoadFontFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataSize, int fontSize, int* codepoints, int codepointCount); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
 bool IsFontReady(Font font); // Check if a font is ready
-GlyphInfo* LoadFontData(const(ubyte)* fileData, int dataSize, int fontSize, int* fontChars, int glyphCount, int type); // Load font data for further use
-Image GenImageFontAtlas(const(GlyphInfo)* chars, Rectangle** recs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
-void UnloadFontData(GlyphInfo* chars, int glyphCount); // Unload font chars info data (RAM)
+GlyphInfo* LoadFontData(const(ubyte)* fileData, int dataSize, int fontSize, int* codepoints, int codepointCount, int type); // Load font data for further use
+Image GenImageFontAtlas(const(GlyphInfo)* glyphs, Rectangle** glyphRecs, int glyphCount, int fontSize, int padding, int packMethod); // Generate image font atlas using chars info
+void UnloadFontData(GlyphInfo* glyphs, int glyphCount); // Unload font chars info data (RAM)
 void UnloadFont(Font font); // Unload font from GPU memory (VRAM)
 bool ExportFontAsCode(Font font, const(char)* fileName); // Export font as code file, returns true on success
 
@@ -1356,9 +1425,10 @@ void DrawText(const(char)* text, int posX, int posY, int fontSize, Color color);
 void DrawTextEx(Font font, const(char)* text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text using font and additional parameters
 void DrawTextPro(Font font, const(char)* text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
 void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint); // Draw one character (codepoint)
-void DrawTextCodepoints(Font font, const(int)* codepoints, int count, Vector2 position, float fontSize, float spacing, Color tint); // Draw multiple character (codepoint)
+void DrawTextCodepoints(Font font, const(int)* codepoints, int codepointCount, Vector2 position, float fontSize, float spacing, Color tint); // Draw multiple character (codepoint)
 
 // Text font info functions
+void SetTextLineSpacing(int spacing); // Set vertical line spacing when drawing with line-breaks
 int MeasureText(const(char)* text, int fontSize); // Measure string width for default font
 Vector2 MeasureTextEx(Font font, const(char)* text, float fontSize, float spacing); // Measure string size for Font
 int GetGlyphIndex(Font font, int codepoint); // Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
@@ -1474,10 +1544,10 @@ void SetMaterialTexture(Material* material, int mapType, Texture2D texture); // 
 void SetModelMeshMaterial(Model* model, int meshId, int materialId); // Set material for a mesh
 
 // Model animations loading/unloading functions
-ModelAnimation* LoadModelAnimations(const(char)* fileName, uint* animCount); // Load model animations from file
+ModelAnimation* LoadModelAnimations(const(char)* fileName, int* animCount); // Load model animations from file
 void UpdateModelAnimation(Model model, ModelAnimation anim, int frame); // Update model animation pose
 void UnloadModelAnimation(ModelAnimation anim); // Unload animation data
-void UnloadModelAnimations(ModelAnimation* animations, uint count); // Unload animation array data
+void UnloadModelAnimations(ModelAnimation* animations, int animCount); // Unload animation array data
 bool IsModelAnimationValid(Model model, ModelAnimation anim); // Check model animation skeleton match
 
 // Collision detection functions
@@ -1500,6 +1570,7 @@ void InitAudioDevice(); // Initialize audio device and context
 void CloseAudioDevice(); // Close the audio device and context
 bool IsAudioDeviceReady(); // Check if audio device has been initialized successfully
 void SetMasterVolume(float volume); // Set master volume (listener)
+float GetMasterVolume(); // Get master volume (listener)
 
 // Wave/Sound loading/unloading functions
 Wave LoadWave(const(char)* fileName); // Load wave data from file
@@ -1507,10 +1578,12 @@ Wave LoadWaveFromMemory(const(char)* fileType, const(ubyte)* fileData, int dataS
 bool IsWaveReady(Wave wave); // Checks if wave data is ready
 Sound LoadSound(const(char)* fileName); // Load sound from file
 Sound LoadSoundFromWave(Wave wave); // Load sound from wave data
+Sound LoadSoundAlias(Sound source); // Create a new sound that shares the same sample data as the source sound, does not own the sound data
 bool IsSoundReady(Sound sound); // Checks if a sound is ready
 void UpdateSound(Sound sound, const(void)* data, int sampleCount); // Update sound buffer with new data
 void UnloadWave(Wave wave); // Unload wave data
 void UnloadSound(Sound sound); // Unload sound
+void UnloadSoundAlias(Sound alias_); // Unload a sound alias (does not deallocate sample data)
 bool ExportWave(Wave wave, const(char)* fileName); // Export wave data to file, returns true on success
 bool ExportWaveAsCode(Wave wave, const(char)* fileName); // Export wave sample data to code (.h), returns true on success
 
@@ -1564,10 +1637,10 @@ void SetAudioStreamPan(AudioStream stream, float pan); // Set pan for audio stre
 void SetAudioStreamBufferSizeDefault(int size); // Default size for new audio streams
 void SetAudioStreamCallback(AudioStream stream, AudioCallback callback); // Audio thread callback to request new data
 
-void AttachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Attach audio stream processor to stream
+void AttachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Attach audio stream processor to stream, receives the samples as <float>s
 void DetachAudioStreamProcessor(AudioStream stream, AudioCallback processor); // Detach audio stream processor from stream
 
-void AttachAudioMixedProcessor(AudioCallback processor); // Attach audio stream processor to the entire audio pipeline
+void AttachAudioMixedProcessor(AudioCallback processor); // Attach audio stream processor to the entire audio pipeline, receives the samples as <float>s
 void DetachAudioMixedProcessor(AudioCallback processor); // Detach audio stream processor from the entire audio pipeline
 
 // RAYLIB_H

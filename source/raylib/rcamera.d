@@ -1,17 +1,19 @@
+module raylib.rcamera;
+
+import raylib;
 /*******************************************************************************************
 *
 *   rcamera - Basic camera system with support for multiple camera modes
 *
 *   CONFIGURATION:
+*       #define RCAMERA_IMPLEMENTATION
+*           Generates the implementation of the library into the included file.
+*           If not defined, the library is in header only mode and can be included in other headers
+*           or source files without problems. But only ONE file should hold the implementation.
 *
-*   #define CAMERA_IMPLEMENTATION
-*       Generates the implementation of the library into the included file.
-*       If not defined, the library is in header only mode and can be included in other headers
-*       or source files without problems. But only ONE file should hold the implementation.
-*
-*   #define CAMERA_STANDALONE
-*       If defined, the library can be used as standalone as a camera system but some
-*       functions must be redefined to manage inputs accordingly.
+*       #define RCAMERA_STANDALONE
+*           If defined, the library can be used as standalone as a camera system but some
+*           functions must be redefined to manage inputs accordingly.
 *
 *   CONTRIBUTORS:
 *       Ramon Santamaria:   Supervision, review, update and maintenance
@@ -39,23 +41,27 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
-module raylib.rcamera;
-
-import raylib;
 
 extern (C) @nogc nothrow:
 
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-// Function specifiers definition // Functions defined as 'extern' by default (implicit specifiers)
+// Function specifiers definition
+
+// Function specifiers in case library is build/used as a shared library (Windows)
+// NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
+
+// We are building the library as a Win32 shared library (.dll)
+
+// We are using the library as a Win32 shared library (.dll) // Functions defined as 'extern' by default (implicit specifiers)
 
 enum CAMERA_CULL_DISTANCE_NEAR = RL_CULL_DISTANCE_NEAR;
 enum CAMERA_CULL_DISTANCE_FAR = RL_CULL_DISTANCE_FAR;
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
-// NOTE: Below types are required for CAMERA_STANDALONE usage
+// NOTE: Below types are required for standalone usage
 //----------------------------------------------------------------------------------
 
 // Vector2, 2 components
@@ -68,6 +74,13 @@ enum CAMERA_CULL_DISTANCE_FAR = RL_CULL_DISTANCE_FAR;
 // Vector x component
 // Vector y component
 // Vector z component
+
+// Matrix, 4x4 components, column major, OpenGL style, right-handed
+
+// Matrix first row (4 components)
+// Matrix second row (4 components)
+// Matrix third row (4 components)
+// Matrix fourth row (4 components)
 
 // Camera type, defines a camera position/orientation in 3d space
 
@@ -121,7 +134,7 @@ void CameraRoll(Camera* camera, float angle);
 Matrix GetCameraViewMatrix(Camera* camera);
 Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 
-// CAMERA_H
+// RCAMERA_H
 
 /***********************************************************************************
 *
@@ -289,12 +302,17 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 
 // Camera movement
 
-//if (IsKeyDown(KEY_SPACE)) CameraMoveUp(camera, CAMERA_MOVE_SPEED);
-//if (IsKeyDown(KEY_LEFT_CONTROL)) CameraMoveUp(camera, -CAMERA_MOVE_SPEED);
+// Camera pan (for CAMERA_FREE)
+
+// Mouse support
+
+// Keyboard support
+
+// Gamepad controller support
 
 // Zoom target distance
 
-// !CAMERA_STANDALONE
+// !RCAMERA_STANDALONE
 
 // Update camera movement, movement/rotation values should be provided by user
 
@@ -313,4 +331,4 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 
 // Zoom target distance
 
-// CAMERA_IMPLEMENTATION
+// RCAMERA_IMPLEMENTATION
