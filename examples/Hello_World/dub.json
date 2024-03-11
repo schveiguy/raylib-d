@@ -4,12 +4,13 @@
 	],
 	"copyright": "Copyright © 2020, Unknown",
 	"dependencies": {
-		"raylib-d": {"path": "../"}
+		"raylib-d": {"path": "../../"}
 	},
 	"libs": [
 		"raylib"
 	],
 	"description": "A minimal D application.",
 	"license": "Zlib",
-	"name": "example"
+	"name": "example",
+	"mainSourceFile": "source/app.d"
 }

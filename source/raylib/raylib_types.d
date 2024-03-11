@@ -63,6 +63,14 @@ struct Rectangle
     float height;
     alias w = width;
     alias h = height;
+
+    Vector2 origin() { // Rectangle function exclusive to raylib-d
+        return Vector2(x, y);
+    }
+    
+    Vector2 dimensions() {
+        return Vector2(width, height);
+    }
 }
 
 enum Colors
@@ -96,4 +104,17 @@ enum Colors
     BLANK = Color(0, 0, 0, 0), // Blank (Transparent)
     MAGENTA = Color(255, 0, 255, 255), // Magenta
     RAYWHITE = Color(245, 245, 245, 255), // My own White (raylib logo)
+}
+
+unittest
+{
+    float x = cast(float)(GetRandomValue(0, 1000) / 7.0f);
+    float y = cast(float)(GetRandomValue(0, 1000) / 7.0f);
+    float width = cast(float)(GetRandomValue(0, 100) / 7.0f);
+    float height = cast(float)(GetRandomValue(0, 100) / 7.0f);
+    Rectangle rect = Rectangle(x, y, width, height);
+    assert(x == rect.origin.x);
+    assert(y == rect.origin.y);
+    assert(width == rect.dimensions.x);
+    assert(width == rect.dimensions.y);
 }
