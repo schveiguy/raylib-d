@@ -71,6 +71,20 @@ struct Rectangle
     Vector2 dimensions() {
         return Vector2(width, height);
     }
+
+    alias topLeft = origin;
+
+    Vector2 topRight() {
+        return Vector2(x:(x + width), y:y);
+    }
+
+    Vector2 bottomLeft() {
+        return Vector2(x:x, y:(y + height));
+    }
+
+    Vector2 bottomRight() {
+        return Vector2(x:(x + width), y:(y + height));
+    }
 }
 
 enum Colors
@@ -108,13 +122,17 @@ enum Colors
 
 unittest
 {
-    float x = cast(float)(GetRandomValue(0, 1000) / 7.0f);
-    float y = cast(float)(GetRandomValue(0, 1000) / 7.0f);
-    float width = cast(float)(GetRandomValue(0, 100) / 7.0f);
-    float height = cast(float)(GetRandomValue(0, 100) / 7.0f);
+    float x = cast(float)(GetRandomValue(-500, 1000) / 7.0f);
+    float y = cast(float)(GetRandomValue(-500, 1000) / 7.0f);
+    float width = cast(float)(GetRandomValue(0, 200) / 7.0f);
+    float height = cast(float)(GetRandomValue(0, 200) / 7.0f);
     Rectangle rect = Rectangle(x, y, width, height);
-    assert(x == rect.origin.x);
-    assert(y == rect.origin.y);
-    assert(width == rect.dimensions.x);
-    assert(width == rect.dimensions.y);
+    assert(rect.origin.x == x);
+    assert(rect.origin.y == y);
+    assert(rect.dimensions.x == width);
+    assert(rect.dimensions.y == height);
+    assert(rect.topLeft == Vector2(x:x, y:y));
+    assert(rect.topRight.x == x + width);
+    assert(rect.bottomLeft == Vector2(x:x, y:(y + height)));
+    assert(rect.bottomRight == Vector2(x:(x+width), y:(y + height)));
 }
