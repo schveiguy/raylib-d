@@ -103,7 +103,7 @@ int main() {
     //----------------------------------------------------------------------------------
 
     // Custom GUI font loading
-    //Font font = LoadFontEx("fonts/rainyhearts16.ttf", 12, 0, 0);
+    //Font font = LoadFontEx("fonts/rainyhearts16.ttf".toStringz, 12, 0, 0);
     //GuiSetFont(font);
 
     bool exitWindow = false;

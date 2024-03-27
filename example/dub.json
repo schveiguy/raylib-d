@@ -9,7 +9,8 @@
 	"libs": [
 		"raylib"
 	],
-	"description": "A minimal D application.",
+	"description": "'Hello World' example",
 	"license": "Zlib",
-	"name": "example"
+	"name": "example",
+	"mainSourceFile": "source/app.d"
 }
