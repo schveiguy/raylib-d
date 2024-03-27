@@ -74,16 +74,42 @@ struct Rectangle
 
     alias topLeft = origin;
 
-    Vector2 topRight() {
+    Vector2 topRight() const {
         return Vector2(x:(x + width), y:y);
     }
 
-    Vector2 bottomLeft() {
+    Vector2 bottomLeft() const {
         return Vector2(x:x, y:(y + height));
     }
 
-    Vector2 bottomRight() {
+    Vector2 bottomRight() const {
         return Vector2(x:(x + width), y:(y + height));
+    }
+
+    void opOpAssign(string op)(Vector2 offset) {
+        static assert(op=="+" || op=="-");
+        
+        static if (op=="+") {
+            this.x += offset.x;
+            this.y += offset.y;
+        } else static if (op=="-") {
+            this.x -= offset.x;
+            this.y -= offset.y;
+        }
+    }
+
+    Rectangle opBinary(string op)(Vector2 offset) const {
+        static assert(op=="+" || op=="-");
+
+        Rectangle result = this;
+        static if (op=="+") {
+            result.x += offset.x;
+            result.y += offset.y;
+        } else static if (op=="-") {
+            result.x -= offset.x;
+            result.y -= offset.y;
+        }
+        return result;
     }
 }
 
@@ -122,6 +148,8 @@ enum Colors
 
 unittest
 {
+    import std.conv;
+    
     float x = cast(float)(GetRandomValue(-500, 1000) / 7.0f);
     float y = cast(float)(GetRandomValue(-500, 1000) / 7.0f);
     float width = cast(float)(GetRandomValue(0, 200) / 7.0f);
@@ -135,4 +163,15 @@ unittest
     assert(rect.topRight.x == x + width);
     assert(rect.bottomLeft == Vector2(x:x, y:(y + height)));
     assert(rect.bottomRight == Vector2(x:(x+width), y:(y + height)));
+
+    x += 26.3f;
+    y += 43.2f;
+    assert((rect + Vector2(26.3f, 0.0f)).x == rect.origin.x + 26.3f);
+    rect.x = 10.0f;
+    rect.y = 14.0f;
+    rect += Vector2(19.0f, 7.3f);
+    assert(rect.origin == Vector2(29.0f, 21.3f));
+    rect -= Vector2(4.5f, 2.3f);
+    assert(rect.x == 24.5f, "`rect.x` should be 24.5f. Instead it is "~to!string(rect.x));
+    assert(rect.y == 19.0f, "`rect.y` should be 20.7f. Instead it is "~to!string(rect.y));
 }
