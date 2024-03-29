@@ -88,8 +88,9 @@ public
     import raylib.rcamera;
     import raylib.raylib_types;
     import raylib.binding;
-    import raylib.old_enums;
 }
+
+import raylibd_templates;
 
 import core.stdc.config;
 import core.stdc.stdarg;
@@ -1843,5 +1844,5 @@ void DetachAudioStreamProcessor(AudioStream stream, AudioCallback processor); //
 void AttachAudioMixedProcessor(AudioCallback processor); // Attach audio stream processor to the entire audio pipeline, receives the samples as <float>s
 void DetachAudioMixedProcessor(AudioCallback processor); // Detach audio stream processor from the entire audio pipeline
 
-// RAYLIB_H
-
+// To generate overloads using `string` arguments instead of `const(char)*`:
+//mixin GenerateOverloadsWithStrings!"raylib";
