@@ -103,7 +103,7 @@ int main() {
     //----------------------------------------------------------------------------------
 
     // Custom GUI font loading
-    //Font font = LoadFontEx("fonts/rainyhearts16.ttf".toStringz, 12, 0, 0);
+    //Font font = LoadFontEx("fonts/rainyhearts16.ttf", 12, 0, 0);
     //GuiSetFont(font);
 
     bool exitWindow = false;
@@ -124,9 +124,9 @@ int main() {
         //----------------------------------------------------------------------------------
         exitWindow = WindowShouldClose();
 
-        if (IsKeyPressed(KeyboardKey.KEY_ESCAPE)) showMessageBox = !showMessageBox;
+        if (IsKeyPressed(KeyboardKey.ESCAPE)) showMessageBox = !showMessageBox;
 
-        if (IsKeyDown(KeyboardKey.KEY_LEFT_CONTROL) && IsKeyPressed(KeyboardKey.KEY_S)) showTextInputBox = true;
+        if (IsKeyDown(KeyboardKey.LEFT_CONTROL) && IsKeyPressed(KeyboardKey.KEY_S)) showTextInputBox = true;
 
         if (IsFileDropped())
         {

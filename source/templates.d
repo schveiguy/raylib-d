@@ -19,8 +19,8 @@ string EnumPrefixes(T)(string prefix) {
     return result;
 }
 
-template OverloadWithString(Func) {
-    static if (is(Func == function)) {
+template OverloadWithString(Args) {
+    static if (is(Args == function)) {
         // Extract function name
         alias Func FunctionType;
         enum funcName = __traits(identifier, FunctionType);
@@ -33,10 +33,16 @@ template OverloadWithString(Func) {
 
         // Generate overloaded function signature with string arguments
         string generateOverload(alias name, alias params)() {
+            bool hasCString;
+            
             string result = "void " ~ name ~ "(";
             foreach (param; params) {
-                result ~= param.stringof ~ " " ~ __traits(identifier, param) ~ ", ";
+                if (param.stringof == "const(char)*") {
+                    result ~= "string " ~ __traits(identifier, param) ~ ", ";
+                    hasCString = true;
+                } else result ~= param.stringof ~ " " ~ __traits(identifier, param) ~ ", ";
             }
+            if (!hasCString) return "";
             result ~= ") {" ~ name ~ "(";
             foreach (param; params) {
                 result ~= "toStringz(" ~ __traits(identifier, param) ~ "), ";
