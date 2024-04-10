@@ -92,14 +92,9 @@ struct Rectangle
     }
     alias centre = center;
 
-    void opOpAssign(string op)(Vector2 offset) {
-        static if (op=="+") {
-            this.x += offset.x;
-            this.y += offset.y;
-        } else static if (op=="-") {
-            this.x -= offset.x;
-            this.y -= offset.y;
-        }
+    void opOpAssign(string op)(Vector2 offset) if (op == "+" || op == "-") {
+        mixin("this.x ", op, "= offset.x;");
+        mixin("this.y ", op, "= offset.y;");
     }
 
     Rectangle opBinary(string op)(Vector2 offset) const if(op=="+" || op=="-") {
