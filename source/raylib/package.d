@@ -743,7 +743,6 @@ enum KeyboardKey
     KEY_KB_MENU = 348, // Key: KB menu
     KB_MENU = 348,
     // Keypad keys
-    
     KEY_KP_0 = 320, // Key: Keypad 0
     KP_0 = 320,
     KEY_KP_1 = 321, // Key: Keypad 1
@@ -779,7 +778,6 @@ enum KeyboardKey
     KEY_KP_EQUAL = 336, // Key: Keypad =
     KP_EQUAL = 336,
     // Android key buttons
-    
     KEY_BACK = 4, // Key: Android back button
     BACK = 4,
     KEY_MENU = 82, // Key: Android menu button
@@ -789,12 +787,11 @@ enum KeyboardKey
     KEY_VOLUME_DOWN = 25, // Key: Android volume down button
     VOLUME_DOWN = 25,
 }
-//mixin(EnumPrefixes!Key("KeyboardKey", "KEY_"));
 
 // Add backwards compatibility support for deprecated names
-enum MOUSE_LEFT_BUTTON = MouseButton.MOUSE_BUTTON_LEFT;
-enum MOUSE_RIGHT_BUTTON = MouseButton.MOUSE_BUTTON_RIGHT;
-enum MOUSE_MIDDLE_BUTTON = MouseButton.MOUSE_BUTTON_MIDDLE;
+deprecated enum MOUSE_LEFT_BUTTON = MouseButton.MOUSE_BUTTON_LEFT;
+deprecated enum MOUSE_RIGHT_BUTTON = MouseButton.MOUSE_BUTTON_RIGHT;
+deprecated enum MOUSE_MIDDLE_BUTTON = MouseButton.MOUSE_BUTTON_MIDDLE;
 
 // Mouse buttons
 enum MouseButton

@@ -67,6 +67,7 @@ struct Rectangle
     Vector2 origin() { // Rectangle function exclusive to raylib-d
         return Vector2(x, y);
     }
+    alias position = origin;
     
     Vector2 dimensions() {
         return Vector2(width, height);
@@ -86,9 +87,12 @@ struct Rectangle
         return Vector2(x:(x + width), y:(y + height));
     }
 
+    Vector2 center() const {
+        return Vector2(x:(x + width/2.0f), y:(y + height/2.0f));
+    }
+    alias centre = center;
+
     void opOpAssign(string op)(Vector2 offset) {
-        static assert(op=="+" || op=="-");
-        
         static if (op=="+") {
             this.x += offset.x;
             this.y += offset.y;
@@ -98,9 +102,7 @@ struct Rectangle
         }
     }
 
-    Rectangle opBinary(string op)(Vector2 offset) const {
-        static assert(op=="+" || op=="-");
-
+    Rectangle opBinary(string op)(Vector2 offset) const if(op=="+" || op=="-") {
         Rectangle result = this;
         static if (op=="+") {
             result.x += offset.x;
@@ -150,19 +152,19 @@ unittest
 {
     import std.conv;
     
-    float x = cast(float)(GetRandomValue(-500, 1000) / 7.0f);
-    float y = cast(float)(GetRandomValue(-500, 1000) / 7.0f);
-    float width = cast(float)(GetRandomValue(0, 200) / 7.0f);
-    float height = cast(float)(GetRandomValue(0, 200) / 7.0f);
+    float x = 543.3f;
+    float y = 235.9f;
+    float width = 50.0f;
+    float height = 20.0f;
     Rectangle rect = Rectangle(x, y, width, height);
-    assert(rect.origin.x == x);
-    assert(rect.origin.y == y);
-    assert(rect.dimensions.x == width);
-    assert(rect.dimensions.y == height);
-    assert(rect.topLeft == Vector2(x:x, y:y));
-    assert(rect.topRight.x == x + width);
-    assert(rect.bottomLeft == Vector2(x:x, y:(y + height)));
-    assert(rect.bottomRight == Vector2(x:(x+width), y:(y + height)));
+    assert(rect.origin.x == 543.3f, "`rect.origin.x` should be 543.3, not "~to!string(rect.origin.x));
+    assert(rect.origin.y == 235.9f, "`rect.centre.y` should be 235.9, not "~to!string(rect.origin.y));
+    assert(rect.dimensions == Vector2(50.0f, 20.0f));
+    assert(rect.topLeft == Vector2(x:543.3f, y:235.9f), "`rect.topLeft` should be Vector2(543.3, 235.9), not "~to!string(rect.topLeft));
+    assert(rect.topRight.x == 593.3f);
+    assert(rect.bottomLeft == Vector2(543.3f, 255.9f), "`rect.bottomLeft` should be Vector2(543.3, 255.9), not "~to!string(rect.bottomLeft));
+    assert(rect.bottomRight == Vector2(593.3f, 255.9f), "`rect.bottomRight` should be Vector2(593.3, 255.9), not "~to!string(rect.bottomRight));
+    assert(rect.centre == Vector2(568.3f, 245.9f), "`rect.centre` should be Vector2(568.3, 245.9), not "~to!string(rect.centre));
 
     x += 26.3f;
     y += 43.2f;

@@ -124,7 +124,7 @@ int main() {
         //----------------------------------------------------------------------------------
         exitWindow = WindowShouldClose();
 
-        if (IsKeyPressed(KeyboardKey.ESCAPE)) showMessageBox = !showMessageBox;
+        if (IsKeyPressed(Key.KEY_ESCAPE)) showMessageBox = !showMessageBox;
 
         if (IsKeyDown(KeyboardKey.LEFT_CONTROL) && IsKeyPressed(KeyboardKey.KEY_S)) showTextInputBox = true;
 

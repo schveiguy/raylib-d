@@ -1440,26 +1440,26 @@ Rectangle GuiScrollPanel(Rectangle bounds, const(char)* text, Rectangle content,
         // Check button state
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
 
 version (SUPPORT_SCROLLBAR_KEY_INPUT) {
             if (hasHorizontalScrollBar)
             {
-                if (IsKeyDown(KeyboardKey.KEY_RIGHT)) scrollPos.x -= GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
-                if (IsKeyDown(KeyboardKey.KEY_LEFT)) scrollPos.x += GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                if (IsKeyDown(KeyboardKey.RIGHT)) scrollPos.x -= GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                if (IsKeyDown(KeyboardKey.LEFT)) scrollPos.x += GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
             }
 
             if (hasVerticalScrollBar)
             {
-                if (IsKeyDown(KeyboardKey.KEY_DOWN)) scrollPos.y -= GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
-                if (IsKeyDown(KeyboardKey.KEY_UP)) scrollPos.y += GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                if (IsKeyDown(KeyboardKey.DOWN)) scrollPos.y -= GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                if (IsKeyDown(KeyboardKey.UP)) scrollPos.y += GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
             }
 }
             float wheelMove = GetMouseWheelMove();
 
             // Horizontal scroll (Shift + Mouse wheel)
-            if (hasHorizontalScrollBar && (IsKeyDown(KeyboardKey.KEY_LEFT_CONTROL) || IsKeyDown(KeyboardKey.KEY_RIGHT_SHIFT))) scrollPos.x += wheelMove*20;
+            if (hasHorizontalScrollBar && (IsKeyDown(KeyboardKey.LEFT_CONTROL) || IsKeyDown(KeyboardKey.RIGHT_SHIFT))) scrollPos.x += wheelMove*20;
             else scrollPos.y += wheelMove*20; // Vertical scroll
         }
     }
@@ -1546,10 +1546,10 @@ bool GuiButton(Rectangle bounds, const(char)* text) {
         // Check button state
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
 
-            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) pressed = true;
+            if (IsMouseButtonReleased(MouseButton.LEFT)) pressed = true;
         }
     }
     //--------------------------------------------------------------------
@@ -1581,10 +1581,10 @@ bool GuiLabelButton(Rectangle bounds, const(char)* text) {
         // Check checkbox state
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
 
-            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) pressed = true;
+            if (IsMouseButtonReleased(MouseButton.LEFT)) pressed = true;
         }
     }
     //--------------------------------------------------------------------
@@ -1610,8 +1610,8 @@ bool GuiToggle(Rectangle bounds, const(char)* text, bool active) {
         // Check toggle button state
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
-            else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
+            else if (IsMouseButtonReleased(MouseButton.LEFT))
             {
                 state = STATE_NORMAL;
                 active = !active;
@@ -1702,10 +1702,10 @@ bool GuiCheckBox(Rectangle bounds, const(char)* text, bool checked) {
         // Check checkbox state
         if (CheckCollisionPointRec(mousePoint, totalBounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
 
-            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) checked = !checked;
+            if (IsMouseButtonReleased(MouseButton.LEFT)) checked = !checked;
         }
     }
     //--------------------------------------------------------------------
@@ -1754,13 +1754,13 @@ int GuiComboBox(Rectangle bounds, const(char)* text, int active) {
         if (CheckCollisionPointRec(mousePoint, bounds) ||
             CheckCollisionPointRec(mousePoint, selector))
         {
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonPressed(MouseButton.LEFT))
             {
                 active += 1;
                 if (active >= itemCount) active = 0;
             }
 
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
         }
     }
@@ -1819,11 +1819,11 @@ bool GuiDropdownBox(Rectangle bounds, const(char)* text, int* active, bool editM
             // Check if mouse has been pressed or released outside limits
             if (!CheckCollisionPointRec(mousePoint, boundsOpen))
             {
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) pressed = true;
+                if (IsMouseButtonPressed(MouseButton.LEFT) || IsMouseButtonReleased(MouseButton.LEFT)) pressed = true;
             }
 
             // Check if already selected item has been pressed again
-            if (CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) pressed = true;
+            if (CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MouseButton.LEFT)) pressed = true;
 
             // Check focused and selected item
             for (int i = 0; i < itemCount; i++)
@@ -1834,7 +1834,7 @@ bool GuiDropdownBox(Rectangle bounds, const(char)* text, int* active, bool editM
                 if (CheckCollisionPointRec(mousePoint, itemBounds))
                 {
                     itemFocused = i;
-                    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+                    if (IsMouseButtonReleased(MouseButton.LEFT))
                     {
                         itemSelected = i;
                         pressed = true;     // Item selected, change to editMode = false
@@ -1849,7 +1849,7 @@ bool GuiDropdownBox(Rectangle bounds, const(char)* text, int* active, bool editM
         {
             if (CheckCollisionPointRec(mousePoint, bounds))
             {
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                if (IsMouseButtonPressed(MouseButton.LEFT))
                 {
                     pressed = true;
                     state = STATE_PRESSED;
@@ -1957,21 +1957,21 @@ bool GuiTextBox(Rectangle bounds, char* text, int textSize, bool editMode) {
             // Delete text
             if (keyCount > 0)
             {
-                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE))
+                if (IsKeyPressed(KeyboardKey.BACKSPACE))
                 {
                     while ((keyCount > 0) && ((text[--keyCount] & 0xc0) == 0x80)){}
                     text[keyCount] = '\0';
                 }
             }
 
-            if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) pressed = true;
+            if (IsKeyPressed(KeyboardKey.ENTER) || (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MouseButton.LEFT))) pressed = true;
         }
         else
         {
             if (CheckCollisionPointRec(mousePoint, bounds))
             {
                 state = STATE_FOCUSED;
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) pressed = true;
+                if (IsMouseButtonPressed(MouseButton.LEFT)) pressed = true;
             }
         }
     }
@@ -2043,7 +2043,7 @@ bool GuiSpinner(Rectangle bounds, const(char)* text, int* value, int minValue, i
         // Check spinner state
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
         }
     }
@@ -2141,7 +2141,7 @@ bool GuiValueBox(Rectangle bounds, const(char)* text, int* value, int minValue, 
             // Delete text
             if (keyCount > 0)
             {
-                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE))
+                if (IsKeyPressed(KeyboardKey.BACKSPACE))
                 {
                     keyCount--;
                     textValue[keyCount] = '\0';
@@ -2155,7 +2155,7 @@ bool GuiValueBox(Rectangle bounds, const(char)* text, int* value, int minValue, 
             //if (*value > maxValue) *value = maxValue;
             //else if (*value < minValue) *value = minValue;
 
-            if (IsKeyPressed(KeyboardKey.KEY_ENTER) || (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) pressed = true;
+            if (IsKeyPressed(KeyboardKey.ENTER) || (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MouseButton.LEFT))) pressed = true;
         }
         else
         {
@@ -2165,7 +2165,7 @@ bool GuiValueBox(Rectangle bounds, const(char)* text, int* value, int minValue, 
             if (CheckCollisionPointRec(mousePoint, bounds))
             {
                 state = STATE_FOCUSED;
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) pressed = true;
+                if (IsMouseButtonPressed(MouseButton.LEFT)) pressed = true;
             }
         }
     }
@@ -2232,7 +2232,7 @@ bool GuiTextBoxMulti(Rectangle bounds, char* text, int textSize, bool editMode) 
             // Introduce characters
             if ((textLength + byteSize) < textSize)
             {
-                if (IsKeyPressed(KeyboardKey.KEY_ENTER))
+                if (IsKeyPressed(KeyboardKey.ENTER))
                 {
                     text[textLength] = '\n';
                     textLength++;
@@ -2250,7 +2250,7 @@ bool GuiTextBoxMulti(Rectangle bounds, char* text, int textSize, bool editMode) 
             // Delete characters
             if (textLength > 0)
             {
-                if (IsKeyPressed(KeyboardKey.KEY_BACKSPACE))
+                if (IsKeyPressed(KeyboardKey.BACKSPACE))
                 {
                     if (cast(ubyte)text[textLength - 1] < 127)
                     {
@@ -2271,14 +2271,14 @@ bool GuiTextBoxMulti(Rectangle bounds, char* text, int textSize, bool editMode) 
             }
 
             // Exit edit mode
-            if (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) pressed = true;
+            if (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MouseButton.LEFT)) pressed = true;
         }
         else
         {
             if (CheckCollisionPointRec(mousePoint, bounds))
             {
                 state = STATE_FOCUSED;
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) pressed = true;
+                if (IsMouseButtonPressed(MouseButton.LEFT)) pressed = true;
             }
         }
     }
@@ -2400,7 +2400,7 @@ float GuiSliderPro(Rectangle bounds, const(char)* textLeft, const(char)* textRig
 
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonDown(MouseButton.LEFT))
             {
                 state = STATE_PRESSED;
 
@@ -2549,7 +2549,7 @@ void GuiDummyRec(Rectangle bounds, const(char)* text) {
         // Check button state
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            if (IsMouseButtonDown(MouseButton.LEFT)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;
         }
     }
@@ -2615,7 +2615,7 @@ int GuiListViewEx(Rectangle bounds, const(char)** text, int count, int* focus, i
                 if (CheckCollisionPointRec(mousePoint, itemBounds))
                 {
                     itemFocused = startIndex + i;
-                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                    if (IsMouseButtonPressed(MouseButton.LEFT))
                     {
                         if (itemSelected == (startIndex + i)) itemSelected = -1;
                         else itemSelected = startIndex + i;
@@ -2744,7 +2744,7 @@ Color GuiColorPanel(Rectangle bounds, const(char)* text, Color color)
 
         if (CheckCollisionPointRec(mousePoint, bounds))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonDown(MouseButton.LEFT))
             {
                 state = STATE_PRESSED;
                 pickerSelector = mousePoint;
@@ -2813,7 +2813,7 @@ float GuiColorBarAlpha(Rectangle bounds, const(char)* text, float alpha) {
         if (CheckCollisionPointRec(mousePoint, bounds) ||
             CheckCollisionPointRec(mousePoint, selector))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonDown(MouseButton.LEFT))
             {
                 state = STATE_PRESSED;
 
@@ -2877,7 +2877,7 @@ float GuiColorBarHue(Rectangle bounds, const(char)* text, float hue) {
         if (CheckCollisionPointRec(mousePoint, bounds) ||
             CheckCollisionPointRec(mousePoint, selector))
         {
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonDown(MouseButton.LEFT))
             {
                 state = STATE_PRESSED;
 
@@ -2888,12 +2888,12 @@ float GuiColorBarHue(Rectangle bounds, const(char)* text, float hue) {
             }
             else state = STATE_FOCUSED;
 
-            /*if (IsKeyDown(KeyboardKey.KEY_UP))
+            /*if (IsKeyDown(KeyboardKey.UP))
             {
                 hue -= 2.0f;
                 if (hue <= 0.0f) hue = 0.0f;
             }
-            else if (IsKeyDown(KeyboardKey.KEY_DOWN))
+            else if (IsKeyDown(KeyboardKey.DOWN))
             {
                 hue += 2.0f;
                 if (hue >= 360.0f) hue = 360.0f;
@@ -4119,14 +4119,14 @@ static int GuiScrollBar(Rectangle bounds, int value, int minValue, int maxValue)
             int wheel = cast(int)GetMouseWheelMove();
             if (wheel != 0) value += wheel;
 
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonPressed(MouseButton.LEFT))
             {
                 if (CheckCollisionPointRec(mousePoint, arrowUpLeft)) value -= range/GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
                 else if (CheckCollisionPointRec(mousePoint, arrowDownRight)) value += range/GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
 
                 state = STATE_PRESSED;
             }
-            else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            else if (IsMouseButtonDown(MouseButton.LEFT))
             {
                 if (!isVertical)
                 {
