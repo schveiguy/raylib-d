@@ -86,20 +86,13 @@ struct Rectangle
         return Vector2(x:(x + width), y:(y + height));
     }
 
-    void opOpAssign(string op)(Vector2 offset) {
-        static assert(op=="+" || op=="-");
+    void opOpAssign(string op)(Vector2 offset) if (op == "+" || op == "-") {
         
-        static if (op=="+") {
-            this.x += offset.x;
-            this.y += offset.y;
-        } else static if (op=="-") {
-            this.x -= offset.x;
-            this.y -= offset.y;
-        }
+     mixin("this.x ", op, "= offset.x;");
+     mixin("this.y ", op, "= offset.y;");
     }
 
-    Rectangle opBinary(string op)(Vector2 offset) const {
-        static assert(op=="+" || op=="-");
+    Rectangle opBinary(string op)(Vector2 offset) const if(op=="+" || op=="-") {
 
         Rectangle result = this;
         static if (op=="+") {
