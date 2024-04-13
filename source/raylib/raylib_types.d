@@ -99,13 +99,7 @@ struct Rectangle
 
     Rectangle opBinary(string op)(Vector2 offset) const if(op=="+" || op=="-") {
         Rectangle result = this;
-        static if (op=="+") {
-            result.x += offset.x;
-            result.y += offset.y;
-        } else static if (op=="-") {
-            result.x -= offset.x;
-            result.y -= offset.y;
-        }
+        result.opOpAssign!op(offset);
         return result;
     }
 }
