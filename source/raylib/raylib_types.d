@@ -2,6 +2,7 @@
 module raylib.raylib_types;
 
 import raylib;
+debug import std.stdio;
 
 // Vector2 type
 struct Vector2
@@ -52,6 +53,30 @@ struct Matrix
     float m7 = 0.0f;
     float m11 = 0.0f;
     float m15 = 0.0f;
+}
+
+// Camera2D, defines position/orientation in 2d space
+struct Camera2D
+{
+    version (enhancedD) {
+        Vector2 offset; // Camera offset (displacement from target)
+        Vector2 target; // Camera target (rotation and zoom origin)
+        float rotation; // Camera rotation in degrees
+        float zoom; // Camera zoom (scaling), should be 1.0f by default
+
+        this() {initialize(); return this;}
+    } else {
+        Vector2 offset; // Camera offset (displacement from target)
+        Vector2 target; // Camera target (rotation and zoom origin)
+        float rotation; // Camera rotation in degrees
+        float zoom; // Camera zoom (scaling), should be 1.0f by default
+    }
+    
+    void initialize() {
+        this.zoom = 1.0f;
+        if (IsWindowReady) offset = Vector2(GetScreenWidth/2.0f, GetScreenHeight/2.0f);
+        else debug writeln("Didn't initialize camera offset, as Window isn't open.");
+    }
 }
 
 // Rectangle type
