@@ -3,7 +3,9 @@
 	"description": "D binding for Raylib",
 	"license": "Zlib",
 	"authors": [
-		"ONROUNDIT"
+		"ONROUNDIT",
+        "Steven Schveighoffer",
+        "Liam McGillivray"
 	],
         "configurations" : [
             {
