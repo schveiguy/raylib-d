@@ -218,7 +218,8 @@ alias RAYGUI_FREE=free;
 
 // Simple log system to avoid printf() calls if required
 // NOTE: Avoiding those calls, also avoids const strings memory usage
-alias RAYGUI_LOG=printf;
+// D Note: Don't use this. Use `writeln`
+deprecated alias RAYGUI_LOG=printf;
 
 // Style property
 struct GuiStyleProp {
@@ -419,7 +420,7 @@ enum SCROLLBAR_RIGHT_SIDE =    1;
 //----------------------------------------------------------------------------------
 // ...
 
-// NOTE: because D doesn't work like C, we can't define custom icons this way.
+// D NOTE: because D doesn't work like C, we can't define custom icons this way.
 // If we want custom icons we can do it a different way (if needed). But for
 // now, just error.
 version(RAYGUI_CUSTOM_ICONS) {
@@ -710,7 +711,7 @@ enum RAYGUI_ICON_MAX_NAME_LENGTH =    32;          // Maximum length of icon nam
 // Those arrays are stored as unsigned int data arrays, so,
 // every array element defines 32 pixels (bits) of information
 // One icon is defined by 8 int, (8 int * 32 bit = 256 bit = 16*16 pixels)
-// NOTE: Number of elemens depend on RAYGUI_ICON_SIZE (by default 16x16 pixels)
+// NOTE: Number of elements depend on RAYGUI_ICON_SIZE (by default 16x16 pixels)
 enum RAYGUI_ICON_DATA_ELEMENTS =   (RAYGUI_ICON_SIZE*RAYGUI_ICON_SIZE/32);
 
 //----------------------------------------------------------------------------------
@@ -2216,7 +2217,7 @@ bool GuiValueBox(Rectangle bounds, const(char)* text, int* value, int minValue, 
 }
 
 // Text Box control with multiple lines
-// Deprecated (removed in upstream raygui) because cursor placement is not working correctly
+// D Note: Deprecated (removed in upstream raygui) because cursor placement is not working correctly
 // This was never included in a release of raygui, but is kept here because it was available for a long time.
 deprecated bool GuiTextBoxMulti(Rectangle bounds, char* text, int textSize, bool editMode) {
     GuiState state = guiState;
