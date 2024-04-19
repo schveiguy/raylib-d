@@ -106,27 +106,6 @@ import core.stdc.config: c_long, c_ulong;
 *
 *   TOOL: rGuiIcons is a visual tool to customize raygui icons and create new ones.
 *
-*
-*   CONFIGURATION:
-*
-*   #define RAYGUI_IMPLEMENTATION
-*       Generates the implementation of the library into the included file.
-*       If not defined, the library is in header only mode and can be included in other headers
-*       or source files without problems. But only ONE file should hold the implementation.
-*
-*   #define RAYGUI_STANDALONE
-*       Avoid raylib.h header inclusion in this file. Data types defined on raylib are defined
-*       internally in the library and input management and drawing functions must be provided by
-*       the user (check library implementation for further details).
-*
-*   #define RAYGUI_NO_ICONS
-*       Avoid including embedded ricons data (256 icons, 16x16 pixels, 1-bit per pixel, 2KB)
-*
-*   #define RAYGUI_CUSTOM_ICONS
-*       Includes custom ricons.h header defining a set of custom icons,
-*       this file can be generated using rGuiIcons tool
-*
-*
 *   VERSIONS HISTORY:
 *       3.5 (xx-xxx-2022) ADDED: Multiple new icons, useful for code editing tools
 *                         ADDED: GuiTabBar(), based on GuiToggle()
@@ -218,7 +197,7 @@ import core.stdc.config: c_long, c_ulong;
 **********************************************************************************************/
 
 enum RAYGUI_VERSION_MAJOR = 3;
-//enum RAYGUI_VERSION_MINOR = 5;
+enum RAYGUI_VERSION_MINOR = 5;
 enum RAYGUI_VERSION =  "3.5";
 
 import raylib;

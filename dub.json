@@ -27,6 +27,7 @@
         {
             "name": "raygui",
             "targetType": "library",
+            "dependencies": {"raylib-d": {"path": "."}},
             "sourceFiles": ["source/raygui.d"]
         }
     ]
