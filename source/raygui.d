@@ -1,14 +1,11 @@
 module raygui;
 
-enum enumMixin(Enum) = {
-    assert(__ctfe);
-    string result;
-    foreach(m; __traits(allMembers, Enum))
+template enumAlias(alias Enum) {
+    static foreach(m; __traits(allMembers, Enum)) static if (!__traits(isDeprecated, __traits(getMember, Enum, m)))
     {
-        result ~= "alias " ~ m ~ " = " ~ Enum.stringof ~ "." ~ m ~ ";";
+        mixin("alias "~m~" = __traits(getMember, Enum, m);");
     }
-    return result;
-}();
+};
 @nogc nothrow extern(C) __gshared:
 
 private template HasVersion(string versionId) {
@@ -236,7 +233,7 @@ enum _GuiState {
     STATE_DISABLED,
 }alias _GuiState GuiState;
 
-mixin(enumMixin!GuiState);
+mixin enumAlias!GuiState;
 
 // Gui control text alignment
 enum _GuiTextAlignment {
@@ -245,7 +242,7 @@ enum _GuiTextAlignment {
     TEXT_ALIGN_RIGHT,
 }alias _GuiTextAlignment GuiTextAlignment;
 
-mixin(enumMixin!GuiTextAlignment);
+mixin enumAlias!GuiTextAlignment;
 
 // Gui controls
 enum _GuiControl {
@@ -269,7 +266,7 @@ enum _GuiControl {
     STATUSBAR
 }alias _GuiControl GuiControl;
 
-mixin(enumMixin!GuiControl);
+mixin enumAlias!GuiControl;
 
 // Gui base properties for every control
 // NOTE: RAYGUI_MAX_PROPS_BASE properties (by default 16 properties)
@@ -292,7 +289,7 @@ enum _GuiControlProperty {
     RESERVED
 }alias _GuiControlProperty GuiControlProperty;
 
-mixin(enumMixin!GuiControlProperty);
+mixin enumAlias!GuiControlProperty;
 
 // Gui extended properties depend on control
 // NOTE: RAYGUI_MAX_PROPS_EXTENDED properties (by default 8 properties)
@@ -307,7 +304,7 @@ enum _GuiDefaultProperty {
     BACKGROUND_COLOR,           // Background color
 }alias _GuiDefaultProperty GuiDefaultProperty;
 
-mixin(enumMixin!GuiDefaultProperty);
+mixin enumAlias!GuiDefaultProperty;
 
 // Label
 //typedef enum { } GuiLabelProperty;
@@ -320,7 +317,7 @@ enum _GuiToggleProperty {
     GROUP_PADDING = 16,         // ToggleGroup separation between toggles
 }alias _GuiToggleProperty GuiToggleProperty;
 
-mixin(enumMixin!GuiToggleProperty);
+mixin enumAlias!GuiToggleProperty;
 
 // Slider/SliderBar
 enum _GuiSliderProperty {
@@ -328,14 +325,14 @@ enum _GuiSliderProperty {
     SLIDER_PADDING              // Slider/SliderBar internal bar padding
 }alias _GuiSliderProperty GuiSliderProperty;
 
-mixin(enumMixin!GuiSliderProperty);
+mixin enumAlias!GuiSliderProperty;
 
 // ProgressBar
 enum _GuiProgressBarProperty {
     PROGRESS_PADDING = 16,      // ProgressBar internal padding
 }alias _GuiProgressBarProperty GuiProgressBarProperty;
 
-mixin(enumMixin!GuiProgressBarProperty);
+mixin enumAlias!GuiProgressBarProperty;
 
 // ScrollBar
 enum _GuiScrollBarProperty {
@@ -347,14 +344,14 @@ enum _GuiScrollBarProperty {
     SCROLL_SPEED,
 }alias _GuiScrollBarProperty GuiScrollBarProperty;
 
-mixin(enumMixin!GuiScrollBarProperty);
+mixin enumAlias!GuiScrollBarProperty;
 
 // CheckBox
 enum _GuiCheckBoxProperty {
     CHECK_PADDING = 16          // CheckBox internal check padding
 }alias _GuiCheckBoxProperty GuiCheckBoxProperty;
 
-mixin(enumMixin!GuiCheckBoxProperty);
+mixin enumAlias!GuiCheckBoxProperty;
 
 // ComboBox
 enum _GuiComboBoxProperty {
@@ -362,7 +359,7 @@ enum _GuiComboBoxProperty {
     COMBO_BUTTON_SPACING        // ComboBox button separation
 }alias _GuiComboBoxProperty GuiComboBoxProperty;
 
-mixin(enumMixin!GuiComboBoxProperty);
+mixin enumAlias!GuiComboBoxProperty;
 
 // DropdownBox
 enum _GuiDropdownBoxProperty {
@@ -370,7 +367,7 @@ enum _GuiDropdownBoxProperty {
     DROPDOWN_ITEMS_SPACING      // DropdownBox items separation
 }alias _GuiDropdownBoxProperty GuiDropdownBoxProperty;
 
-mixin(enumMixin!GuiDropdownBoxProperty);
+mixin enumAlias!GuiDropdownBoxProperty;
 
 // TextBox/TextBoxMulti/ValueBox/Spinner
 enum _GuiTextBoxProperty {
@@ -381,7 +378,7 @@ enum _GuiTextBoxProperty {
     TEXT_WRAP_MODE,              // TextBox wrap mode for multiline: 0-NO_WRAP, 1-CHAR_WRAP, 2-WORD_WRAP
 }alias _GuiTextBoxProperty GuiTextBoxProperty;
 
-mixin(enumMixin!GuiTextBoxProperty);
+mixin enumAlias!GuiTextBoxProperty;
 
 // Spinner
 enum _GuiSpinnerProperty {
@@ -389,7 +386,7 @@ enum _GuiSpinnerProperty {
     SPIN_BUTTON_SPACING,        // Spinner buttons separation
 }alias _GuiSpinnerProperty GuiSpinnerProperty;
 
-mixin(enumMixin!GuiSpinnerProperty);
+mixin enumAlias!GuiSpinnerProperty;
 
 // ListView
 enum _GuiListViewProperty {
@@ -399,7 +396,7 @@ enum _GuiListViewProperty {
     SCROLLBAR_SIDE,             // ListView scrollbar side (0-left, 1-right)
 }alias _GuiListViewProperty GuiListViewProperty;
 
-mixin(enumMixin!GuiListViewProperty);
+mixin enumAlias!GuiListViewProperty;
 
 // ColorPicker
 enum _GuiColorPickerProperty {
@@ -410,7 +407,7 @@ enum _GuiColorPickerProperty {
     HUEBAR_SELECTOR_OVERFLOW    // ColorPicker right hue bar selector overflow
 }alias _GuiColorPickerProperty GuiColorPickerProperty;
 
-mixin(enumMixin!GuiColorPickerProperty);
+mixin enumAlias!GuiColorPickerProperty;
 
 enum SCROLLBAR_LEFT_SIDE =     0;
 enum SCROLLBAR_RIGHT_SIDE =    1;
@@ -649,7 +646,9 @@ enum _GuiIconName {
     ICON_BURGER_MENU              = 214,
     ICON_CASE_SENSITIVE           = 215,
     ICON_REG_EXP                  = 216,
+deprecated("Use `ICON_FOLDER`") ICON_217 = 217,
     ICON_FOLDER                   = 217,
+deprecated("Use `ICON_FILE`") ICON_218 = 218,
     ICON_FILE                     = 218,
     ICON_219                      = 219,
     ICON_220                      = 220,
@@ -691,7 +690,7 @@ enum _GuiIconName {
 }alias _GuiIconName GuiIconName;
 }
 
-mixin(enumMixin!GuiIconName);
+mixin enumAlias!GuiIconName;
 
 
 /***********************************************************************************
@@ -943,8 +942,8 @@ private uint[RAYGUI_ICON_MAX_ICONS*RAYGUI_ICON_DATA_ELEMENTS] guiIcons = [
     0x00000000, 0x00000000, 0x1ff81ff8, 0x1ff80000, 0x00001ff8, 0x1ff81ff8, 0x00000000, 0x00000000,      // ICON_BURGER_MENU
     0x00000000, 0x00000000, 0x00880070, 0x0c880088, 0x1e8810f8, 0x3e881288, 0x00000000, 0x00000000,      // ICON_CASE_SENSITIVE
     0x00000000, 0x02000000, 0x07000a80, 0x07001fc0, 0x02000a80, 0x00300030, 0x00000000, 0x00000000,      // ICON_REG_EXP
-    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,      // ICON_FOLDER
-    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,      // ICON_FILE
+    0x00000000, 0x0042007e, 0x40027fc2, 0x40024002, 0x40024002, 0x40024002, 0x7ffe4002, 0x00000000,      // ICON_FOLDER
+    0x3ff00000, 0x201c2010, 0x20042004, 0x20042004, 0x20042004, 0x20042004, 0x20042004, 0x00003ffc,      // ICON_FILE
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,      // ICON_219
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,      // ICON_220
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,      // ICON_221
@@ -999,7 +998,7 @@ enum RAYGUI_MAX_PROPS_EXTENDED =        8;      // Maximum number of extended pr
 // Gui control property style color element
 enum _GuiPropertyElement { BORDER = 0, BASE, TEXT, OTHER }alias _GuiPropertyElement GuiPropertyElement;
 
-mixin(enumMixin!GuiPropertyElement);
+mixin enumAlias!GuiPropertyElement;
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -3354,7 +3353,7 @@ static if (!HasVersion!"RAYGUI_STANDALONE") {
                     imFont.data = DecompressData(compData, fontImageCompSize, &dataUncompSize);
 
                     // Security check, dataUncompSize must match the provided fontImageUncompSize
-                    if (dataUncompSize != fontImageUncompSize) RAYGUI_LOG("WARNING: Uncompressed font atlas image data could be corrupted");
+                    if (dataUncompSize != fontImageUncompSize) printf("WARNING: Uncompressed font atlas image data could be corrupted");
 
                     RAYGUI_FREE(compData);
                 }
