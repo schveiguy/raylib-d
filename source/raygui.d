@@ -3319,9 +3319,9 @@ void GuiLoadStyle(const(char)* fileName) {
 
             for (int i = 0; i < propertyCount; i++)
             {
-                fread(&controlId, 1, short.sizeof, rgsFile);
-                fread(&propertyId, 1, short.sizeof, rgsFile);
-                fread(&propertyValue, 1, uint.sizeof, rgsFile);
+                fread(&controlId, short.sizeof, 1, rgsFile);
+                fread(&propertyId, short.sizeof, 1, rgsFile);
+                fread(&propertyValue, uint.sizeof, 1, rgsFile);
 
                 if (controlId == 0) // DEFAULT control
                 {
@@ -3346,31 +3346,31 @@ static if (!HasVersion!"RAYGUI_STANDALONE") {
                 int fontType = 0;   // 0-Normal, 1-SDF
                 Rectangle whiteRec; // = { 0 };
 
-                fread(&font.baseSize, 1, int.sizeof, rgsFile);
-                fread(&font.glyphCount, 1, int.sizeof, rgsFile);
-                fread(&fontType, 1, int.sizeof, rgsFile);
+                fread(&font.baseSize, int.sizeof, 1, rgsFile);
+                fread(&font.glyphCount, int.sizeof, 1, rgsFile);
+                fread(&fontType, int.sizeof, 1, rgsFile);
 
                 // Load font white rectangle
-                fread(&whiteRec, 1, Rectangle.sizeof, rgsFile);
+                fread(&whiteRec, Rectangle.sizeof, 1, rgsFile);
 
                 // Load font image parameters
                 int fontImageUncompSize = 0;
                 int fontImageCompSize = 0;
-                fread(&fontImageUncompSize, 1, int.sizeof, rgsFile);
-                fread(&fontImageCompSize, 1, int.sizeof, rgsFile);
+                fread(&fontImageUncompSize, int.sizeof, 1, rgsFile);
+                fread(&fontImageCompSize, int.sizeof, 1, rgsFile);
 
                 Image imFont; // = { 0 };
                 imFont.mipmaps = 1;
-                fread(&imFont.width, 1, int.sizeof, rgsFile);
-                fread(&imFont.height, 1, int.sizeof, rgsFile);
-                fread(&imFont.format, 1, int.sizeof, rgsFile);
+                fread(&imFont.width, int.sizeof, 1, rgsFile);
+                fread(&imFont.height, int.sizeof, 1, rgsFile);
+                fread(&imFont.format, int.sizeof, 1, rgsFile);
 
                 if (fontImageCompSize < fontImageUncompSize)
                 {
                     // Compressed font atlas image data (DEFLATE), it requires DecompressData()
                     int dataUncompSize = 0;
                     ubyte* compData = cast(ubyte*)RAYGUI_MALLOC(fontImageCompSize);
-                    fread(compData, 1, fontImageCompSize, rgsFile);
+                    fread(compData, fontImageCompSize, 1, rgsFile);
                     imFont.data = DecompressData(compData, fontImageCompSize, &dataUncompSize);
 
                     // Security check, dataUncompSize must match the provided fontImageUncompSize
@@ -3382,7 +3382,7 @@ static if (!HasVersion!"RAYGUI_STANDALONE") {
                 {
                     // Font atlas image data is not compressed
                     imFont.data = cast(ubyte*)RAYGUI_MALLOC(fontImageUncompSize);
-                    fread(imFont.data, 1, fontImageUncompSize, rgsFile);
+                    fread(imFont.data, fontImageUncompSize, 1, rgsFile);
                 }
 
                 if (font.texture.id != GetFontDefault().texture.id) UnloadTexture(font.texture);
@@ -3393,16 +3393,16 @@ static if (!HasVersion!"RAYGUI_STANDALONE") {
 
                 // Load font recs data
                 font.recs = cast(Rectangle*)RAYGUI_CALLOC(font.glyphCount, Rectangle.sizeof);
-                for (int i = 0; i < font.glyphCount; i++) fread(&font.recs[i], 1, Rectangle.sizeof, rgsFile);
+                for (int i = 0; i < font.glyphCount; i++) fread(&font.recs[i], Rectangle.sizeof, 1, rgsFile);
 
                 // Load font chars info data
                 font.glyphs = cast(GlyphInfo*)RAYGUI_CALLOC(font.glyphCount, GlyphInfo.sizeof);
                 for (int i = 0; i < font.glyphCount; i++)
                 {
-                    fread(&font.glyphs[i].value, 1, int.sizeof, rgsFile);
-                    fread(&font.glyphs[i].offsetX, 1, int.sizeof, rgsFile);
-                    fread(&font.glyphs[i].offsetY, 1, int.sizeof, rgsFile);
-                    fread(&font.glyphs[i].advanceX, 1, int.sizeof, rgsFile);
+                    fread(&font.glyphs[i].value, int.sizeof, 1, rgsFile);
+                    fread(&font.glyphs[i].offsetX, int.sizeof, 1, rgsFile);
+                    fread(&font.glyphs[i].offsetY, int.sizeof, 1, rgsFile);
+                    fread(&font.glyphs[i].advanceX, int.sizeof, 1, rgsFile);
                 }
 
                 GuiSetFont(font);
@@ -3450,9 +3450,9 @@ void GuiLoadStyleDefault() {
     GuiSetStyle(CHECKBOX, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
     GuiSetStyle(TEXTBOX, TEXT_PADDING, 4);
     GuiSetStyle(TEXTBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
-    GuiSetStyle(VALUEBOX, TEXT_PADDING, 4);
+    GuiSetStyle(VALUEBOX, TEXT_PADDING, 0);
     GuiSetStyle(VALUEBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
-    GuiSetStyle(SPINNER, TEXT_PADDING, 4);
+    GuiSetStyle(SPINNER, TEXT_PADDING, 0);
     GuiSetStyle(SPINNER, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
     GuiSetStyle(STATUSBAR, TEXT_PADDING, 8);
     GuiSetStyle(STATUSBAR, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
@@ -3607,7 +3607,7 @@ char** GuiLoadIcons(const(char)* fileName, bool loadIconsName) {
             else fseek(rgiFile, iconCount*RAYGUI_ICON_MAX_NAME_LENGTH, SEEK_CUR);
 
             // Read icons data directly over internal icons array
-            fread(guiIconsPtr, iconCount*(iconSize*iconSize/32), uint.sizeof, rgiFile);
+            fread(guiIconsPtr, uint.sizeof, iconCount*(iconSize*iconSize/32), rgiFile);
         }
 
         fclose(rgiFile);
@@ -3636,6 +3636,11 @@ void GuiDrawIcon(int iconId, int posX, int posY, int pixelSize, Color color) {
     }
 }
 }      // !RAYGUI_NO_ICONS
+
+void GuiSetIconScale(int scale)
+{
+    if (scale >= 1) guiIconScale = scale;
+}
 
 //----------------------------------------------------------------------------------
 // Module specific Functions Definition
@@ -3706,14 +3711,13 @@ private Rectangle GetTextBounds(int control, Rectangle bounds) {
     Rectangle textBounds = bounds;
 
     textBounds.x = bounds.x + GuiGetStyle(control, BORDER_WIDTH);
-    textBounds.y = bounds.y + GuiGetStyle(control, BORDER_WIDTH);
+    textBounds.y = bounds.y + GuiGetStyle(control, BORDER_WIDTH) + GuiGetStyle(control, TEXT_PADDING);
     textBounds.width = bounds.width - 2*GuiGetStyle(control, BORDER_WIDTH) - 2*GuiGetStyle(control, TEXT_PADDING);
-    textBounds.height = bounds.height - 2*GuiGetStyle(control, BORDER_WIDTH);
+    textBounds.height = bounds.height - 2*GuiGetStyle(control, BORDER_WIDTH) - GuiGetStyle(control, TEXT_PADDING);
 
     // Consider TEXT_PADDING properly, depends on control type and TEXT_ALIGNMENT
     switch (control)
     {
-        case COMBOBOX: bounds.width -= (GuiGetStyle(control, COMBO_BUTTON_WIDTH) + GuiGetStyle(control, COMBO_BUTTON_SPACING)); break;
         case VALUEBOX: break;   // NOTE: ValueBox text value always centered, text padding applies to label
         default:
         {
@@ -3761,12 +3765,13 @@ static if (!HasVersion!"RAYGUI_NO_ICONS") {
 }
 
 // Get text divided into lines (by line-breaks '\n')
-char** GetTextLines(char* text, int* count) {
-enum RAYGUI_MAX_TEXT_LINES =   128;
-
-    static char*[RAYGUI_MAX_TEXT_LINES] lines = null;
+const(char)** GetTextLines(const(char)* text, int* count) {
+    enum RAYGUI_MAX_TEXT_LINES =   128;
+    
+    static const(char)*[RAYGUI_MAX_TEXT_LINES] lines = null;
     memset(lines.ptr, 0, (char*).sizeof);
 
+    for (int i = 0; i < RAYGUI_MAX_TEXT_LINES; i++) lines[i] = null;    // Init null pointers to substrings
     int textLen = cast(int)strlen(text);
 
     lines[0] = text;
@@ -3800,14 +3805,16 @@ private void GuiDrawText(const(char)* text, Rectangle bounds, int alignment, Col
         enum ICON_TEXT_PADDING =   4;
     }
 
+    int alignmentVertical = GuiGetStyle(TEXTBOX, TEXT_ALIGNMENT_VERTICAL);
+
     // We process the text lines one by one
     if ((text != null) && (text[0] != '\0'))
     {
         // Get text lines ('\n' delimiter) to process lines individually
-        // NOTE: We can't use GuiTextSplit() because it can be already use before calling
+        // NOTE: We can't use GuiTextSplit() because it can already be used before calling
         // GuiDrawText() and static buffer would be overriden :(
         int lineCount = 0;
-        char** lines = GetTextLines(cast(char*)text, &lineCount);
+        const(char)** lines = GetTextLines(cast(const(char)*)text, &lineCount);
 
         Rectangle textBounds = GetTextBounds(LABEL, bounds);
         float totalHeight = lineCount*GuiGetStyle(DEFAULT, TEXT_SIZE) + (lineCount - 1)*GuiGetStyle(DEFAULT, TEXT_SIZE)/2;
@@ -3839,20 +3846,28 @@ private void GuiDrawText(const(char)* text, Rectangle bounds, int alignment, Col
             switch (alignment)
             {
                 case TEXT_ALIGN_LEFT:
-                {
                     position.x = bounds.x;
-                    position.y = bounds.y + posOffsetY + bounds.height/2 - totalHeight/2 + TEXT_VALIGN_PIXEL_OFFSET(bounds.height);
-                } break;
+                    break;
                 case TEXT_ALIGN_CENTER:
-                {
                     position.x = bounds.x +  bounds.width/2 - textSizeX/2;
-                    position.y = bounds.y + posOffsetY + bounds.height/2 - totalHeight/2 + TEXT_VALIGN_PIXEL_OFFSET(bounds.height);
-                } break;
+                    break;
                 case TEXT_ALIGN_RIGHT:
-                {
                     position.x = bounds.x + bounds.width - textSizeX;
+                    break;
+                default: break;
+            }
+
+            switch (alignmentVertical)
+            {
+                case 0:
                     position.y = bounds.y + posOffsetY + bounds.height/2 - totalHeight/2 + TEXT_VALIGN_PIXEL_OFFSET(bounds.height);
-                } break;
+                    break;      // Centred
+                case TEXT_ALIGN_CENTER:
+                    position.y = bounds.y + posOffsetY + bounds.height/2 - totalHeight/2 + TEXT_VALIGN_PIXEL_OFFSET(bounds.height);
+                    break;      // Up
+                case TEXT_ALIGN_RIGHT:
+                    position.y = bounds.y + posOffsetY + bounds.height/2 - totalHeight/2 + TEXT_VALIGN_PIXEL_OFFSET(bounds.height);
+                    break;      // Down
                 default: break;
             }
 
@@ -3896,8 +3911,7 @@ static if (!HasVersion!"RAYGUI_NO_ICONS") {
                 {
                     if ((codepoint != ' ') && (codepoint != '\t'))
                     {
-                        // TODO: Draw only required text glyphs fitting the bounds.width, '...' can be appended at the end of the text
-                        if (textOffsetX < bounds.width)
+                        if (textOffsetX < bounds.width - guiFont.recs[index].width)
                         {
                             DrawTextCodepoint(guiFont, codepoint, Vector2( position.x + textOffsetX, position.y + textOffsetY ), cast(float)GuiGetStyle(DEFAULT, TEXT_SIZE), tint);
                         }
@@ -4157,7 +4171,7 @@ static int GuiScrollBar(Rectangle bounds, int value, int minValue, int maxValue)
     if (value > maxValue) value = maxValue;
     if (value < minValue) value = minValue;
 
-    const(int) range = maxValue - minValue;
+    const(int) valueRange = maxValue - minValue;
     int sliderSize = GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_SIZE);
 
     // Calculate rectangles for all of the components
@@ -4168,17 +4182,21 @@ static int GuiScrollBar(Rectangle bounds, int value, int minValue, int maxValue)
 
     if (isVertical)
     {
-        arrowDownRight = Rectangle( cast(float)bounds.x + GuiGetStyle(SCROLLBAR, BORDER_WIDTH), cast(float)bounds.y + bounds.height - spinnerSize - GuiGetStyle(SCROLLBAR, BORDER_WIDTH), cast(float)spinnerSize, cast(float)spinnerSize );
+        arrowDownRight = Rectangle(cast(float)bounds.x + GuiGetStyle(SCROLLBAR, BORDER_WIDTH), cast(float)bounds.y + bounds.height - spinnerSize - GuiGetStyle(SCROLLBAR, BORDER_WIDTH), cast(float)spinnerSize, cast(float)spinnerSize );
         scrollbar = Rectangle( bounds.x + GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_PADDING), arrowUpLeft.y + arrowUpLeft.height, bounds.width - 2*(GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_PADDING)), bounds.height - arrowUpLeft.height - arrowDownRight.height - 2*GuiGetStyle(SCROLLBAR, BORDER_WIDTH) );
-        sliderSize = (sliderSize >= scrollbar.height)? (cast(int)scrollbar.height - 2) : sliderSize;     // Make sure the slider won't get outside of the scrollbar
-        slider = Rectangle( cast(float)bounds.x + GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING), cast(float)scrollbar.y + cast(int)((cast(float)(value - minValue)/range)*(scrollbar.height - sliderSize)), cast(float)bounds.width - 2*(GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING)), cast(float)sliderSize );
+        
+        // Make sure the slider won't get outside of the scrollbar
+        sliderSize = (sliderSize >= scrollbar.height)? (cast(int)scrollbar.height - 2) : sliderSize;
+        slider = Rectangle( cast(float)bounds.x + GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING), scrollbar.y + cast(int)((cast(float)(value - minValue)/valueRange)*(scrollbar.height - sliderSize)), cast(float)bounds.width - 2*(GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING)), cast(float)sliderSize );
     }
-    else 
+    else    // horizontal
     {
         arrowDownRight = Rectangle( cast(float)bounds.x + bounds.width - spinnerSize - GuiGetStyle(SCROLLBAR, BORDER_WIDTH), cast(float)bounds.y + GuiGetStyle(SCROLLBAR, BORDER_WIDTH), cast(float)spinnerSize, cast(float)spinnerSize );
         scrollbar = Rectangle( arrowUpLeft.x + arrowUpLeft.width, bounds.y + GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_PADDING), bounds.width - arrowUpLeft.width - arrowDownRight.width - 2*GuiGetStyle(SCROLLBAR, BORDER_WIDTH), bounds.height - 2*(GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_PADDING)) );
+        
+        // Make sure the slider won't get outside of the scrollbar
         sliderSize = (sliderSize >= scrollbar.width)? (cast(int)scrollbar.width - 2) : sliderSize;       // Make sure the slider won't get outside of the scrollbar
-        slider = Rectangle( cast(float)scrollbar.x + cast(int)((cast(float)(value - minValue)/range)*(scrollbar.width - sliderSize)), cast(float)bounds.y + GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING), cast(float)sliderSize, cast(float)bounds.height - 2*(GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING)) );
+        slider = Rectangle( cast(float)scrollbar.x + cast(int)((cast(float)(value - minValue)/valueRange)*(scrollbar.width - sliderSize)), cast(float)bounds.y + GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING), cast(float)sliderSize, cast(float)bounds.height - 2*(GuiGetStyle(SCROLLBAR, BORDER_WIDTH) + GuiGetStyle(SCROLLBAR, SCROLL_SLIDER_PADDING)) );
     }
 
     // Update control
@@ -4197,23 +4215,21 @@ static int GuiScrollBar(Rectangle bounds, int value, int minValue, int maxValue)
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
-                if (CheckCollisionPointRec(mousePoint, arrowUpLeft)) value -= range/GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
-                else if (CheckCollisionPointRec(mousePoint, arrowDownRight)) value += range/GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                if (CheckCollisionPointRec(mousePoint, arrowUpLeft)) value -= valueRange/GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                else if (CheckCollisionPointRec(mousePoint, arrowDownRight)) value += valueRange/GuiGetStyle(SCROLLBAR, SCROLL_SPEED);
+                else if (!CheckCollisionPointRec(mousePoint, slider))
+                {
+                                        // If click on scrollbar position but not on slider, place slider directly on that position
+                    if (isVertical) value = cast(int)(((mousePoint.y - scrollbar.y - slider.height/2.0f)*valueRange)/(scrollbar.height - slider.height) + minValue);
+                    else value = cast(int)(((mousePoint.x - scrollbar.x - slider.width/2.0f)*valueRange)/(scrollbar.width - slider.width) + minValue);
+                }
 
                 state = STATE_PRESSED;
             }
             else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
             {
-                if (!isVertical)
-                {
-                    Rectangle scrollArea = { arrowUpLeft.x + arrowUpLeft.width, arrowUpLeft.y, scrollbar.width, bounds.height - 2*GuiGetStyle(SCROLLBAR, BORDER_WIDTH) };
-                    if (CheckCollisionPointRec(mousePoint, scrollArea)) value = cast(int)((cast(float)(mousePoint.x - scrollArea.x - slider.width/2)*range)/(scrollArea.width - slider.width) + minValue);
-                }
-                else
-                {
-                    Rectangle scrollArea = { arrowUpLeft.x, arrowUpLeft.y+arrowUpLeft.height, bounds.width - 2*GuiGetStyle(SCROLLBAR, BORDER_WIDTH),  scrollbar.height };
-                    if (CheckCollisionPointRec(mousePoint, scrollArea)) value = cast(int)((cast(float)(mousePoint.y - scrollArea.y - slider.height/2)*range)/(scrollArea.height - slider.height) + minValue);
-                }
+                if (isVertical) value += cast(int)(GetMouseDelta.y/scrollbar.height - slider.height)*valueRange;
+                else value += cast(int)(GetMouseDelta.x/(scrollbar.width - slider.width)*valueRange);
             }
         }
 
