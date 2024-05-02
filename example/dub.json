@@ -6,9 +6,6 @@
 	"dependencies": {
 		"raylib-d": {"path": "../"}
 	},
-	"libs": [
-		"raylib"
-	],
 	"description": "'Hello World' example",
 	"license": "Zlib",
 	"name": "example",
