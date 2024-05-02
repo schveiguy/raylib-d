@@ -4,6 +4,11 @@ module raylib.raylib_types;
 import raylib;
 debug import std.stdio;
 
+version (enhancedD) const ED = true;
+else const ED = false;
+
+@safe:
+
 // Vector2 type
 struct Vector2
 {
@@ -58,25 +63,12 @@ struct Matrix
 // Camera2D, defines position/orientation in 2d space
 struct Camera2D
 {
-    version (enhancedD) {
-        Vector2 offset; // Camera offset (displacement from target)
-        Vector2 target; // Camera target (rotation and zoom origin)
-        float rotation; // Camera rotation in degrees
-        float zoom; // Camera zoom (scaling), should be 1.0f by default
 
-        this() {initialize(); return this;}
-    } else {
-        Vector2 offset; // Camera offset (displacement from target)
-        Vector2 target; // Camera target (rotation and zoom origin)
-        float rotation; // Camera rotation in degrees
-        float zoom; // Camera zoom (scaling), should be 1.0f by default
-    }
-    
-    void initialize() {
-        this.zoom = 1.0f;
-        if (IsWindowReady) offset = Vector2(GetScreenWidth/2.0f, GetScreenHeight/2.0f);
-        else debug writeln("Didn't initialize camera offset, as Window isn't open.");
-    }
+    Vector2 offset; // Camera offset (displacement from target)
+    Vector2 target; // Camera target (rotation and zoom origin)
+    float rotation; // Camera rotation in degrees
+    // Warning: In Raylib, & previous versions of Raylib-D, `zoom` is initially `0.0f`.
+    float zoom = 1f; // Camera zoom (scaling), should be 1.0f by default
 }
 
 // Rectangle type
@@ -88,6 +80,11 @@ struct Rectangle
     float height;
     alias w = width;
     alias h = height;
+
+    float top() {return y;}
+    float bottom() {return y + height;}
+    float left() {return x;}
+    float right() {return x + width;}
 
     Vector2 origin() { // Rectangle function exclusive to raylib-d
         return Vector2(x, y);
@@ -127,6 +124,8 @@ struct Rectangle
         result.opOpAssign!op(offset);
         return result;
     }
+
+    Vector2 opCast(T)() if (is(T==Vector2)) => origin();
 }
 
 enum Colors
