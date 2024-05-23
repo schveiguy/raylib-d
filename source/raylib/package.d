@@ -179,7 +179,37 @@ struct Color
     ubyte r; // Color red value
     ubyte g; // Color green value
     ubyte b; // Color blue value
-    ubyte a; // Color alpha value
+    ubyte a = 255; // Color alpha value
+
+    @safe @nogc nothrow:
+
+    this(ubyte r, ubyte g, ubyte b, ubyte a) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+    }
+
+    this(ubyte r, ubyte g, ubyte b) {
+        this(r, g, b, 255);
+    }
+
+    this(ubyte[4] rgba) {
+        this(rgba[0], rgba[1], rgba[2], rgba[3]);
+    }
+
+    this(ubyte[3] rgb) {
+        this(rgb[0], rgb[1], rgb[2], 255);
+    }
+
+    this(uint rgba) {
+        this(
+            (rgba & 0xFF000000) >> 24,
+            (rgba & 0xFF0000) >> 16,
+            (rgba & 0xFF00) >> 8,
+            (rgba & 0xFF),
+        );
+    }
 }
 
 // Rectangle, 4 components
