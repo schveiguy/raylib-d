@@ -2717,8 +2717,8 @@ int GuiListViewEx(Rectangle bounds, const(char)** text, int count, int* focus, i
 // Color Panel control
 Color GuiColorPanel(Rectangle bounds, const(char)* text, Color color)
 {
-    const(Color) colWhite = { 255, 255, 255, 255 };
-    const(Color) colBlack = { 0, 0, 0, 255 };
+    const(Color) colWhite = Color( 255, 255, 255, 255 );
+    const(Color) colBlack = Color( 0, 0, 0, 255 );
 
     GuiState state = guiState;
     Vector2 pickerSelector; // = { 0 };
@@ -2732,9 +2732,9 @@ Color GuiColorPanel(Rectangle bounds, const(char)* text, Color color)
     float hue = -1.0f;
     Vector3 maxHue = { hue >= 0.0f ? hue : hsv.x, 1.0f, 1.0f };
     Vector3 rgbHue = ConvertHSVtoRGB(maxHue);
-    Color maxHueCol = { cast(ubyte)(255.0f*rgbHue.x),
+    Color maxHueCol = Color( cast(ubyte)(255.0f*rgbHue.x),
                       cast(ubyte)(255.0f*rgbHue.y),
-                      cast(ubyte)(255.0f*rgbHue.z), 255 };
+                      cast(ubyte)(255.0f*rgbHue.z), 255 );
 
     // Update control
     //--------------------------------------------------------------------

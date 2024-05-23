@@ -174,13 +174,11 @@ extern (D) auto CLITERAL(T)(auto ref T type)
 // Matrix fourth row (4 components)
 
 // Color, 4 components, R8G8B8A8 (32bit)
-struct Color
-{
-    ubyte r; // Color red value
-    ubyte g; // Color green value
-    ubyte b; // Color blue value
-    ubyte a; // Color alpha value
-}
+
+// Color red value
+// Color green value
+// Color blue value
+// Color alpha value
 
 // Rectangle, 4 components
 
