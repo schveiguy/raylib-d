@@ -2,6 +2,12 @@
 module raylib.raylib_types;
 
 import raylib;
+debug import std.stdio;
+
+version (enhancedD) const ED = true;
+else const ED = false;
+
+@safe:
 
 // Vector2 type
 struct Vector2
@@ -54,6 +60,17 @@ struct Matrix
     float m15 = 0.0f;
 }
 
+// Camera2D, defines position/orientation in 2d space
+struct Camera2D
+{
+
+    Vector2 offset; // Camera offset (displacement from target)
+    Vector2 target; // Camera target (rotation and zoom origin)
+    float rotation; // Camera rotation in degrees
+    // Warning: In Raylib, & previous versions of Raylib-D, `zoom` is initially `0.0f`.
+    float zoom = 1f; // Camera zoom (scaling), should be 1.0f by default
+}
+
 // Rectangle type
 struct Rectangle
 {
@@ -63,6 +80,11 @@ struct Rectangle
     float height;
     alias w = width;
     alias h = height;
+
+    float top() {return y;}
+    float bottom() {return y + height;}
+    float left() {return x;}
+    float right() {return x + width;}
 
     Vector2 origin() { // Rectangle function exclusive to raylib-d
         return Vector2(x, y);
@@ -102,6 +124,8 @@ struct Rectangle
         result.opOpAssign!op(offset);
         return result;
     }
+
+    Vector2 opCast(T)() if (is(T==Vector2)) => origin();
 }
 
 // Color type, R8G8B8A8 (32bit)

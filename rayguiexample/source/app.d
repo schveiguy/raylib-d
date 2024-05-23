@@ -15,7 +15,6 @@ extern(C): __gshared:
 *       - GuiComboBox()
 *       - GuiListView()
 *       - GuiToggleGroup()
-*       - GuiTextBoxMulti()
 *       - GuiColorPicker()
 *       - GuiSlider()
 *       - GuiSliderBar()
@@ -23,13 +22,9 @@ extern(C): __gshared:
 *       - GuiColorBarAlpha()
 *       - GuiScrollPanel()
 *
-*
 *   DEPENDENCIES:
-*       raylib 4.0 - Windowing/input management and drawing.
-*       raygui 3.2 - Immediate-mode GUI controls.
-*
-*   COMPILATION (Windows - MinGW):
-*       gcc -o $(NAME_PART).exe $(FILE_NAME) -I../../src -lraylib -lopengl32 -lgdi32 -std=c99
+*       Raylib-D
+*       raylib 4.5
 *
 *   LICENSE: zlib/libpng
 *
@@ -40,8 +35,6 @@ extern(C): __gshared:
 import raylib;
 
 version = RAYGUI_IMPLEMENTATION;
-//#define RAYGUI_CUSTOM_ICONS     // It requires providing gui_icons.h in the same directory
-//#include "gui_icons.h"          // External icons data provided, it can be generated with rGuiIcons tool
 import raygui;
 
 public import core.stdc.string;             // Required for: strcpy()
@@ -124,9 +117,9 @@ int main() {
         //----------------------------------------------------------------------------------
         exitWindow = WindowShouldClose();
 
-        if (IsKeyPressed(KeyboardKey.KEY_ESCAPE)) showMessageBox = !showMessageBox;
+        if (IsKeyPressed(KeyboardKey.ESCAPE)) showMessageBox = !showMessageBox;
 
-        if (IsKeyDown(KeyboardKey.KEY_LEFT_CONTROL) && IsKeyPressed(KeyboardKey.KEY_S)) showTextInputBox = true;
+        if (IsKeyDown(KeyboardKey.LEFT_CONTROL) && IsKeyPressed(KeyboardKey.KEY_S)) showTextInputBox = true;
 
         if (IsFileDropped())
         {
@@ -146,9 +139,8 @@ int main() {
 
             // raygui: controls drawing
             //----------------------------------------------------------------------------------
+            // Check all possible events that require GuiLock
             if (dropDown000EditMode || dropDown001EditMode) GuiLock();
-            else if (!dropDown000EditMode && !dropDown001EditMode) GuiUnlock();
-            //GuiDisable();
 
             // First GUI column
             //GuiSetStyle(CHECKBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
@@ -177,6 +169,7 @@ int main() {
             comboBoxActive = GuiComboBox(Rectangle( 25, 470, 125, 30 ), "ONE;TWO;THREE;FOUR", comboBoxActive);
 
             // NOTE: GuiDropdownBox must draw after any other control that can be covered on unfolding
+            GuiUnlock;
             GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
             if (GuiDropdownBox(Rectangle( 25, 65, 125, 30 ), "#01#ONE;#02#TWO;#03#THREE;#04#FOUR", &dropdownBox001Active, dropDown001EditMode)) dropDown001EditMode = !dropDown001EditMode;
 
@@ -190,7 +183,7 @@ int main() {
             toggleGroupActive = GuiToggleGroup(Rectangle( 165, 400, 140, 25 ), "#1#ONE\n#3#TWO\n#8#THREE\n#23#", toggleGroupActive);
 
             // Third GUI column
-            if (GuiTextBoxMulti(Rectangle( 320, 25, 225, 140 ), multiTextBoxText.ptr, 256, multiTextBoxEditMode)) multiTextBoxEditMode = !multiTextBoxEditMode;
+            GuiPanel(Rectangle( 320, 25, 225, 140 ), "Panel Info");
             colorPickerValue = GuiColorPicker(Rectangle( 320, 185, 196, 192 ), null, colorPickerValue);
 
             sliderValue = cast(int)GuiSlider(Rectangle( 355, 400, 165, 20 ), "TEST", TextFormat("%2.2f", cast(float)sliderValue), sliderValue, -50, 100);
@@ -198,11 +191,11 @@ int main() {
             progressValue = GuiProgressBar(Rectangle( 320, 460, 200, 20 ), null, null, progressValue, 0, 1);
 
             // NOTE: View rectangle could be used to perform some scissor test
-            Rectangle view = GuiScrollPanel(Rectangle( 560, 25, 100, 160 ), null, Rectangle( 560, 25, 200, 400 ), &viewScroll);
+            Rectangle view = GuiScrollPanel(Rectangle( 560, 25, 102, 354 ), null, Rectangle( 560, 25, 200, 400 ), &viewScroll);
 
             GuiPanel(Rectangle( 560, 25 + 180, 100, 160 ), "Panel Info");
 
-            GuiGrid(Rectangle( 560, 25 + 180 + 180, 100, 120 ), null, 20, 2);
+            GuiGrid(Rectangle( 560, 25 + 195 + 180, 100, 120 ), null, 20, 2);
 
             GuiStatusBar(Rectangle( 0, cast(float)GetScreenHeight() - 20, cast(float)GetScreenWidth(), 20 ), "This is a status bar");
 

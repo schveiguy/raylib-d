@@ -3,25 +3,33 @@
 	"description": "D binding for Raylib",
 	"license": "Zlib",
 	"authors": [
-		"ONROUNDIT"
+		"ONROUNDIT",
+        "Steven Schveighoffer",
+        "Liam McGillivray"
 	],
-        "configurations" : [
-            {
-                "name": "library"
-            },
-            {
-                "name": "unittest",
-                "versions" : ["raylib_test"],
-                "libs" : ["raylib"],
-                "lflags-posix": ["-L."],
-                "lflags-osx": ["-rpath", "@executable_path/"],
-                "lflags-linux" : ["-rpath=$$ORIGIN"]
-            }
-        ],
+    "configurations" : [
+        {
+            "name": "library"
+        },
+        {
+            "name": "unittest",
+            "versions" : ["raylib_test"],
+            "libs" : ["raylib"],
+            "lflags-posix": ["-L."],
+            "lflags-osx": ["-rpath", "@executable_path/"],
+            "lflags-linux" : ["-rpath=$$ORIGIN"]
+        }
+    ],
 	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry), Steven Schveighoffer (@schveiguy), Liam McGillivray (@LiamM32)",
         "excludedSourceFiles": ["source/rlgl.d", "source/raymath.d", "source/easings.d", "source/raymathext.d", "source/raylib_types.d"],
 	"targetType": "sourceLibrary",
-        "subPackages" : [
-            "install"
-        ]
+    "libs": ["raylib"],
+    "subPackages": [
+        {
+            "name": "raygui",
+            "targetType": "sourceLibrary",
+            "dependencies": {"raylib-d": {"path": "."}},
+            "sourceFiles": ["source/raygui.d"]
+        }
+    ]
 }
