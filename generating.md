@@ -14,7 +14,7 @@ Run the following command from the `raylib/src` directory. Note: path/to/raylib-
 
 ```
 dstep raylib.h raymath.h rlgl.h rcamera.h -o path/to/raylib-d/source/raylib --space-after-function-name=false \
-    --skip Vector2 --skip Vector3 --skip Vector4 --skip Quaternion --skip Matrix --skip Rectangle \
+    --skip Vector2 --skip Vector3 --skip Vector4 --skip Quaternion --skip Matrix --skip Rectangle --skip Color \
     --skip RL_MALLOC --skip RL_CALLOC --skip RL_REALLOC --skip RL_FREE
 ```
 
