@@ -11,7 +11,45 @@ struct Bivector2
 {
     float xy = 0.0f;
     alias xy this;
-    mixin Linear;
+
+    enum zero = Bivector2(0.0f);
+    enum one = Bivector2(1.0f);
+
+    @safe @nogc nothrow:
+
+    inout Bivector2 opUnary(string op)() if (op == "+" || op == "-") {
+        return Bivector2(
+            mixin(op, "xy"),
+        );
+    }
+
+    inout Bivector2 opBinary(string op)(inout Bivector2 rhs) if (op == "+" || op == "-") {
+        return Bivector2(
+            mixin("xy", op, "rhs.xy"),
+        );
+    }
+
+    ref Bivector2 opOpAssign(string op)(inout Bivector2 rhs) if (op == "+" || op == "-") {
+        mixin("xy", op, "=rhs.xy;");
+        return this;
+    }
+
+    inout Bivector2 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Bivector2(
+            mixin("xy", op, "rhs"),
+        );
+    }
+
+    inout Bivector2 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Bivector2(
+            mixin("lhs", op, "xy"),
+        );
+    }
+
+    ref Bivector2 opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        mixin("xy", op, "=rhs;");
+        return this;
+    }
 }
 
 // Bivector3 type
@@ -22,7 +60,57 @@ struct Bivector3
     float xy = 0.0f;
     float yz = 0.0f;
     float zx = 0.0f;
-    mixin Linear;
+
+    enum zero = Bivector3(0.0f, 0.0f, 0.0f);
+    enum one = Bivector3(1.0f, 1.0f, 1.0f);
+
+    @safe @nogc nothrow:
+
+    inout Bivector3 opUnary(string op)() if (op == "+" || op == "-") {
+        return Bivector3(
+            mixin(op, "xy"),
+            mixin(op, "yz"),
+            mixin(op, "zx"),
+        );
+    }
+
+    inout Bivector3 opBinary(string op)(inout Bivector3 rhs) if (op == "+" || op == "-") {
+        return Bivector3(
+            mixin("xy", op, "rhs.xy"),
+            mixin("yz", op, "rhs.yz"),
+            mixin("zx", op, "rhs.zx"),
+        );
+    }
+
+    ref Bivector3 opOpAssign(string op)(inout Bivector3 rhs) if (op == "+" || op == "-") {
+        mixin("xy", op, "=rhs.xy;");
+        mixin("yz", op, "=rhs.yz;");
+        mixin("zx", op, "=rhs.zx;");
+        return this;
+    }
+
+    inout Bivector3 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Bivector3(
+            mixin("xy", op, "rhs"),
+            mixin("yz", op, "rhs"),
+            mixin("zx", op, "rhs"),
+        );
+    }
+
+    inout Bivector3 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Bivector3(
+            mixin("lhs", op, "xy"),
+            mixin("lhs", op, "yz"),
+            mixin("lhs", op, "zx"),
+        );
+    }
+
+    ref Bivector3 opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        mixin("xy", op, "=rhs;");
+        mixin("yz", op, "=rhs;");
+        mixin("zx", op, "=rhs;");
+        return this;
+    }
 }
 
 // Rotor type
@@ -32,11 +120,15 @@ struct Rotor3
     float xy = 0.0f;
     float yz = 0.0f;
     float zx = 0.0f;
-    mixin Linear;
+
+    enum zero = Rotor3(0.0f, 0.0f, 0.0f, 0.0f);
+    enum one = Rotor3(1.0f, 1.0f, 1.0f, 1.0f);
 
     alias i = yz;
     alias j = zx;
     alias k = xy;
+
+    @safe @nogc nothrow:
 
     @property Bivector3 b()
     {
@@ -64,130 +156,71 @@ struct Rotor3
         yz = _yz;
         zx = _zx;
     }
-}
 
-alias Matrix4 = Matrix;
-
-mixin template Linear()
-{
-    private static alias T = typeof(this);
-    private import std.traits : FieldNameTuple;
-
-    static T zero()
-    {
-        enum fragment = {
-            string result;
-            static foreach(i; 0 .. T.tupleof.length)
-                result ~= "0,";
-            return result;
-        }();
-        return mixin("T(", fragment, ")");
+    inout Rotor3 opUnary(string op)() if (op == "+" || op == "-") {
+        return Rotor3(
+            mixin(op, "a"),
+            mixin(op, "xy"),
+            mixin(op, "yz"),
+            mixin(op, "zx"),
+        );
     }
 
-    static T one()
-    {
-        enum fragment = {
-            string result;
-            static foreach(i; 0 .. T.tupleof.length)
-                result ~= "1,";
-            return result;
-        }();
-        return mixin("T(", fragment, ")");
+    /// Returns a rotor equivalent to first apply p, then apply q
+    inout Rotor3 opBinary(string op)(inout Rotor3 q) if (op == "*") {
+        alias p = this;
+        Rotor3 r;
+        r.a = p.a * q.a - p.i * q.i - p.j * q.j - p.k * q.k;
+        r.i = p.i * q.a + p.a * q.i + p.j * q.k - p.k * q.j;
+        r.j = p.j * q.a + p.a * q.j + p.k * q.i - p.i * q.k;
+        r.k = p.k * q.a + p.a * q.k + p.i * q.j - p.j * q.i;
+        return r;
     }
 
-    inout T opUnary(string op)() if (op == "+" || op == "-")
-    {
-        enum fragment = {
-            string result;
-            static foreach(fn; FieldNameTuple!T)
-                result ~= op ~ fn ~ ",";
-            return result;
-        }();
-        return mixin("T(", fragment, ")");
+    inout Vector3 opBinary(string op)(inout Vector3 v) if (op == "*") {
+        Vector3 rv;
+        rv.x = a * v.x + xy * v.y - zx * v.z;
+        rv.y = a * v.y + yz * v.z - xy * v.x;
+        rv.z = a * v.z + zx * v.x - yz * v.y;
+        return rv;
     }
 
-    static if (is(T == Rotor3))
-    {
-        /// Returns a rotor equivalent to first apply p, then apply q
-        inout Rotor3 opBinary(string op)(inout Rotor3 q) if (op == "*")
-        {
-            alias p = this;
-            Rotor3 r;
-            r.a = p.a * q.a - p.i * q.i - p.j * q.j - p.k * q.k;
-            r.i = p.i * q.a + p.a * q.i + p.j * q.k - p.k * q.j;
-            r.j = p.j * q.a + p.a * q.j + p.k * q.i - p.i * q.k;
-            r.k = p.k * q.a + p.a * q.k + p.i * q.j - p.j * q.i;
-            return r;
-        }
-
-        inout Vector3 opBinary(string op)(inout Vector3 v) if (op == "*")
-        {
-            Vector3 rv;
-            rv.x = a * v.x + xy * v.y - zx * v.z;
-            rv.y = a * v.y + yz * v.z - xy * v.x;
-            rv.z = a * v.z + zx * v.x - yz * v.y;
-            return rv;
-        }
-
-        inout Vector3 opBinaryRight(string op)(inout Vector3 v) if (op == "*")
-        {
-            Vector3 vr;
-            vr.x = v.x * a - v.y * xy + v.z * zx;
-            vr.y = v.y * a - v.z * yz + v.x * xy;
-            vr.z = v.z * a - v.x * zx + v.y * yz;
-            return vr;
-        }
-    }
-    else
-    {
-        inout T opBinary(string op)(inout T rhs) if (op == "+" || op == "-")
-        {
-            enum fragment = {
-                string result;
-                foreach(fn; FieldNameTuple!T)
-                    result ~= fn ~ op ~ "rhs." ~ fn ~ ",";
-                return result;
-            }();
-            return mixin("T(", fragment, ")");
-        }
-
-        ref T opOpAssign(string op)(inout T rhs) if (op == "+" || op == "-")
-        {
-            foreach (field; FieldNameTuple!T)
-                mixin(field, op,  "= rhs.", field, ";");
-            return this;
-        }
+    inout Vector3 opBinaryRight(string op)(inout Vector3 v) if (op == "*") {
+        Vector3 vr;
+        vr.x = v.x * a - v.y * xy + v.z * zx;
+        vr.y = v.y * a - v.z * yz + v.x * xy;
+        vr.z = v.z * a - v.x * zx + v.y * yz;
+        return vr;
     }
 
-    inout T opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/")
-    {
-        enum fragment = {
-            string result;
-            foreach(fn; FieldNameTuple!T)
-                result ~= fn ~ op ~ "rhs,";
-            return result;
-        }();
-        return mixin("T(", fragment, ")");
+    inout Rotor3 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Rotor3(
+            mixin("a", op, "rhs"),
+            mixin("xy", op, "rhs"),
+            mixin("yz", op, "rhs"),
+            mixin("zx", op, "rhs"),
+        );
     }
 
-    inout T opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/")
-    {
-        enum fragment = {
-            string result;
-            foreach(fn; FieldNameTuple!T)
-                result ~= "lhs" ~ op ~ fn ~ ",";
-            return result;
-        }();
-        return mixin("T(", fragment, ")");
+    inout Rotor3 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Rotor3(
+            mixin("lhs", op, "a"),
+            mixin("lhs", op, "xy"),
+            mixin("lhs", op, "yz"),
+            mixin("lhs", op, "zx"),
+        );
     }
 
-    ref T opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/")
-    {
-        foreach (field; FieldNameTuple!T)
-            mixin(field, op, "= rhs;");
+    ref Rotor3 opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        mixin("a", op, "=rhs;");
+        mixin("xy", op, "=rhs;");
+        mixin("yz", op, "=rhs;");
+        mixin("zx", op, "=rhs;");
         return this;
     }
 }
+
+alias Matrix4 = Matrix;
 
 unittest
 {
