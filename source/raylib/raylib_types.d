@@ -4,9 +4,6 @@ module raylib.raylib_types;
 import raylib;
 debug import std.stdio;
 
-version (enhancedD) const ED = true;
-else const ED = false;
-
 @safe:
 
 // Vector2 type
@@ -81,12 +78,19 @@ struct Rectangle
     alias w = width;
     alias h = height;
 
-    float top() {return y;}
-    float bottom() {return y + height;}
-    float left() {return x;}
-    float right() {return x + width;}
+    // The following rectangle functions are exclusive to Raylib-D.
 
-    Vector2 origin() { // Rectangle function exclusive to raylib-d
+    float top() const {return y;}
+    float bottom() const {return y + height;}
+    float left() const {return x;}
+    float right() const {return x + width;}
+
+    void top(const float yPosition) {y = yPosition;}
+    void bottom(const float yPosition) {y = yPosition - height;}
+    void left(const float xPosition) {x = xPosition;}
+    void right(const float xPosition) {x = xPosition - width;}
+
+    Vector2 origin() {
         return Vector2(x, y);
     }
     alias position = origin;
@@ -158,7 +162,7 @@ enum Colors
     BLACK = Color(0, 0, 0, 255), // Black
     BLANK = Color(0, 0, 0, 0), // Blank (Transparent)
     MAGENTA = Color(255, 0, 255, 255), // Magenta
-    RAYWHITE = Color(245, 245, 245, 255), // My own White (raylib logo)
+    RAYWHITE = Color(245, 245, 245, 255), // Grey-white colour from Raylib logo
 }
 
 unittest
@@ -171,7 +175,10 @@ unittest
     float height = 20.0f;
     Rectangle rect = Rectangle(x, y, width, height);
     assert(rect.origin.x == 543.3f, "`rect.origin.x` should be 543.3, not "~to!string(rect.origin.x));
+    assert(rect.left == 543.3f, "`rect.left` should be 543.3, not "~to!string(rect.left));
+    assert(rect.right == 593.3f, "`rect.right` should be 593.3, not "~to!string(rect.right));
     assert(rect.origin.y == 235.9f, "`rect.centre.y` should be 235.9, not "~to!string(rect.origin.y));
+    assert(rect.bottom == 255.9f, "`rect.bottom` should be 255.9, not "~to!string(rect.bottom));
     assert(rect.dimensions == Vector2(50.0f, 20.0f));
     assert(rect.topLeft == Vector2(x:543.3f, y:235.9f), "`rect.topLeft` should be Vector2(543.3, 235.9), not "~to!string(rect.topLeft));
     assert(rect.topRight.x == 593.3f);
@@ -189,4 +196,11 @@ unittest
     rect -= Vector2(4.5f, 2.3f);
     assert(rect.x == 24.5f, "`rect.x` should be 24.5f. Instead it is "~to!string(rect.x));
     assert(rect.y == 19.0f, "`rect.y` should be 20.7f. Instead it is "~to!string(rect.y));
+
+    rect.right = 100f;
+    rect.bottom = 60f;
+    assert(rect.x == 50.0f);
+    assert(rect.left == 50.0f);
+    assert(rect.y == 40.0f);
+    assert(rect.top == 40.0f);
 }
