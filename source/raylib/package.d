@@ -268,15 +268,6 @@ struct Camera3D
 
 alias Camera = Camera3D; // Camera type fallback, defaults to Camera3D
 
-// Camera2D, defines position/orientation in 2d space
-struct Camera2D
-{
-    Vector2 offset; // Camera offset (displacement from target)
-    Vector2 target; // Camera target (rotation and zoom origin)
-    float rotation; // Camera rotation in degrees
-    float zoom; // Camera zoom (scaling), should be 1.0f by default
-}
-
 // Mesh, vertex data and vao/vbo
 struct Mesh
 {

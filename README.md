@@ -3,6 +3,9 @@
 # raylib-d [![DUB](https://img.shields.io/dub/v/raylib-d?style=for-the-badge)](https://code.dlang.org/packages/raylib-d)
 (static) D bindings for [raylib](https://www.raylib.com/), a simple and easy-to-use library to learn videogames programming.
 
+# Differences from Raylib
+All functions, types, and enum values are the same as in upstream Raylib. The only difference is that the `zoom` property of the `Camera2D` struct is initially set to `1.0f` instead of `0.0f`.
+
 # Installation
 
 ## Adding the dependency
