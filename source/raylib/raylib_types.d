@@ -8,7 +8,51 @@ struct Vector2
 {
     float x = 0.0f;
     float y = 0.0f;
-    mixin Linear;
+    
+    enum zero = Vector2(0.0f, 0.0f);
+    enum one = Vector2(1.0f, 1.0f);
+
+    @safe @nogc nothrow:
+
+    inout Vector2 opUnary(string op)() if (op == "+" || op == "-") {
+        return Vector2(
+            mixin(op, "x"),
+            mixin(op, "y"),
+        );
+    }
+
+    inout Vector2 opBinary(string op)(inout Vector2 rhs) if (op == "+" || op == "-") {
+        return Vector2(
+            mixin("x", op, "rhs.x"),
+            mixin("y", op, "rhs.y"),
+        );
+    }
+
+    ref Vector2 opOpAssign(string op)(inout Vector2 rhs) if (op == "+" || op == "-") {
+        mixin("x", op, "=rhs.x;");
+        mixin("y", op, "=rhs.y;");
+        return this;
+    }
+
+    inout Vector2 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Vector2(
+            mixin("x", op, "rhs"),
+            mixin("y", op, "rhs"),
+        );
+    }
+
+    inout Vector2 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Vector2(
+            mixin("lhs", op, "x"),
+            mixin("lhs", op, "y"),
+        );
+    }
+
+    ref Vector2 opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        mixin("x", op, "=rhs;");
+        mixin("y", op, "=rhs;");
+        return this;
+    }
 }
 
 // Vector3 type
@@ -17,7 +61,57 @@ struct Vector3
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
-    mixin Linear;
+
+    enum zero = Vector3(0.0f, 0.0f, 0.0f);
+    enum one = Vector3(1.0f, 1.0f, 1.0f);
+
+    @safe @nogc nothrow:
+
+    inout Vector3 opUnary(string op)() if (op == "+" || op == "-") {
+        return Vector3(
+            mixin(op, "x"),
+            mixin(op, "y"),
+            mixin(op, "z"),
+        );
+    }
+
+    inout Vector3 opBinary(string op)(inout Vector3 rhs) if (op == "+" || op == "-") {
+        return Vector3(
+            mixin("x", op, "rhs.x"),
+            mixin("y", op, "rhs.y"),
+            mixin("z", op, "rhs.z"),
+        );
+    }
+
+    ref Vector3 opOpAssign(string op)(inout Vector3 rhs) if (op == "+" || op == "-") {
+        mixin("x", op, "=rhs.x;");
+        mixin("y", op, "=rhs.y;");
+        mixin("z", op, "=rhs.z;");
+        return this;
+    }
+
+    inout Vector3 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Vector3(
+            mixin("x", op, "rhs"),
+            mixin("y", op, "rhs"),
+            mixin("z", op, "rhs"),
+        );
+    }
+
+    inout Vector3 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Vector3(
+            mixin("lhs", op, "x"),
+            mixin("lhs", op, "y"),
+            mixin("lhs", op, "z"),
+        );
+    }
+
+    ref Vector3 opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        mixin("x", op, "=rhs;");
+        mixin("y", op, "=rhs;");
+        mixin("z", op, "=rhs;");
+        return this;
+    }
 }
 
 // Vector4 type
@@ -27,7 +121,63 @@ struct Vector4
     float y = 0.0f;
     float z = 0.0f;
     float w = 0.0f;
-    mixin Linear;
+
+    enum zero = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+    enum one = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    @safe @nogc nothrow:
+
+    inout Vector4 opUnary(string op)() if (op == "+" || op == "-") {
+        return Vector4(
+            mixin(op, "x"),
+            mixin(op, "y"),
+            mixin(op, "z"),
+            mixin(op, "w"),
+        );
+    }
+
+    inout Vector4 opBinary(string op)(inout Vector4 rhs) if (op == "+" || op == "-") {
+        return Vector4(
+            mixin("x", op, "rhs.x"),
+            mixin("y", op, "rhs.y"),
+            mixin("z", op, "rhs.z"),
+            mixin("w", op, "rhs.w"),
+        );
+    }
+
+    ref Vector4 opOpAssign(string op)(inout Vector4 rhs) if (op == "+" || op == "-") {
+        mixin("x", op, "=rhs.x;");
+        mixin("y", op, "=rhs.y;");
+        mixin("z", op, "=rhs.z;");
+        mixin("w", op, "=rhs.w;");
+        return this;
+    }
+
+    inout Vector4 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Vector4(
+            mixin("x", op, "rhs"),
+            mixin("y", op, "rhs"),
+            mixin("z", op, "rhs"),
+            mixin("w", op, "rhs"),
+        );
+    }
+
+    inout Vector4 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        return Vector4(
+            mixin("lhs", op, "x"),
+            mixin("lhs", op, "y"),
+            mixin("lhs", op, "z"),
+            mixin("lhs", op, "w"),
+        );
+    }
+
+    ref Vector4 opOpAssign(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+        mixin("x", op, "=rhs;");
+        mixin("y", op, "=rhs;");
+        mixin("z", op, "=rhs;");
+        mixin("w", op, "=rhs;");
+        return this;
+    }
 }
 
 // Quaternion type, same as Vector4
@@ -63,6 +213,8 @@ struct Rectangle
     float height;
     alias w = width;
     alias h = height;
+
+    @safe @nogc nothrow:
 
     Vector2 origin() { // Rectangle function exclusive to raylib-d
         return Vector2(x, y);
