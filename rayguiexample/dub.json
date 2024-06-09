@@ -5,6 +5,9 @@
         "dependencies" : {
             "raylib-d" : {
                 "path" : "../"
+            },
+            "raylib-d:raygui" : {
+                "path" : "../"
             }
         },
 	"description": "D port of raygui example controls_test_suite",
