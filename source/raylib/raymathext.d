@@ -2,7 +2,7 @@ module raylib.raymathext;
 
 import raylib;
 import core.stdc.math;
-import std.traits : FieldNameTuple;
+// import std.traits : FieldNameTuple;
 
 pragma(inline, true):
 
@@ -248,8 +248,8 @@ float length(T)(T v)
 {
     enum fragment = () {
         string result;
-        foreach(string fn; FieldNameTuple!T)
-            result ~= fn ~ "*" ~ fn ~ "+";
+        static foreach(fn; T.tupleof)
+            result ~= fn.stringof ~ "*" ~ fn.stringof ~ "+";
         return result[0 .. $-1]; // trim off last +
     }();
     with(v) return mixin("sqrt(", fragment, ")");
@@ -269,8 +269,8 @@ float dot(T)(T lhs, T rhs)
 {
     enum fragment = {
         string result;
-        foreach(fn; FieldNameTuple!T)
-            result ~= "lhs." ~ fn ~ "*" ~ "rhs." ~ fn ~ "+";
+        static foreach(fn; T.tupleof)
+            result ~= "lhs." ~ fn.stringof ~ "*" ~ "rhs." ~ fn.stringof ~ "+";
         return result[0 .. $-1]; // trim off last +
     }();
     return mixin(fragment);
