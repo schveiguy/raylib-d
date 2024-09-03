@@ -10,5 +10,6 @@
     },
     "description": "Install raylib binary files",
     "license": "boost-1.0",
-    "name": "install"
+    "name": "install",
+    "targetType": "executable"
 }
