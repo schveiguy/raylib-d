@@ -1,27 +1,46 @@
 {
-	"name": "raylib-d",
-	"description": "D binding for Raylib",
-	"license": "Zlib",
 	"authors": [
 		"ONROUNDIT"
 	],
-        "configurations" : [
-            {
-                "name": "library"
-            },
-            {
-                "name": "unittest",
-                "versions" : ["raylib_test"],
-                "libs" : ["raylib"],
-                "lflags-posix": ["-L."],
-                "lflags-osx": ["-rpath", "@executable_path/"],
-                "lflags-linux" : ["-rpath=$$ORIGIN"]
-            }
-        ],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "sourceLibrary"
+		},
+		{
+			"lflags-linux": [
+				"-rpath=$$ORIGIN"
+			],
+			"lflags-osx": [
+				"-rpath",
+				"@executable_path/"
+			],
+			"lflags-posix": [
+				"-L."
+			],
+			"libs": [
+				"raylib"
+			],
+			"name": "unittest",
+			"targetType": "sourceLibrary",
+			"versions": [
+				"raylib_test"
+			]
+		}
+	],
 	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry), Steven Schveighoffer (@schveiguy), Liam McGillivray (@LiamM32)",
-        "excludedSourceFiles": ["source/rlgl.d", "source/raymath.d", "source/easings.d", "source/raymathext.d", "source/raylib_types.d"],
-	"targetType": "sourceLibrary",
-        "subPackages" : [
-            "install"
-        ]
+	"description": "D binding for Raylib",
+	"excludedSourceFiles": [
+		"source/rlgl.d",
+		"source/raymath.d",
+		"source/easings.d",
+		"source/raymathext.d",
+		"source/raylib_types.d"
+	],
+	"license": "Zlib",
+	"name": "raylib-d",
+	"subPackages": [
+		"install"
+	],
+	"targetType": "sourceLibrary"
 }

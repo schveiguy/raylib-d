@@ -23,7 +23,7 @@ import raylib;
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2022-2023 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
+*   Copyright (c) 2022-2024 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -167,13 +167,12 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
+// Units per second
 
 // Camera mouse movement sensitivity
-// TODO: it should be independant of framerate
 
+// Camera orbital speed in CAMERA_ORBITAL mode
 // Radians per second
-
-// PLAYER (used by camera)
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -301,12 +300,13 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 // Camera rotation
 
 // Camera movement
-
 // Camera pan (for CAMERA_FREE)
 
 // Mouse support
 
 // Keyboard support
+
+// Gamepad movement
 
 // Gamepad controller support
 
