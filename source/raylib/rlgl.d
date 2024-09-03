@@ -279,15 +279,6 @@ enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 = 5;
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 
-// Boolean type
-
-// Matrix, 4x4 components, column major, OpenGL style, right handed
-
-// Matrix first row (4 components)
-// Matrix second row (4 components)
-// Matrix third row (4 components)
-// Matrix fourth row (4 components)
-
 // Dynamic vertex buffers (position + texcoords + colors + indices arrays)
 struct rlVertexBuffer
 {

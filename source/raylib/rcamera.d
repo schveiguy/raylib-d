@@ -64,52 +64,6 @@ enum CAMERA_CULL_DISTANCE_FAR = RL_CULL_DISTANCE_FAR;
 // NOTE: Below types are required for standalone usage
 //----------------------------------------------------------------------------------
 
-// Vector2, 2 components
-
-// Vector x component
-// Vector y component
-
-// Vector3, 3 components
-
-// Vector x component
-// Vector y component
-// Vector z component
-
-// Matrix, 4x4 components, column major, OpenGL style, right-handed
-
-// Matrix first row (4 components)
-// Matrix second row (4 components)
-// Matrix third row (4 components)
-// Matrix fourth row (4 components)
-
-// Camera type, defines a camera position/orientation in 3d space
-
-// Camera position
-// Camera target it looks-at
-// Camera up vector (rotation over its axis)
-// Camera field-of-view apperture in Y (degrees) in perspective, used as near plane width in orthographic
-// Camera projection type: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
-
-// Camera type fallback, defaults to Camera3D
-
-// Camera projection
-
-// Perspective projection
-// Orthographic projection
-
-// Camera system modes
-
-// Camera custom, controlled by user (UpdateCamera() does nothing)
-// Camera free mode
-// Camera orbital, around target, zoom supported
-// Camera first person
-// Camera third person
-
-//----------------------------------------------------------------------------------
-// Global Variables Definition
-//----------------------------------------------------------------------------------
-//...
-
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
 //----------------------------------------------------------------------------------

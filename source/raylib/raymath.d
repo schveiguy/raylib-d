@@ -98,21 +98,6 @@ extern (D) auto Vector3ToFloat(T)(auto ref T vec)
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 
-// Vector2 type
-
-// Vector3 type
-
-// Vector4 type
-
-// Quaternion type
-
-// Matrix type (OpenGL style 4x4 - right handed, column major)
-
-// Matrix first row (4 components)
-// Matrix second row (4 components)
-// Matrix third row (4 components)
-// Matrix fourth row (4 components)
-
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
 struct float3
 {
