@@ -13,7 +13,7 @@ Use `dub add` to add raylib-d to the dependency list of an existing project:
 
 ```sh
 > dub add raylib-d
-Adding dependency raylib-d ~>4.2.3
+Adding dependency raylib-d ~>5.0.1
 >
 ```
 
@@ -28,7 +28,7 @@ You will need a copy of the raylib binary C library to link against, in order to
 
 ### *NEW* Method 1: install appropriate raylib library with helper tool
 
-In version 4.2.1 of raylib-d, a new subproject `raylib-d:install` is included, along with pre-built binary libraries of raylib. This greatly simplifies the process of obtaining pre-built libraries. Note that this is a *work in progress* and not every binary distribution is included.
+In raylib-d version 4.2.1 onwards, a new `raylib-d:install` subproject is included, along with pre-built binary raylib libraries. This greatly simplifies the process of obtaining pre-built libraries. Note that this is a *work in progress* and not all binary distributions are included.
 
 To run this, run this command from your project directory, and it will copy all the appropriate library files to your project directory:
 
@@ -43,7 +43,7 @@ The following OS/arch combinations are included:
 * MacOS - x86_64
 * MacOS - arm64
 
-If you do not have one of these systems, or want to use static linking, please use a different method.
+If you do not have one of these systems (e.g. FreeBSD), or want to use static linking, please use a different method.
 
 If other platforms are desired, please let me know in the issues. As of now, I am only supporting libraries that I built myself or that are included in the official distribution.
 
@@ -88,7 +88,7 @@ You must include the linker flags to link against the raylib library in your dub
 The following directives should work for all systems, for the case where the library is in the project directory.
 
 ```json
-"dependencies": { "raylib-d": "~>4.2.0" },
+"dependencies": { "raylib-d": "~>5.0.1" },
 "libs": [ "raylib" ],
 "lflags-posix" : ["-L."],
 "lflags-osx" : ["-rpath", "@executable_path/"],
