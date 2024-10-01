@@ -4,11 +4,12 @@
     ],
     "copyright": "Copyright © 2022-2023, Steven Schveighoffer",
     "dependencies": {
-        "jsoniopipe": "~>0.2.5",
-        "iopipe": "~>0.2.4",
-        "io": "~>0.3.4"
+        "jsoniopipe": "~>0.2.7",
+        "iopipe": "~>0.2.5",
+        "io": "~>0.3.5"
     },
     "description": "Install raylib binary files",
     "license": "boost-1.0",
-    "name": "install"
+    "name": "install",
+    "targetType": "executable",
 }

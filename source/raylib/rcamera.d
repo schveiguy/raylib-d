@@ -23,7 +23,7 @@ import raylib;
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2022-2023 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
+*   Copyright (c) 2022-2024 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -63,52 +63,6 @@ enum CAMERA_CULL_DISTANCE_FAR = RL_CULL_DISTANCE_FAR;
 // Types and Structures Definition
 // NOTE: Below types are required for standalone usage
 //----------------------------------------------------------------------------------
-
-// Vector2, 2 components
-
-// Vector x component
-// Vector y component
-
-// Vector3, 3 components
-
-// Vector x component
-// Vector y component
-// Vector z component
-
-// Matrix, 4x4 components, column major, OpenGL style, right-handed
-
-// Matrix first row (4 components)
-// Matrix second row (4 components)
-// Matrix third row (4 components)
-// Matrix fourth row (4 components)
-
-// Camera type, defines a camera position/orientation in 3d space
-
-// Camera position
-// Camera target it looks-at
-// Camera up vector (rotation over its axis)
-// Camera field-of-view apperture in Y (degrees) in perspective, used as near plane width in orthographic
-// Camera projection type: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
-
-// Camera type fallback, defaults to Camera3D
-
-// Camera projection
-
-// Perspective projection
-// Orthographic projection
-
-// Camera system modes
-
-// Camera custom, controlled by user (UpdateCamera() does nothing)
-// Camera free mode
-// Camera orbital, around target, zoom supported
-// Camera first person
-// Camera third person
-
-//----------------------------------------------------------------------------------
-// Global Variables Definition
-//----------------------------------------------------------------------------------
-//...
 
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
@@ -167,13 +121,12 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
+// Units per second
 
 // Camera mouse movement sensitivity
-// TODO: it should be independant of framerate
 
+// Camera orbital speed in CAMERA_ORBITAL mode
 // Radians per second
-
-// PLAYER (used by camera)
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -301,12 +254,13 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 // Camera rotation
 
 // Camera movement
-
 // Camera pan (for CAMERA_FREE)
 
 // Mouse support
 
 // Keyboard support
+
+// Gamepad movement
 
 // Gamepad controller support
 
