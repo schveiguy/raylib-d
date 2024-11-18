@@ -1,9 +1,6 @@
-module raylib.raymath;
-
-import raylib;
 /**********************************************************************************************
 *
-*   raymath v1.5 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
+*   raymath v2.0 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
 *
 *   CONVENTIONS:
 *     - Matrix structure is defined as row-major (memory layout) but parameters naming AND all
@@ -15,7 +12,7 @@ import raylib;
 *     - Functions are always self-contained, no function use another raymath function inside,
 *       required code is directly re-implemented inside
 *     - Functions input parameters are always received by value (2 unavoidable exceptions)
-*     - Functions use always a "result" variable for return
+*     - Functions use always a "result" variable for return (except C++ operators)
 *     - Functions are always defined inline
 *     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
 *     - No compound literals used to make sure libray is compatible with C++
@@ -30,10 +27,12 @@ import raylib;
 *           Define static inline functions code, so #include header suffices for use.
 *           This may use up lots of memory.
 *
+*       #define RAYMATH_DISABLE_CPP_OPERATORS
+*           Disables C++ operator overloads for raymath types.
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2015-2023 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2015-2024 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -51,12 +50,17 @@ import raylib;
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+module raylib.raymath;
+
+import raylib;
 
 extern (C) @nogc nothrow:
 
 // Function specifiers definition
 
-// We are building raylib as a Win32 shared library (.dll).
+// We are building raylib as a Win32 shared library (.dll)
+
+// We are building raylib as a Unix shared library (.so/.dylib)
 
 // We are using raylib as a Win32 shared library (.dll)
 
@@ -122,7 +126,7 @@ struct float16
     float[16] v;
 }
 
-// Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), floor(), fminf(), fmaxf(), fabs()
+// Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), floor(), fminf(), fmaxf(), fabsf()
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Utils math
@@ -225,6 +229,12 @@ Vector2 Vector2Lerp(Vector2 v1, Vector2 v2, float amount);
 // Dot product
 Vector2 Vector2Reflect(Vector2 v, Vector2 normal);
 
+// Get min value for each pair of components
+Vector2 Vector2Min(Vector2 v1, Vector2 v2);
+
+// Get max value for each pair of components
+Vector2 Vector2Max(Vector2 v1, Vector2 v2);
+
 // Rotate vector by angle
 Vector2 Vector2Rotate(Vector2 v, float angle);
 
@@ -239,10 +249,19 @@ Vector2 Vector2Invert(Vector2 v);
 Vector2 Vector2Clamp(Vector2 v, Vector2 min, Vector2 max);
 
 // Clamp the magnitude of the vector between two min and max values
+
+// By default, 1 as the neutral element.
 Vector2 Vector2ClampValue(Vector2 v, float min, float max);
 
 // Check whether two given vectors are almost equal
 int Vector2Equals(Vector2 p, Vector2 q);
+
+// Compute the direction of a refracted ray
+// v: normalized direction of the incoming ray
+// n: normalized normal vector of the interface of two optical media
+// r: ratio of the refractive index of the medium from where the ray comes
+//    to the refractive index of the medium on the other side of the surface
+Vector2 Vector2Refract(Vector2 v, Vector2 n, float r);
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vector3 math
@@ -348,8 +367,20 @@ Vector3 Vector3RotateByQuaternion(Vector3 v, Quaternion q);
 // Vector3Scale(wwv, 2)
 Vector3 Vector3RotateByAxisAngle(Vector3 v, Vector3 axis, float angle);
 
+// Move Vector towards target
+Vector3 Vector3MoveTowards(Vector3 v, Vector3 target, float maxDistance);
+
 // Calculate linear interpolation between two vectors
 Vector3 Vector3Lerp(Vector3 v1, Vector3 v2, float amount);
+
+// Calculate cubic hermite interpolation between two vectors and their tangents
+// as described in the GLTF 2.0 specification: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
+Vector3 Vector3CubicHermite(
+    Vector3 v1,
+    Vector3 tangent1,
+    Vector3 v2,
+    Vector3 tangent2,
+    float amount);
 
 // Calculate reflected vector to normal
 
@@ -407,6 +438,8 @@ Vector3 Vector3Invert(Vector3 v);
 Vector3 Vector3Clamp(Vector3 v, Vector3 min, Vector3 max);
 
 // Clamp the magnitude of the vector between two values
+
+// By default, 1 as the neutral element.
 Vector3 Vector3ClampValue(Vector3 v, float min, float max);
 
 // Check whether two given vectors are almost equal
@@ -418,6 +451,66 @@ int Vector3Equals(Vector3 p, Vector3 q);
 // r: ratio of the refractive index of the medium from where the ray comes
 //    to the refractive index of the medium on the other side of the surface
 Vector3 Vector3Refract(Vector3 v, Vector3 n, float r);
+
+//----------------------------------------------------------------------------------
+// Module Functions Definition - Vector4 math
+//----------------------------------------------------------------------------------
+
+Vector4 Vector4Zero();
+
+Vector4 Vector4One();
+
+Vector4 Vector4Add(Vector4 v1, Vector4 v2);
+
+Vector4 Vector4AddValue(Vector4 v, float add);
+
+Vector4 Vector4Subtract(Vector4 v1, Vector4 v2);
+
+Vector4 Vector4SubtractValue(Vector4 v, float add);
+
+float Vector4Length(Vector4 v);
+
+float Vector4LengthSqr(Vector4 v);
+
+float Vector4DotProduct(Vector4 v1, Vector4 v2);
+
+// Calculate distance between two vectors
+float Vector4Distance(Vector4 v1, Vector4 v2);
+
+// Calculate square distance between two vectors
+float Vector4DistanceSqr(Vector4 v1, Vector4 v2);
+
+Vector4 Vector4Scale(Vector4 v, float scale);
+
+// Multiply vector by vector
+Vector4 Vector4Multiply(Vector4 v1, Vector4 v2);
+
+// Negate vector
+Vector4 Vector4Negate(Vector4 v);
+
+// Divide vector by vector
+Vector4 Vector4Divide(Vector4 v1, Vector4 v2);
+
+// Normalize provided vector
+Vector4 Vector4Normalize(Vector4 v);
+
+// Get min value for each pair of components
+Vector4 Vector4Min(Vector4 v1, Vector4 v2);
+
+// Get max value for each pair of components
+Vector4 Vector4Max(Vector4 v1, Vector4 v2);
+
+// Calculate linear interpolation between two vectors
+Vector4 Vector4Lerp(Vector4 v1, Vector4 v2, float amount);
+
+// Move Vector towards target
+Vector4 Vector4MoveTowards(Vector4 v, Vector4 target, float maxDistance);
+
+// Invert the given vector
+Vector4 Vector4Invert(Vector4 v);
+
+// Check whether two given vectors are almost equal
+int Vector4Equals(Vector4 p, Vector4 q);
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Matrix math
@@ -498,8 +591,8 @@ Matrix MatrixFrustum(
     double right,
     double bottom,
     double top,
-    double near,
-    double far);
+    double nearPlane,
+    double farPlane);
 
 // Get perspective projection matrix
 // NOTE: Fovy angle must be provided in radians
@@ -590,6 +683,15 @@ Quaternion QuaternionNlerp(Quaternion q1, Quaternion q2, float amount);
 // Calculates spherical linear interpolation between two quaternions
 Quaternion QuaternionSlerp(Quaternion q1, Quaternion q2, float amount);
 
+// Calculate quaternion cubic spline interpolation using Cubic Hermite Spline algorithm
+// as described in the GLTF 2.0 specification: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
+Quaternion QuaternionCubicHermiteSpline(
+    Quaternion q1,
+    Quaternion outTangent1,
+    Quaternion q2,
+    Quaternion inTangent2,
+    float t);
+
 // Calculate quaternion based on the rotation from one vector to another
 
 // Vector3DotProduct(from, to)
@@ -642,5 +744,40 @@ Quaternion QuaternionTransform(Quaternion q, Matrix mat);
 
 // Check whether two given quaternions are almost equal
 int QuaternionEquals(Quaternion p, Quaternion q);
+
+// Decompose a transformation matrix into its rotational, translational and scaling components
+
+// Extract translation.
+
+// Extract upper-left for determinant computation
+
+// Extract scale
+
+// Remove scale from the matrix if it is not close to zero
+
+// Extract rotation
+
+// Set to identity if close to zero
+void MatrixDecompose(
+    Matrix mat,
+    Vector3* translation,
+    Quaternion* rotation,
+    Vector3* scale);
+
+// Optional C++ math operators
+//-------------------------------------------------------------------------------
+
+// Vector2 operators
+
+// Vector3 operators
+
+// Vector4 operators
+
+// Quaternion operators
+
+// Matrix operators
+
+//-------------------------------------------------------------------------------
+// C++ operators
 
 // RAYMATH_H
