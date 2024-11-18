@@ -1043,7 +1043,7 @@ void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // S
 void UnloadShader(Shader shader); // Unload shader from GPU memory (VRAM)
 
 // Screen-space-related functions
-enum GetMouseRay = GetScreenToWorldRay; // Compatibility hack for previous raylib versions
+alias GetMouseRay = GetScreenToWorldRay; // Compatibility hack for previous raylib versions
 Ray GetScreenToWorldRay(Vector2 position, Camera camera); // Get a ray trace from screen position (i.e mouse)
 Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height); // Get a ray trace from screen position (i.e mouse) in a viewport
 Vector2 GetWorldToScreen(Vector3 position, Camera camera); // Get the screen space position for a 3d world space position
