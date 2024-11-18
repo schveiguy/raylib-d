@@ -12,6 +12,8 @@ import iopipe.json.parser;
 import iopipe.json.dom : JSONValue;
 import std.exception;
 import iopipe.traits;
+import schlib.getopt2;
+import std.getopt: defaultGetoptPrinter;
 
 // tar support copied from arsd.archive:  https://github.com/adamdruppe/arsd
 // Written by Adam D. Ruppe
@@ -274,157 +276,203 @@ void extractArchive(char[] path)
     }
 }
 
-int main()
+int main(string[] args)
 {
-    writeln("raylib-d library installation");
-    // look at the dub.selections.json file
-    auto dubConfig = execute(["dub", "describe"], null, Config.stderrPassThrough);
-    string raylibdPath;
-    if(dubConfig.status != 0)
-    {
-        stderr.writeln("Error executing dub describe");
-        return dubConfig.status;
+    enum UpdateJson {
+        ask,
+        yes,
+        no
     }
-    char[] getRaylibPath(char[] jsonStr)
-    {
-        auto tokens = jsonTokenizer(jsonStr);
-        enforce(tokens.parseTo("packages"), "Could not find packages in dub json output!");
-        auto nt = tokens.next.token;
-        enforce(nt == JSONToken.ArrayStart, "Expected array start in packages");
-        while(nt != JSONToken.ArrayEnd)
-        {
-            tokens.releaseParsed();
-            tokens.startCache;
-            enforce(tokens.parseTo("name"), "Could not find package name in json file");
-            auto n = tokens.next;
-            jsonExpect(n, JSONToken.String, "Expected string for package name");
-            if(n.data(tokens.chain) == "raylib-d")
-            {
-                tokens.rewind;
-                tokens.parseTo("path");
-                auto p = tokens.next;
-                jsonExpect(p, JSONToken.String, "Expected string for path");
-                return p.data(tokens.chain);
-            }
-            tokens.rewind;
-            tokens.endCache;
-            nt = tokens.skipItem;
-            // skip whatever the next token is, it's either a comma, or the array end.
-            cast(void)tokens.next;
-        }
-        throw new Exception("Could not find raylib-d dependency for current project!");
+    struct Opts {
+        @description("Should the install script update your dub.json file? yes/no/ask")
+        @shortname("u")
+        UpdateJson updateJson = UpdateJson.ask;
+        @description("Suppress all stdout, and most stderr output. Good for scripts")
+        @shortname("q")
+        bool quiet = false;
     }
-    try {
-        auto path = getRaylibPath(dubConfig.output.dup);
-        // check to see if the `lib` directory exists, and if not, see if we can extract it from a tarball
-        writeln("Detected raylib dependency path as ", path);
-        auto libpath = buildPath(path, baseDir);
-        writeln("Copying library files from ", libpath);
-        if(!exists(libpath))
-        {
-            // extract the data, but only for the detected OS
-            writeln("Library path does not exist, trying archive");
-            extractArchive(path);
-        }
-        foreach(ent; dirEntries(libpath, SpanMode.shallow))
-        {
-            auto newLoc = buildPath(".", ent.name.baseName(".lnk"));
-            if(exists(newLoc))
-            {
-                writeln("Skipping existing file ", newLoc);
-                continue;
-            }
-            version(Posix)
-            {
-                void makeLink(string origln)
-                {
-                    writefln("Creating symlink %s -> %s", newLoc, origln);
-                    symlink(origln, newLoc);
-                }
-                if(ent.isSymlink)
-                {
-                    // recreate the symlink
-                    makeLink(readLink(ent.name));
-                    continue;
-                }
-                else if(ent.name.endsWith(".lnk"))
-                {
-                    // dub workaround. This is really a symlink but wasn't
-                    // properly downloaded by dub.
-                    makeLink(readText(ent.name));
-                    continue;
-                }
-            }
-            writefln("Installing library file %s", newLoc);
-            copy(ent.name, newLoc, PreserveAttributes.yes);
-        }
-    } catch(Exception ex) {
-        stderr.writeln("Error: ", ex.msg);
+
+    Opts opts;
+    auto optResult = args.getopt2(opts);
+    if(optResult.helpWanted)
+    {
+        defaultGetoptPrinter(
+`Install a binary library for use with linking to raylib. This program uses your dub configuration
+and OS to determine the correct library files to copy, and places them in your project directory.
+Your program must have raylib-d as a dependency. It optionally can update your dub.json file to
+include linker directives for building your program. This script can be used in build scripts by
+passing a parameter to not update the dub.json file.`, optResult.options);
         return 1;
     }
-
-    // display what to put in the json or sdl file
-    if(exists("dub.json"))
+    auto notify(Args...)(Args args)
     {
-        import std.io : File, mode;
-        import iopipe.bufpipe;
-        import iopipe.refc;
-        import iopipe.textpipe;
-        import std.algorithm : canFind;
-        // json, we can handle. Read the file and check for the correct flags
-        static struct DubFile {
-            @optional:
-            string[] libs;
-            @alternateName("lflags-posix") string[] lflagsPosix;
-            @alternateName("lflags-osx") string[] lflagsOsx;
-            @alternateName("lflags-linux") string[] lflagsLinux;
-            @extras JSONValue!string _extras;
-        }
-        auto dubfile = File("dub.json", mode!"rb").refCounted.bufd.assumeText.deserialize!DubFile;
-        // check to see that all the proper things are present
-        bool hasLib = dubfile.libs.canFind("raylib");
-        bool hasPosixFlags = dubfile.lflagsPosix.canFind("-L.");
-        bool hasOsxFlags = dubfile.lflagsOsx.canFind(["-rpath", "@executable_path/"]);
-        bool hasLinuxFlags = dubfile.lflagsLinux.canFind("-rpath=$$ORIGIN");
-        if(!hasLib || !hasPosixFlags || !hasOsxFlags || !hasLinuxFlags)
-        {
-            writeln(
-`Proper dub linker directives missing, the following directives in dub.json will link the installed raylib library:
-    "libs": [ "raylib" ],
-    "lflags-posix" : ["-L."],
-    "lflags-osx" : ["-rpath", "@executable_path/"],
-    "lflags-linux" : ["-rpath=$$ORIGIN"]`);
+        if(!opts.quiet)
+            return writefln(args);
+    }
 
-            // ask the user if they want to update the dub.json file with the
-            // correct directives.
-            write("Automatically add these directives to your dub.json file? [Y/n] ");
-            stdout.flush();
-            auto result = readln().strip;
-            if(result == "Y" || result == "y" || result == "")
+    notify("raylib-d library installation");
+    // look at the dub.selections.json file
+    try {
+        auto dubConfig = execute(["dub", "describe"], null, Config.stderrPassThrough);
+        string raylibdPath;
+        if(dubConfig.status != 0)
+        {
+            if(!opts.quiet)
+                stderr.writeln("Error executing dub describe");
+            return dubConfig.status;
+        }
+        char[] getRaylibPath(char[] jsonStr)
+        {
+            auto tokens = jsonTokenizer(jsonStr);
+            enforce(tokens.parseTo("packages"), "Could not find packages in dub json output!");
+            auto nt = tokens.next.token;
+            enforce(nt == JSONToken.ArrayStart, "Expected array start in packages");
+            while(nt != JSONToken.ArrayEnd)
             {
-                // add the correct directives
-                if(!hasLib)
-                    dubfile.libs ~= "raylib";
-                if(!hasPosixFlags)
-                    dubfile.lflagsPosix ~= "-L.";
-                if(!hasOsxFlags)
-                    dubfile.lflagsOsx ~= ["-rpath", "@executable_path/"];
-                if(!hasLinuxFlags)
-                    dubfile.lflagsLinux ~= "-rpath=$$ORIGIN";
-                // rewrite the file
-                std.file.write("dub.json", serialize(dubfile));
-                writeln("dub.json file updated!");
+                tokens.releaseParsed();
+                tokens.startCache;
+                enforce(tokens.parseTo("name"), "Could not find package name in json file");
+                auto n = tokens.next;
+                jsonExpect(n, JSONToken.String, "Expected string for package name");
+                if(n.data(tokens.chain) == "raylib-d")
+                {
+                    tokens.rewind;
+                    tokens.parseTo("path");
+                    auto p = tokens.next;
+                    jsonExpect(p, JSONToken.String, "Expected string for path");
+                    return p.data(tokens.chain);
+                }
+                tokens.rewind;
+                tokens.endCache;
+                nt = tokens.skipItem;
+                // skip whatever the next token is, it's either a comma, or the array end.
+                cast(void)tokens.next;
+            }
+            throw new Exception("Could not find raylib-d dependency for current project!");
+        }
+        try {
+            auto path = getRaylibPath(dubConfig.output.dup);
+            // check to see if the `lib` directory exists, and if not, see if we can extract it from a tarball
+            notify("Detected raylib dependency path as %s", path);
+            auto libpath = buildPath(path, baseDir);
+            notify("Copying library files from %s", libpath);
+            if(!exists(libpath))
+            {
+                // extract the data, but only for the detected OS
+                notify("Library path does not exist, trying archive");
+                extractArchive(path);
+            }
+            foreach(ent; dirEntries(libpath, SpanMode.shallow))
+            {
+                auto newLoc = buildPath(".", ent.name.baseName(".lnk"));
+                if(exists(newLoc))
+                {
+                    notify("Skipping existing file %s", newLoc);
+                    continue;
+                }
+                version(Posix)
+                {
+                    void makeLink(string origln)
+                    {
+                        notify("Creating symlink %s -> %s", newLoc, origln);
+                        symlink(origln, newLoc);
+                    }
+                    if(ent.isSymlink)
+                    {
+                        // recreate the symlink
+                        makeLink(readLink(ent.name));
+                        continue;
+                    }
+                    else if(ent.name.endsWith(".lnk"))
+                    {
+                        // dub workaround. This is really a symlink but wasn't
+                        // properly downloaded by dub.
+                        makeLink(readText(ent.name));
+                        continue;
+                    }
+                }
+                notify("Installing library file %s", newLoc);
+                copy(ent.name, newLoc, PreserveAttributes.yes);
+            }
+        } catch(Exception ex) {
+            if(!opts.quiet)
+                stderr.writeln("Error: ", ex.msg);
+            return 1;
+        }
+
+        // display what to put in the json or sdl file
+        if(exists("dub.json"))
+        {
+            import std.io : File, mode;
+            import iopipe.bufpipe;
+            import iopipe.refc;
+            import iopipe.textpipe;
+            import std.algorithm : canFind;
+            // json, we can handle. Read the file and check for the correct flags
+            static struct DubFile {
+                @optional:
+                    string[] libs;
+                @alternateName("lflags-posix") string[] lflagsPosix;
+                @alternateName("lflags-osx") string[] lflagsOsx;
+                @alternateName("lflags-linux") string[] lflagsLinux;
+                @extras JSONValue!string _extras;
+            }
+            auto dubfile = File("dub.json", mode!"rb").refCounted.bufd.assumeText.deserialize!DubFile;
+            // check to see that all the proper things are present
+            bool hasLib = dubfile.libs.canFind("raylib");
+            bool hasPosixFlags = dubfile.lflagsPosix.canFind("-L.");
+            bool hasOsxFlags = dubfile.lflagsOsx.canFind(["-rpath", "@executable_path/"]);
+            bool hasLinuxFlags = dubfile.lflagsLinux.canFind("-rpath=$$ORIGIN");
+            if(!hasLib || !hasPosixFlags || !hasOsxFlags || !hasLinuxFlags)
+            {
+                if(opts.updateJson == UpdateJson.ask)
+                {
+                    writeln(
+                            `Proper dub linker directives missing, the following directives in dub.json will link the installed raylib library:
+                            "libs": [ "raylib" ],
+                            "lflags-posix" : ["-L."],
+                            "lflags-osx" : ["-rpath", "@executable_path/"],
+                            "lflags-linux" : ["-rpath=$$ORIGIN"]`);
+
+                    // ask the user if they want to update the dub.json file with the
+                    // correct directives.
+                    std.stdio.write("Automatically add these directives to your dub.json file? [Y/n] ");
+                    stdout.flush();
+                    auto result = readln().strip;
+                    if(result == "Y" || result == "y" || result == "")
+                        opts.updateJson = UpdateJson.yes;
+                }
+                if(opts.updateJson == UpdateJson.yes)
+                {
+                    // add the correct directives
+                    if(!hasLib)
+                        dubfile.libs ~= "raylib";
+                    if(!hasPosixFlags)
+                        dubfile.lflagsPosix ~= "-L.";
+                    if(!hasOsxFlags)
+                        dubfile.lflagsOsx ~= ["-rpath", "@executable_path/"];
+                    if(!hasLinuxFlags)
+                        dubfile.lflagsLinux ~= "-rpath=$$ORIGIN";
+                    // rewrite the file
+                    std.file.write("dub.json", serialize(dubfile));
+                    notify("dub.json file updated!");
+                }
             }
         }
+        else if(exists("dub.sdl"))
+        {
+            notify(
+                    `If not already present, the following directives in dub.sdl will link the installed raylib library:
+                    libs "raylib"
+                    lflags "-rpath" "@executable_path/" platform="osx"
+                    lflags "-L." platform="posix"
+                    lflags "-rpath=$$ORIGIN" platform="linux"`);
+        }
     }
-    else if(exists("dub.sdl"))
+    catch(Throwable t)
     {
-        writeln(
-`If not already present, the following directives in dub.sdl will link the installed raylib library:
-    libs "raylib"
-    lflags "-rpath" "@executable_path/" platform="osx"
-    lflags "-L." platform="posix"
-    lflags "-rpath=$$ORIGIN" platform="linux"`);
+        // suppress any output
+        if(opts.quiet) return 1;
     }
     return 0;
 }

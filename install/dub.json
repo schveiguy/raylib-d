@@ -6,7 +6,8 @@
     "dependencies": {
         "jsoniopipe": "~>0.2.5",
         "iopipe": "~>0.2.4",
-        "io": "~>0.3.4"
+        "io": "~>0.3.4",
+        "getopt2": "0.0.1"
     },
     "description": "Install raylib binary files",
     "license": "boost-1.0",
