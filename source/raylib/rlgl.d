@@ -1,9 +1,6 @@
-module raylib.rlgl;
-
-import raylib;
 /**********************************************************************************************
 *
-*   rlgl v4.5 - A multi-OpenGL abstraction layer with an immediate-mode style API
+*   rlgl v5.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
 *
 *   DESCRIPTION:
 *       An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0)
@@ -11,17 +8,17 @@ import raylib;
 *
 *   ADDITIONAL NOTES:
 *       When choosing an OpenGL backend different than OpenGL 1.1, some internal buffer are
-*       initialized on rlglInit() to accumulate vertex data.
+*       initialized on rlglInit() to accumulate vertex data
 *
 *       When an internal state change is required all the stored vertex data is renderer in batch,
-*       additionally, rlDrawRenderBatchActive() could be called to force flushing of the batch.
+*       additionally, rlDrawRenderBatchActive() could be called to force flushing of the batch
 *
 *       Some resources are also loaded for convenience, here the complete list:
 *          - Default batch (RLGL.defaultBatch): RenderBatch system to accumulate vertex data
 *          - Default texture (RLGL.defaultTextureId): 1x1 white pixel R8G8B8A8
 *          - Default shader (RLGL.State.defaultShaderId, RLGL.State.defaultShaderLocs)
 *
-*       Internal buffer (and resources) must be manually unloaded calling rlglClose().
+*       Internal buffer (and resources) must be manually unloaded calling rlglClose()
 *
 *   CONFIGURATION:
 *       #define GRAPHICS_API_OPENGL_11
@@ -35,9 +32,9 @@ import raylib;
 *           required by any other module, use rlGetVersion() to check it
 *
 *       #define RLGL_IMPLEMENTATION
-*           Generates the implementation of the library into the included file.
+*           Generates the implementation of the library into the included file
 *           If not defined, the library is in header only mode and can be included in other headers
-*           or source files without problems. But only ONE file should hold the implementation.
+*           or source files without problems. But only ONE file should hold the implementation
 *
 *       #define RLGL_RENDER_TEXTURES_HINT
 *           Enable framebuffer objects (fbo) support (enabled by default)
@@ -65,18 +62,21 @@ import raylib;
 *       When loading a shader, the following vertex attributes and uniform
 *       location names are tried to be set automatically:
 *
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION     "vertexPosition"    // Bound by default to shader location: 0
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD     "vertexTexCoord"    // Bound by default to shader location: 1
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL       "vertexNormal"      // Bound by default to shader location: 2
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR        "vertexColor"       // Bound by default to shader location: 3
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT      "vertexTangent"     // Bound by default to shader location: 4
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: 5
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION     "vertexPosition"    // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD     "vertexTexCoord"    // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL       "vertexNormal"      // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR        "vertexColor"       // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT      "vertexTangent"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEIDS      "vertexBoneIds"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS  "vertexBoneWeights" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MVP         "mvp"               // model-view-projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW        "matView"           // view matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_PROJECTION  "matProjection"     // projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MODEL       "matModel"          // model matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL      "matNormal"         // normal matrix (transpose(inverse(matModelView)))
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR       "colDiffuse"        // color diffuse (base tint color, multiplied by texture color)
+*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONE_MATRICES  "boneMatrices"   // bone matrices
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0  "texture0"          // texture0 (texture slot active 0)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1  "texture1"          // texture1 (texture slot active 1)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
@@ -88,7 +88,7 @@ import raylib;
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2014-2023 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014-2024 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -106,15 +106,21 @@ import raylib;
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+module raylib.rlgl;
+
+import raylib;
 
 extern (C) @nogc nothrow:
 
-enum RLGL_VERSION = "4.5";
+enum RLGL_VERSION = "5.0";
 
-// Function specifiers in case library is build/used as a shared library (Windows)
+// Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
+// NOTE: visibility(default) attribute makes symbols "visible" when compiled with -fvisibility=hidden
 
 // We are building the library as a Win32 shared library (.dll)
+
+// We are building the library as a Unix shared library (.so/.dylib)
 
 // We are using the library as a Win32 shared library (.dll)
 
@@ -254,6 +260,25 @@ enum RL_BLEND_DST_ALPHA = 0x80CA; // GL_BLEND_DST_ALPHA
 enum RL_BLEND_SRC_ALPHA = 0x80CB; // GL_BLEND_SRC_ALPHA
 enum RL_BLEND_COLOR = 0x8005; // GL_BLEND_COLOR
 
+enum RL_READ_FRAMEBUFFER = 0x8CA8; // GL_READ_FRAMEBUFFER
+enum RL_DRAW_FRAMEBUFFER = 0x8CA9; // GL_DRAW_FRAMEBUFFER
+
+// Default shader vertex attribute locations
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION = 0;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD = 1;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL = 2;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR = 3;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT = 4;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 = 5;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES = 6;
+
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
@@ -274,6 +299,7 @@ struct rlVertexBuffer
 
     float* vertices; // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
     float* texcoords; // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
+    float* normals; // Vertex normal (XYZ - 3 components per vertex) (shader-location = 2)
     ubyte* colors; // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
 
     uint* indices; // Vertex indices (in case vertex data comes indexed) (6 indices per quad)
@@ -281,7 +307,7 @@ struct rlVertexBuffer
     // Vertex indices (in case vertex data comes indexed) (6 indices per quad)
 
     uint vaoId; // OpenGL Vertex Array Object id
-    uint[4] vboId; // OpenGL Vertex Buffer Objects id (4 types of vertex data)
+    uint[5] vboId; // OpenGL Vertex Buffer Objects id (5 types of vertex data)
 }
 
 // Draw call type
@@ -439,7 +465,11 @@ enum rlShaderUniformDataType
     RL_SHADER_UNIFORM_IVEC2 = 5, // Shader uniform type: ivec2 (2 int)
     RL_SHADER_UNIFORM_IVEC3 = 6, // Shader uniform type: ivec3 (3 int)
     RL_SHADER_UNIFORM_IVEC4 = 7, // Shader uniform type: ivec4 (4 int)
-    RL_SHADER_UNIFORM_SAMPLER2D = 8 // Shader uniform type: sampler2d
+    RL_SHADER_UNIFORM_UINT = 8, // Shader uniform type: unsigned int
+    RL_SHADER_UNIFORM_UIVEC2 = 9, // Shader uniform type: uivec2 (2 unsigned int)
+    RL_SHADER_UNIFORM_UIVEC3 = 10, // Shader uniform type: uivec3 (3 unsigned int)
+    RL_SHADER_UNIFORM_UIVEC4 = 11, // Shader uniform type: uivec4 (4 unsigned int)
+    RL_SHADER_UNIFORM_SAMPLER2D = 12 // Shader uniform type: sampler2d
 }
 
 // Shader attribute data types
@@ -504,6 +534,9 @@ void rlMultMatrixf(const(float)* matf); // Multiply the current matrix by anothe
 void rlFrustum(double left, double right, double bottom, double top, double znear, double zfar);
 void rlOrtho(double left, double right, double bottom, double top, double znear, double zfar);
 void rlViewport(int x, int y, int width, int height); // Set the viewport area
+void rlSetClipPlanes(double nearPlane, double farPlane); // Set clip planes distances
+double rlGetCullDistanceNear(); // Get cull plane distance near
+double rlGetCullDistanceFar(); // Get cull plane distance far
 
 //------------------------------------------------------------------------------------
 // Functions Declaration - Vertex level operations
@@ -554,8 +587,10 @@ void rlDisableShader(); // Disable shader program
 // Framebuffer state
 void rlEnableFramebuffer(uint id); // Enable render texture (fbo)
 void rlDisableFramebuffer(); // Disable render texture (fbo), return to default framebuffer
+uint rlGetActiveFramebuffer(); // Get the currently active render texture (fbo), 0 for default framebuffer
 void rlActiveDrawBuffers(int count); // Activate multiple draw color buffers
 void rlBlitFramebuffer(int srcX, int srcY, int srcWidth, int srcHeight, int dstX, int dstY, int dstWidth, int dstHeight, int bufferMask); // Blit active framebuffer to main framebuffer
+void rlBindFramebuffer(uint target, uint framebuffer); // Bind framebuffer (FBO)
 
 // General render state
 void rlEnableColorBlend(); // Enable color blending
@@ -566,13 +601,14 @@ void rlEnableDepthMask(); // Enable depth write
 void rlDisableDepthMask(); // Disable depth write
 void rlEnableBackfaceCulling(); // Enable backface culling
 void rlDisableBackfaceCulling(); // Disable backface culling
+void rlColorMask(bool r, bool g, bool b, bool a); // Color mask control
 void rlSetCullFace(int mode); // Set face culling mode
 void rlEnableScissorTest(); // Enable scissor test
 void rlDisableScissorTest(); // Disable scissor test
 void rlScissor(int x, int y, int width, int height); // Scissor test
 void rlEnableWireMode(); // Enable wire mode
-void rlEnablePointMode(); //  Enable point mode
-void rlDisableWireMode(); // Disable wire mode ( and point ) maybe rename
+void rlEnablePointMode(); // Enable point mode
+void rlDisableWireMode(); // Disable wire (and point) mode
 void rlSetLineWidth(float width); // Set the line drawing width
 float rlGetLineWidth(); // Get the line drawing width
 void rlEnableSmoothLines(); // Enable line aliasing
@@ -621,25 +657,25 @@ void rlSetTexture(uint id); // Set current texture for render batch and check bu
 
 // Vertex buffers management
 uint rlLoadVertexArray(); // Load vertex array (vao) if supported
-uint rlLoadVertexBuffer(const(void)* buffer, int size, bool dynamic); // Load a vertex buffer attribute
-uint rlLoadVertexBufferElement(const(void)* buffer, int size, bool dynamic); // Load a new attributes element buffer
-void rlUpdateVertexBuffer(uint bufferId, const(void)* data, int dataSize, int offset); // Update GPU buffer with new data
-void rlUpdateVertexBufferElements(uint id, const(void)* data, int dataSize, int offset); // Update vertex buffer elements with new data
-void rlUnloadVertexArray(uint vaoId);
-void rlUnloadVertexBuffer(uint vboId);
-void rlSetVertexAttribute(uint index, int compSize, int type, bool normalized, int stride, const(void)* pointer);
-void rlSetVertexAttributeDivisor(uint index, int divisor);
-void rlSetVertexAttributeDefault(int locIndex, const(void)* value, int attribType, int count); // Set vertex attribute default value
-void rlDrawVertexArray(int offset, int count);
-void rlDrawVertexArrayElements(int offset, int count, const(void)* buffer);
-void rlDrawVertexArrayInstanced(int offset, int count, int instances);
-void rlDrawVertexArrayElementsInstanced(int offset, int count, const(void)* buffer, int instances);
+uint rlLoadVertexBuffer(const(void)* buffer, int size, bool dynamic); // Load a vertex buffer object
+uint rlLoadVertexBufferElement(const(void)* buffer, int size, bool dynamic); // Load vertex buffer elements object
+void rlUpdateVertexBuffer(uint bufferId, const(void)* data, int dataSize, int offset); // Update vertex buffer object data on GPU buffer
+void rlUpdateVertexBufferElements(uint id, const(void)* data, int dataSize, int offset); // Update vertex buffer elements data on GPU buffer
+void rlUnloadVertexArray(uint vaoId); // Unload vertex array (vao)
+void rlUnloadVertexBuffer(uint vboId); // Unload vertex buffer object
+void rlSetVertexAttribute(uint index, int compSize, int type, bool normalized, int stride, int offset); // Set vertex attribute data configuration
+void rlSetVertexAttributeDivisor(uint index, int divisor); // Set vertex attribute data divisor
+void rlSetVertexAttributeDefault(int locIndex, const(void)* value, int attribType, int count); // Set vertex attribute default value, when attribute to provided
+void rlDrawVertexArray(int offset, int count); // Draw vertex array (currently active vao)
+void rlDrawVertexArrayElements(int offset, int count, const(void)* buffer); // Draw vertex array elements
+void rlDrawVertexArrayInstanced(int offset, int count, int instances); // Draw vertex array (currently active vao) with instancing
+void rlDrawVertexArrayElementsInstanced(int offset, int count, const(void)* buffer, int instances); // Draw vertex array elements with instancing
 
 // Textures management
-uint rlLoadTexture(const(void)* data, int width, int height, int format, int mipmapCount); // Load texture in GPU
+uint rlLoadTexture(const(void)* data, int width, int height, int format, int mipmapCount); // Load texture data
 uint rlLoadTextureDepth(int width, int height, bool useRenderBuffer); // Load depth texture/renderbuffer (to be attached to fbo)
-uint rlLoadTextureCubemap(const(void)* data, int size, int format); // Load texture cubemap
-void rlUpdateTexture(uint id, int offsetX, int offsetY, int width, int height, int format, const(void)* data); // Update GPU texture with new data
+uint rlLoadTextureCubemap(const(void)* data, int size, int format, int mipmapCount); // Load texture cubemap data
+void rlUpdateTexture(uint id, int offsetX, int offsetY, int width, int height, int format, const(void)* data); // Update texture with new data on GPU
 void rlGetGlTextureFormats(int format, uint* glInternalFormat, uint* glFormat, uint* glType); // Get OpenGL internal formats
 const(char)* rlGetPixelFormatName(uint format); // Get name string for pixel format
 void rlUnloadTexture(uint id); // Unload texture from GPU memory
@@ -648,7 +684,7 @@ void* rlReadTexturePixels(uint id, int width, int height, int format); // Read t
 ubyte* rlReadScreenPixels(int width, int height); // Read screen pixel data (color buffer)
 
 // Framebuffer management (fbo)
-uint rlLoadFramebuffer(int width, int height); // Load an empty framebuffer
+uint rlLoadFramebuffer(); // Load an empty framebuffer
 void rlFramebufferAttach(uint fboId, uint texId, int attachType, int texType, int mipLevel); // Attach texture/renderbuffer to a framebuffer
 bool rlFramebufferComplete(uint id); // Verify framebuffer is complete
 void rlUnloadFramebuffer(uint id); // Delete framebuffer from GPU
@@ -662,6 +698,7 @@ int rlGetLocationUniform(uint shaderId, const(char)* uniformName); // Get shader
 int rlGetLocationAttrib(uint shaderId, const(char)* attribName); // Get shader location attribute
 void rlSetUniform(int locIndex, const(void)* value, int uniformType, int count); // Set shader value uniform
 void rlSetUniformMatrix(int locIndex, Matrix mat); // Set shader value matrix
+void rlSetUniformMatrices(int locIndex, const(Matrix)* mat, int count); // Set shader value matrices
 void rlSetUniformSampler(int locIndex, uint textureId); // Set shader value sampler
 void rlSetShader(uint id, int* locs); // Set shader currently active (id and locations)
 
@@ -704,6 +741,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 *
 ************************************************************************************/
 
+// Expose OpenGL functions from glad in raylib
+
 // OpenGL 1.1 library for OSX
 // OpenGL extensions library
 
@@ -719,7 +758,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // OpenGL ES 2.0 extensions library
 
-// NOTE: OpenGL ES 2.0 can be enabled on PLATFORM_DESKTOP,
+// NOTE: OpenGL ES 2.0 can be enabled on Desktop platforms,
 // in that case, functions are loaded from a custom glad for OpenGL ES 2.0
 
 //#include <EGL/egl.h>          // EGL library -> not required, platform layer
@@ -739,17 +778,21 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Default shader vertex attribute names to set location points
 
-// Bound by default to shader location: 0
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION
 
-// Bound by default to shader location: 1
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD
 
-// Bound by default to shader location: 2
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL
 
-// Bound by default to shader location: 3
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR
 
-// Bound by default to shader location: 4
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT
 
-// Bound by default to shader location: 5
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2
+
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_BONEIDS
+
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS
 
 // model-view-projection matrix
 
@@ -762,6 +805,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // normal matrix (transpose(inverse(matModelView))
 
 // color diffuse (base tint color, multiplied by texture color)
+
+// bone matrices
 
 // texture0 (texture slot active 0)
 
@@ -871,8 +916,13 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Get pixel data size in bytes (image or texture)
 
 // Auxiliar matrix math functions
+
+// Get float array of matrix data
+// Get float vector for Matrix
 // Get identity matrix
 // Multiply two matrices
+// Transposes provided matrix
+// Invert provided matrix
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Matrix operations
@@ -922,6 +972,12 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Set the viewport area (transformation from normalized device coordinates to window coordinates)
 // NOTE: We store current viewport dimensions
 
+// Set clip planes distances
+
+// Get cull plane distance near
+
+// Get cull plane distance far
+
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vertex level operations
 //----------------------------------------------------------------------------------
@@ -951,8 +1007,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Transform provided vector if required
 
-// WARNING: We can't break primitives when launching a new batch.
-// RL_LINES comes in pairs, RL_TRIANGLES come in groups of 3 vertices and RL_QUADS come in groups of 4 vertices.
+// WARNING: We can't break primitives when launching a new batch
+// RL_LINES comes in pairs, RL_TRIANGLES come in groups of 3 vertices and RL_QUADS come in groups of 4 vertices
 // We must check current draw.mode when a new vertex is required and finish the batch only if the draw.mode draw.vertexCount is %2, %3 or %4
 
 // Reached the maximum number of vertices for RL_LINES drawing
@@ -963,7 +1019,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Add current texcoord
 
-// WARNING: By default rlVertexBuffer struct does not store normals
+// Add current normal
 
 // Add current color
 
@@ -1021,9 +1077,13 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Enable rendering to texture (fbo)
 
+// return the active render texture (fbo)
+
 // Disable rendering to texture
 
 // Blit active framebuffer to main framebuffer
+
+// Bind framebuffer object (fbo)
 
 // Activate multiple draw color buffers
 // NOTE: One color buffer is always active by default
@@ -1053,6 +1113,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Disable backface culling
 
+// Set color mask active for screen read/draw
+
 // Set face culling mode
 
 // Enable scissor test
@@ -1064,6 +1126,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Enable wire mode
 
 // NOTE: glPolygonMode() not available on OpenGL ES
+
+// Enable point mode
 
 // NOTE: glPolygonMode() not available on OpenGL ES
 
@@ -1140,6 +1204,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Loaded: RLGL.State.defaultShaderId + RLGL.State.defaultShaderLocs
 
 // Init default vertex arrays buffers
+// Simulate that the default shader has the location RL_SHADER_LOC_VERTEX_NORMAL to bind the normal buffer for the default render batch
 
 // Init stack matrices (emulating OpenGL 1.1)
 
@@ -1244,9 +1309,20 @@ void rlLoadDrawQuad(); // Load and draw a quad
 //glIsVertexArray = (PFNGLISVERTEXARRAYOESPROC)loader("glIsVertexArrayOES");     // NOTE: Fails in WebGL, omitted
 
 // Check instanced rendering support
-// Web ANGLE
+// Broad check for instanced_arrays
 
-// Standard EXT
+// Specific check
+// ANGLE
+
+// EXT
+
+// NVIDIA GLES
+
+// The feature will only be marked as supported if the elements from GL_XXX_instanced_arrays are present
+
+// GL_ANGLE_draw_instanced doesn't exist
+
+// But the functions will at least be loaded if only GL_XX_EXT_draw_instanced exist
 
 // Check NPOT textures support
 // NOTE: Only check on OpenGL ES, OpenGL 3.3 has NPOT textures full support as core feature
@@ -1322,6 +1398,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // 3 float by vertex, 4 vertex by quad
 // 2 float by texcoord, 4 texcoord by quad
+// 3 float by vertex, 4 vertex by quad
 // 4 float by color, 4 colors by quad
 
 // 6 int by quad (indices)
@@ -1341,6 +1418,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Vertex position buffer (shader-location = 0)
 
 // Vertex texcoord buffer (shader-location = 1)
+
+// Vertex normal buffer (shader-location = 2)
 
 // Vertex color buffer (shader-location = 3)
 
@@ -1398,15 +1477,19 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 //glBufferData(GL_ARRAY_BUFFER, sizeof(float)*2*4*batch->vertexBuffer[batch->currentBuffer].elementCount, batch->vertexBuffer[batch->currentBuffer].texcoords, GL_DYNAMIC_DRAW); // Update all buffer
 
+// Normals buffer
+
+//glBufferData(GL_ARRAY_BUFFER, sizeof(float)*3*4*batch->vertexBuffer[batch->currentBuffer].elementCount, batch->vertexBuffer[batch->currentBuffer].normals, GL_DYNAMIC_DRAW); // Update all buffer
+
 // Colors buffer
 
 //glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*4*batch->vertexBuffer[batch->currentBuffer].elementCount, batch->vertexBuffer[batch->currentBuffer].colors, GL_DYNAMIC_DRAW);    // Update all buffer
 
-// NOTE: glMapBuffer() causes sync issue.
-// If GPU is working with this buffer, glMapBuffer() will wait(stall) until GPU to finish its job.
-// To avoid waiting (idle), you can call first glBufferData() with NULL pointer before glMapBuffer().
+// NOTE: glMapBuffer() causes sync issue
+// If GPU is working with this buffer, glMapBuffer() will wait(stall) until GPU to finish its job
+// To avoid waiting (idle), you can call first glBufferData() with NULL pointer before glMapBuffer()
 // If you do that, the previous data in PBO will be discarded and glMapBuffer() returns a new
-// allocated pointer immediately even if GPU is still working with the previous data.
+// allocated pointer immediately even if GPU is still working with the previous data
 
 // Another option: map the buffer object into client's memory
 // Probably this code could be moved somewhere else...
@@ -1436,9 +1519,14 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Create modelview-projection matrix and upload to shader
 
+// WARNING: For the following setup of the view, model, and normal matrices, it is expected that
+// transformations and rendering occur between rlPushMatrix() and rlPopMatrix()
+
 // Bind vertex attrib: position (shader-location = 0)
 
 // Bind vertex attrib: texcoord (shader-location = 1)
+
+// Bind vertex attrib: normal (shader-location = 2)
 
 // Bind vertex attrib: color (shader-location = 3)
 
@@ -1569,7 +1657,13 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // NOTE: Cubemap data is expected to be 6 images in a single data array (one after the other),
 // expected the following convention: +X, -X, +Y, -Y, +Z, -Z
 
-// Load cubemap faces
+// NOTE: Added pointer math separately from function to avoid UBSAN complaining
+
+// Load cubemap faces/mipmaps
+
+// Increment data pointer to next mipmap
+
+// Security check for NPOT textures
 
 // Set cubemap texture sampling parameters
 
@@ -1618,13 +1712,13 @@ void rlLoadDrawQuad(); // Load and draw a quad
 //glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
 //glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
 
-// NOTE: Each row written to or read from by OpenGL pixel operations like glGetTexImage are aligned to a 4 byte boundary by default, which may add some padding.
-// Use glPixelStorei to modify padding with the GL_[UN]PACK_ALIGNMENT setting.
+// NOTE: Each row written to or read from by OpenGL pixel operations like glGetTexImage are aligned to a 4 byte boundary by default, which may add some padding
+// Use glPixelStorei to modify padding with the GL_[UN]PACK_ALIGNMENT setting
 // GL_PACK_ALIGNMENT affects operations that read from OpenGL memory (glReadPixels, glGetTexImage, etc.)
 // GL_UNPACK_ALIGNMENT affects operations that write to OpenGL memory (glTexImage, etc.)
 
 // glGetTexImage() is not available on OpenGL ES 2.0
-// Texture width and height are required on OpenGL ES 2.0. There is no way to get it from texture id.
+// Texture width and height are required on OpenGL ES 2.0, there is no way to get it from texture id
 // Two possible Options:
 // 1 - Bind texture to color fbo attachment and glReadPixels()
 // 2 - Create an fbo, activate it, render quad with texture, glReadPixels()
@@ -1676,7 +1770,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // https://registry.khronos.org/webgl/specs/latest/1.0/
 
 // NOTE: If a texture object is deleted while its image is attached to the *currently bound* framebuffer,
-// the texture image is automatically detached from the currently bound framebuffer.
+// the texture image is automatically detached from the currently bound framebuffer
 
 // Vertex data management
 //-----------------------------------------------------------------------------------------
@@ -1728,6 +1822,11 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Set vertex attribute
 
+// NOTE: Data type could be: GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_INT, GL_UNSIGNED_INT
+// Additional types (depends on OpenGL version or extensions):
+//  - GL_HALF_FLOAT, GL_FLOAT, GL_DOUBLE, GL_FIXED,
+//  - GL_INT_2_10_10_10_REV, GL_UNSIGNED_INT_2_10_10_10_REV, GL_UNSIGNED_INT_10F_11F_11F_REV
+
 // Set vertex attribute divisor
 
 // Unload vertex array object (VAO)
@@ -1742,12 +1841,10 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
 
 // Compile vertex shader (if provided)
-
-// In case no vertex shader was provided or compilation failed, we use default vertex shader
+// NOTE: If not vertex shader is provided, use default one
 
 // Compile fragment shader (if provided)
-
-// In case no fragment shader was provided or compilation failed, we use default fragment shader
+// NOTE: If not vertex shader is provided, use default one
 
 // In case vertex and fragment shader are the default ones, no need to recompile, we can just assign the default shader program id
 
@@ -1803,7 +1900,7 @@ else
 // NOTE: All uniform variables are intitialised to 0 when a program links
 
 // Get the size of compiled shader program (not available on OpenGL ES 2.0)
-// NOTE: If GL_LINK_STATUS is GL_FALSE, program binary length is zero.
+// NOTE: If GL_LINK_STATUS is GL_FALSE, program binary length is zero
 //GLint binarySize = 0;
 //glGetProgramiv(id, GL_PROGRAM_BINARY_LENGTH, &binarySize);
 
@@ -1821,9 +1918,16 @@ else
 
 // Set shader value uniform
 
+// TODO: Support glUniform1uiv(), glUniform2uiv(), glUniform3uiv(), glUniform4uiv()
+
 // Set shader value attribute
 
 // Set shader value uniform matrix
+
+// Set shader value uniform matrix
+
+// WARNING: WebGL does not support Matrix transpose ("true" parameter)
+// REF: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniformMatrix
 
 // Set shader value uniform sampler
 
@@ -1842,7 +1946,7 @@ else
 // NOTE: All uniform variables are intitialised to 0 when a program links
 
 // Get the size of compiled shader program (not available on OpenGL ES 2.0)
-// NOTE: If GL_LINK_STATUS is GL_FALSE, program binary length is zero.
+// NOTE: If GL_LINK_STATUS is GL_FALSE, program binary length is zero
 //GLint binarySize = 0;
 //glGetProgramiv(id, GL_PROGRAM_BINARY_LENGTH, &binarySize);
 
@@ -1968,9 +2072,13 @@ else
 
 // Vertex shader directly defined, no external file required
 
+// Precision required for OpenGL ES3 (WebGL 2) (on some browsers)
+
 // Precision required for OpenGL ES2 (WebGL) (on some browsers)
 
 // Fragment shader directly defined, no external file required
+
+// Precision required for OpenGL ES3 (WebGL 2)
 
 // Precision required for OpenGL ES2 (WebGL)
 
@@ -2021,9 +2129,19 @@ else
 
 // Auxiliar math functions
 
+// Get float array of matrix data
+
 // Get identity matrix
 
 // Get two matrix multiplication
 // NOTE: When multiplying matrices... the order matters!
+
+// Transposes provided matrix
+
+// Invert provided matrix
+
+// Cache the matrix values (speed optimization)
+
+// Calculate the invert determinant (inlined to avoid double-caching)
 
 // RLGL_IMPLEMENTATION

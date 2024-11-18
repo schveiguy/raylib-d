@@ -61,6 +61,14 @@ import raylib;
 Additionally, each of those modules will have an automatically generated `extern (C):` line. We need to find it and
 edit it to `extern (C) @nogc nothrow:`.
 
+Inside `source/raylib/package.d` there will be a line that looks like this:
+
+```d
+enum GetMouseRay = GetScreenToWorldRay; // Compatibility hack for previous raylib versions
+```
+
+This was translated by dstep to be an enum, but should be an alias. Replace `enum` with `alias`.
+
 This should be enough. Run `dub test` and see if it compiles.
 
 ## Generating raygui

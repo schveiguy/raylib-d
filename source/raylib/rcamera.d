@@ -1,6 +1,3 @@
-module raylib.rcamera;
-
-import raylib;
 /*******************************************************************************************
 *
 *   rcamera - Basic camera system with support for multiple camera modes
@@ -23,7 +20,7 @@ import raylib;
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2022-2023 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
+*   Copyright (c) 2022-2024 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -41,6 +38,9 @@ import raylib;
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
+module raylib.rcamera;
+
+import raylib;
 
 extern (C) @nogc nothrow:
 
@@ -167,13 +167,12 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
+// Units per second
 
 // Camera mouse movement sensitivity
-// TODO: it should be independant of framerate
 
+// Camera orbital speed in CAMERA_ORBITAL mode
 // Radians per second
-
-// PLAYER (used by camera)
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -296,17 +295,20 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 // Update camera position for selected mode
 // Camera mode: CAMERA_FREE, CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON, CAMERA_ORBITAL or CUSTOM
 
+// Camera speeds based on frame time
+
 // Orbital can just orbit
 
 // Camera rotation
 
 // Camera movement
-
 // Camera pan (for CAMERA_FREE)
 
 // Mouse support
 
 // Keyboard support
+
+// Gamepad movement
 
 // Gamepad controller support
 
