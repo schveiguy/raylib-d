@@ -20,7 +20,7 @@
         ],
 	"copyright": "Copyright (c) Ramon Santamaria (@raysan5), Petro Romanovych (@onroundit), Jan Hoenig (@m3m0ry), Steven Schveighoffer (@schveiguy), Liam McGillivray (@LiamM32)",
         "excludedSourceFiles": ["source/rlgl.d", "source/raymath.d", "source/easings.d", "source/raymathext.d", "source/raylib_types.d"],
-	"targetType": "sourceLibrary",
+	"targetType": "library",
         "subPackages" : [
             "install"
         ]

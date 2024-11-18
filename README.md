@@ -13,7 +13,7 @@ Use `dub add` to add raylib-d to the dependency list of an existing project:
 
 ```sh
 > dub add raylib-d
-Adding dependency raylib-d ~>5.0.1
+Adding dependency raylib-d ~>5.5.0
 >
 ```
 
@@ -22,15 +22,15 @@ Or you can add the dependency through the interactive prompts when creating your
 ## Get a copy of Raylib
 You will need a copy of the raylib binary C library to link against, in order to run a raylib-d program. There are 3 ways to get this. Please read ALL the instructions before picking which mechanism you want to use.
 
-1. (beta) Use the raylib-d:install utility to copy the appropriate pre-built library.
+1. (preferred) Use the raylib-d:install utility to copy the appropriate pre-built library.
 2. Download the precompiled binary from the official github account for raylib.
 3. Compile the library from source
 
-### *NEW* Method 1: install appropriate raylib library with helper tool
+### Method 1: install appropriate raylib library with helper tool
 
-In raylib-d version 4.2.1 onwards, a new `raylib-d:install` subproject is included, along with pre-built binary raylib libraries. This greatly simplifies the process of obtaining pre-built libraries. Note that this is a *work in progress* and not all binary distributions are included.
+Since raylib-d version 4.2.1 onwards, a new `raylib-d:install` subproject is included, along with pre-built binary raylib libraries. This greatly simplifies the process of obtaining pre-built libraries. Note that not all binary distributions are included.
 
-To run this, run this command from your project directory, and it will copy all the appropriate library files to your project directory:
+Run this command from your project directory, and it will copy all the appropriate library files to your project directory:
 
 ```sh
 > dub upgrade
@@ -43,9 +43,11 @@ The following OS/arch combinations are included:
 * MacOS - x86_64
 * MacOS - arm64
 
-If you do not have one of these systems (e.g. FreeBSD), or want to use static linking, please use a different method.
-
 If other platforms are desired, please let me know in the issues. As of now, I am only supporting libraries that I built myself or that are included in the official distribution.
+
+Note that D does not natively support WASM, and until it does, I will not be supporting it here.
+
+This command can be executed as part of your build (generally in a [`preBuildCommands`](https://dub.pm/dub-reference/build_settings/#prebuildcommands) directive), with the option `-u=no` to suppress any interactive prompts, and also `-q` will suppress any output in general.
 
 ### Method 2: Download official binaries
 
@@ -88,7 +90,7 @@ You must include the linker flags to link against the raylib library in your dub
 The following directives should work for all systems, for the case where the library is in the project directory.
 
 ```json
-"dependencies": { "raylib-d": "~>5.0.1" },
+"dependencies": { "raylib-d": "~>5.5.0" },
 "libs": [ "raylib" ],
 "lflags-posix" : ["-L."],
 "lflags-osx" : ["-rpath", "@executable_path/"],
@@ -99,6 +101,8 @@ The OS-specific `lflags` lines are unnecessary if your library is copied to `/us
 
 The `-rpath` flag allows the system to load the library from the local directory without using environment variables.
 
+If you are using `dub.json`, and you use the `raylib-d:install` script, this will give the option to update your dub.json file to include all the correct linker directives.
+
 ## Using the correct library
 
 *WARNING*: Make sure you get the correct copy of the raylib library based on the version of raylib-d! Getting the incorrect version will cause SILENT compatibility errors, including memory corruption. It is extremely important to match these together.
@@ -107,14 +111,7 @@ If you depend on raylib-d vX.Y.Z, then your raylib binary should be vX.Y.0. Note
 
 For example, if you depend on raylib-d version `v3.0.x`, then you should download raylib version `3.0.0`. If you depend on raylib-d version `3.7.x`, then you should download raylib version `3.7.0`.
 
-Starting with version 4.2.0, raylib-d includes a new module `raylib.binding`,
-which at the moment contains one function: `validateRaylibBinding`. @raysan5
-was kind enough to include a runtime-accessible version string for version
-4.2.0 of the library, so now we can validate the raylib binding mechanically
-without relying on proper environmental setup. So if you compile against one
-version, but link against another, you can call this function and it will exit
-the program with an error code if the binding is incorrect. This is better than
-creating memory corruption errors!
+Starting with version 4.2.0, raylib-d includes a new module `raylib.binding`, which at the moment contains one function: `validateRaylibBinding`. @raysan5 was kind enough to include a runtime-accessible version string for version 4.2.0 of the library, so now we can validate the raylib binding mechanically without relying on proper environmental setup. So if you compile against one version, but link against another, you can call this function and it will exit the program with an error code if the binding is incorrect. This is better than creating memory corruption errors!
 
 As noted earlier, this did not properly get exported for the pre-built Windows dll for 4.2.0. Therefore, you *must* use installation method 1 above to link with raylib-d 4.2.x.
 
@@ -149,17 +146,21 @@ void main()
 
 # Port of raylib examples
 
-@D-a-n-i-l-o has been kind enough to port a large amount of the raylib examples from the C library to D (maybe all of them at this point!)
-
-Please see his [repository](https://github.com/D-a-n-i-l-o/raylib-d_examples) for more information.
+@D-a-n-i-l-o has been kind enough to port a large amount of the raylib examples from the C library to D (maybe all of them at this point!). He has passed on the repository to me, so please see the [repository](https://github.com/schveiguy/raylib-d_examples) for more information.
 
 # BetterC support (Experimental)
 
-[BetterC](https://dlang.org/spec/betterc.html) support has been added for the raylib-d binding. This should work just as well as the original binding, but be usable with the `betterC` compilation option. No specific configuration is necessary.
+[BetterC](https://dlang.org/spec/betterc.html) was added for the raylib-d binding, but has since broken since switching away from a source library.
+
+If you wish to help fix, please file an issue and even better, submit a PR.
 
 # Docs/Cheatsheet
 
 At the moment, we do not properly ddoc the binding. This may change in the near future. However, all documentation is valid from the raylib [online cheatsheet](https://www.raylib.com/cheatsheet/cheatsheet.html), or you can view the binding source files directly.
+
+# Raygui
+
+As of v 5.5.0, raygui is no longer included in raylib-d. This is intentional, as the raygui binding was not properly maintained, and the version of raygui is not tied to any one version of raylib. Instead, it is in the [raygui-d](https://code.dlang.org/packages/raygui-d) package.
 
 # License
 raylib-d is licensed under an unmodified zlib/libpng license. View [LICENSE](LICENSE).
