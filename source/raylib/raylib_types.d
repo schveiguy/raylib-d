@@ -12,16 +12,16 @@ struct Vector2
     enum zero = Vector2(0.0f, 0.0f);
     enum one = Vector2(1.0f, 1.0f);
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    inout Vector2 opUnary(string op)() if (op == "+" || op == "-") {
+    Vector2 opUnary(string op)() const if (op == "+" || op == "-") {
         return Vector2(
             mixin(op, "x"),
             mixin(op, "y"),
         );
     }
 
-    inout Vector2 opBinary(string op)(inout Vector2 rhs) if (op == "+" || op == "-") {
+    Vector2 opBinary(string op)(inout Vector2 rhs) const if (op == "+" || op == "-") {
         return Vector2(
             mixin("x", op, "rhs.x"),
             mixin("y", op, "rhs.y"),
@@ -34,14 +34,14 @@ struct Vector2
         return this;
     }
 
-    inout Vector2 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Vector2 opBinary(string op)(inout float rhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Vector2(
             mixin("x", op, "rhs"),
             mixin("y", op, "rhs"),
         );
     }
 
-    inout Vector2 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Vector2 opBinaryRight(string op)(inout float lhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Vector2(
             mixin("lhs", op, "x"),
             mixin("lhs", op, "y"),
@@ -65,9 +65,9 @@ struct Vector3
     enum zero = Vector3(0.0f, 0.0f, 0.0f);
     enum one = Vector3(1.0f, 1.0f, 1.0f);
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    inout Vector3 opUnary(string op)() if (op == "+" || op == "-") {
+    Vector3 opUnary(string op)() const if (op == "+" || op == "-") {
         return Vector3(
             mixin(op, "x"),
             mixin(op, "y"),
@@ -75,7 +75,7 @@ struct Vector3
         );
     }
 
-    inout Vector3 opBinary(string op)(inout Vector3 rhs) if (op == "+" || op == "-") {
+    Vector3 opBinary(string op)(inout Vector3 rhs) const if (op == "+" || op == "-") {
         return Vector3(
             mixin("x", op, "rhs.x"),
             mixin("y", op, "rhs.y"),
@@ -90,7 +90,7 @@ struct Vector3
         return this;
     }
 
-    inout Vector3 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Vector3 opBinary(string op)(inout float rhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Vector3(
             mixin("x", op, "rhs"),
             mixin("y", op, "rhs"),
@@ -98,7 +98,7 @@ struct Vector3
         );
     }
 
-    inout Vector3 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Vector3 opBinaryRight(string op)(inout float lhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Vector3(
             mixin("lhs", op, "x"),
             mixin("lhs", op, "y"),
@@ -125,9 +125,9 @@ struct Vector4
     enum zero = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
     enum one = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    inout Vector4 opUnary(string op)() if (op == "+" || op == "-") {
+    Vector4 opUnary(string op)() const if (op == "+" || op == "-") {
         return Vector4(
             mixin(op, "x"),
             mixin(op, "y"),
@@ -136,7 +136,7 @@ struct Vector4
         );
     }
 
-    inout Vector4 opBinary(string op)(inout Vector4 rhs) if (op == "+" || op == "-") {
+    Vector4 opBinary(string op)(inout Vector4 rhs) const if (op == "+" || op == "-") {
         return Vector4(
             mixin("x", op, "rhs.x"),
             mixin("y", op, "rhs.y"),
@@ -153,7 +153,7 @@ struct Vector4
         return this;
     }
 
-    inout Vector4 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Vector4 opBinary(string op)(inout float rhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Vector4(
             mixin("x", op, "rhs"),
             mixin("y", op, "rhs"),
@@ -162,7 +162,7 @@ struct Vector4
         );
     }
 
-    inout Vector4 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Vector4 opBinaryRight(string op)(inout float lhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Vector4(
             mixin("lhs", op, "x"),
             mixin("lhs", op, "y"),
@@ -214,14 +214,14 @@ struct Rectangle
     alias w = width;
     alias h = height;
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    Vector2 origin() { // Rectangle function exclusive to raylib-d
+    Vector2 origin() const { // Rectangle function exclusive to raylib-d
         return Vector2(x, y);
     }
     alias position = origin;
     
-    Vector2 dimensions() {
+    Vector2 dimensions() const {
         return Vector2(width, height);
     }
 
@@ -262,22 +262,22 @@ struct Color
     ubyte r;
     ubyte g;
     ubyte b;
-    ubyte a = 255;
+    ubyte a;
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    this(ubyte r, ubyte g, ubyte b, ubyte a = 255) {
+    this(ubyte r, ubyte g, ubyte b, ubyte a = 255) inout {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
     }
 
-    this(ubyte[4] rgba) {
+    this(ubyte[4] rgba) inout {
         this(rgba[0], rgba[1], rgba[2], rgba[3]);
     }
 
-    this(ubyte[3] rgb) {
+    this(ubyte[3] rgb) inout {
         this(rgb[0], rgb[1], rgb[2], 255);
     }
 }
