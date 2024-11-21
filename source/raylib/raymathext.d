@@ -2,7 +2,6 @@ module raylib.raymathext;
 
 import raylib;
 import core.stdc.math;
-import std.traits : FieldNameTuple;
 
 pragma(inline, true):
 
@@ -15,15 +14,15 @@ struct Bivector2
     enum zero = Bivector2(0.0f);
     enum one = Bivector2(1.0f);
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    inout Bivector2 opUnary(string op)() if (op == "+" || op == "-") {
+    Bivector2 opUnary(string op)() const if (op == "+" || op == "-") {
         return Bivector2(
             mixin(op, "xy"),
         );
     }
 
-    inout Bivector2 opBinary(string op)(inout Bivector2 rhs) if (op == "+" || op == "-") {
+    Bivector2 opBinary(string op)(inout Bivector2 rhs) const if (op == "+" || op == "-") {
         return Bivector2(
             mixin("xy", op, "rhs.xy"),
         );
@@ -34,13 +33,13 @@ struct Bivector2
         return this;
     }
 
-    inout Bivector2 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Bivector2 opBinary(string op)(inout float rhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Bivector2(
             mixin("xy", op, "rhs"),
         );
     }
 
-    inout Bivector2 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Bivector2 opBinaryRight(string op)(inout float lhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Bivector2(
             mixin("lhs", op, "xy"),
         );
@@ -64,9 +63,9 @@ struct Bivector3
     enum zero = Bivector3(0.0f, 0.0f, 0.0f);
     enum one = Bivector3(1.0f, 1.0f, 1.0f);
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    inout Bivector3 opUnary(string op)() if (op == "+" || op == "-") {
+    Bivector3 opUnary(string op)() const if (op == "+" || op == "-") {
         return Bivector3(
             mixin(op, "xy"),
             mixin(op, "yz"),
@@ -74,7 +73,7 @@ struct Bivector3
         );
     }
 
-    inout Bivector3 opBinary(string op)(inout Bivector3 rhs) if (op == "+" || op == "-") {
+    Bivector3 opBinary(string op)(inout Bivector3 rhs) const if (op == "+" || op == "-") {
         return Bivector3(
             mixin("xy", op, "rhs.xy"),
             mixin("yz", op, "rhs.yz"),
@@ -89,7 +88,7 @@ struct Bivector3
         return this;
     }
 
-    inout Bivector3 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Bivector3 opBinary(string op)(inout float rhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Bivector3(
             mixin("xy", op, "rhs"),
             mixin("yz", op, "rhs"),
@@ -97,7 +96,7 @@ struct Bivector3
         );
     }
 
-    inout Bivector3 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Bivector3 opBinaryRight(string op)(inout float lhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Bivector3(
             mixin("lhs", op, "xy"),
             mixin("lhs", op, "yz"),
@@ -128,9 +127,9 @@ struct Rotor3
     alias j = zx;
     alias k = xy;
 
-    @safe @nogc nothrow:
+    @safe @nogc nothrow pure:
 
-    @property Bivector3 b()
+    @property Bivector3 b() const
     {
         return Bivector3(xy, yz, zx);
     }
@@ -143,13 +142,15 @@ struct Rotor3
         return _b;
     }
 
-    this(float _a, Bivector3 _b)
+    this(float _a, Bivector3 _b) inout
     {
         a = _a;
-        b = _b;
+        xy = _b.xy;
+        yz = _b.yz;
+        zx = _b.zx;
     }
 
-    this(float _a, float _xy, float _yz, float _zx)
+    this(float _a, float _xy, float _yz, float _zx) inout
     {
         a = _a;
         xy = _xy;
@@ -157,7 +158,7 @@ struct Rotor3
         zx = _zx;
     }
 
-    inout Rotor3 opUnary(string op)() if (op == "+" || op == "-") {
+    Rotor3 opUnary(string op)() const if (op == "+" || op == "-") {
         return Rotor3(
             mixin(op, "a"),
             mixin(op, "xy"),
@@ -167,7 +168,7 @@ struct Rotor3
     }
 
     /// Returns a rotor equivalent to first apply p, then apply q
-    inout Rotor3 opBinary(string op)(inout Rotor3 q) if (op == "*") {
+    Rotor3 opBinary(string op)(inout Rotor3 q) const if (op == "*") {
         alias p = this;
         Rotor3 r;
         r.a = p.a * q.a - p.i * q.i - p.j * q.j - p.k * q.k;
@@ -177,7 +178,7 @@ struct Rotor3
         return r;
     }
 
-    inout Vector3 opBinary(string op)(inout Vector3 v) if (op == "*") {
+    Vector3 opBinary(string op)(inout Vector3 v) const if (op == "*") {
         Vector3 rv;
         rv.x = a * v.x + xy * v.y - zx * v.z;
         rv.y = a * v.y + yz * v.z - xy * v.x;
@@ -185,7 +186,7 @@ struct Rotor3
         return rv;
     }
 
-    inout Vector3 opBinaryRight(string op)(inout Vector3 v) if (op == "*") {
+    Vector3 opBinaryRight(string op)(inout Vector3 v) const if (op == "*") {
         Vector3 vr;
         vr.x = v.x * a - v.y * xy + v.z * zx;
         vr.y = v.y * a - v.z * yz + v.x * xy;
@@ -193,7 +194,7 @@ struct Rotor3
         return vr;
     }
 
-    inout Rotor3 opBinary(string op)(inout float rhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Rotor3 opBinary(string op)(inout float rhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Rotor3(
             mixin("a", op, "rhs"),
             mixin("xy", op, "rhs"),
@@ -202,7 +203,7 @@ struct Rotor3
         );
     }
 
-    inout Rotor3 opBinaryRight(string op)(inout float lhs) if (op == "+" || op == "-" || op == "*" || op ==  "/") {
+    Rotor3 opBinaryRight(string op)(inout float lhs) const if (op == "+" || op == "-" || op == "*" || op ==  "/") {
         return Rotor3(
             mixin("lhs", op, "a"),
             mixin("lhs", op, "xy"),
@@ -247,6 +248,7 @@ unittest
 float length(T)(T v)
 {
     enum fragment = () {
+        import std.traits : FieldNameTuple;
         string result;
         foreach(string fn; FieldNameTuple!T)
             result ~= fn ~ "*" ~ fn ~ "+";
@@ -268,6 +270,7 @@ float distance(T)(T lhs, T rhs)
 float dot(T)(T lhs, T rhs)
 {
     enum fragment = {
+        import std.traits : FieldNameTuple;
         string result;
         foreach(fn; FieldNameTuple!T)
             result ~= "lhs." ~ fn ~ "*" ~ "rhs." ~ fn ~ "+";
