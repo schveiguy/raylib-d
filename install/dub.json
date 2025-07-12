@@ -9,6 +9,7 @@
         "io": "~>0.3.4",
         "getopt2": "0.0.1"
     },
+    "libs-posix" : ["z"],
     "description": "Install raylib binary files",
     "license": "boost-1.0",
     "name": "install"
