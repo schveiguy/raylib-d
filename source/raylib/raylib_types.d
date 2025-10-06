@@ -228,19 +228,19 @@ struct Rectangle
     alias topLeft = origin;
 
     Vector2 topRight() const {
-        return Vector2(x:(x + width), y:y);
+        return Vector2(x + width, y);
     }
 
     Vector2 bottomLeft() const {
-        return Vector2(x:x, y:(y + height));
+        return Vector2(x, y + height);
     }
 
     Vector2 bottomRight() const {
-        return Vector2(x:(x + width), y:(y + height));
+        return Vector2(x + width, y + height);
     }
 
     Vector2 center() const {
-        return Vector2(x:(x + width/2.0f), y:(y + height/2.0f));
+        return Vector2(x + width/2.0f, y + height/2.0f);
     }
     alias centre = center;
 
@@ -327,7 +327,7 @@ unittest
     assert(rect.origin.x == 543.3f, "`rect.origin.x` should be 543.3, not "~to!string(rect.origin.x));
     assert(rect.origin.y == 235.9f, "`rect.centre.y` should be 235.9, not "~to!string(rect.origin.y));
     assert(rect.dimensions == Vector2(50.0f, 20.0f));
-    assert(rect.topLeft == Vector2(x:543.3f, y:235.9f), "`rect.topLeft` should be Vector2(543.3, 235.9), not "~to!string(rect.topLeft));
+    assert(rect.topLeft == Vector2(543.3f, 235.9f), "`rect.topLeft` should be Vector2(543.3, 235.9), not "~to!string(rect.topLeft));
     assert(rect.topRight.x == 593.3f);
     assert(rect.bottomLeft == Vector2(543.3f, 255.9f), "`rect.bottomLeft` should be Vector2(543.3, 255.9), not "~to!string(rect.bottomLeft));
     assert(rect.bottomRight == Vector2(593.3f, 255.9f), "`rect.bottomRight` should be Vector2(593.3, 255.9), not "~to!string(rect.bottomRight));
