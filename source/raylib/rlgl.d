@@ -1,16 +1,16 @@
 /**********************************************************************************************
 *
-*   rlgl v5.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
+*   rlgl v6.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
 *
 *   DESCRIPTION:
-*       An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0)
+*       An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0, ES 3.0)
 *       that provides a pseudo-OpenGL 1.1 immediate-mode style API (rlVertex, rlTranslate, rlRotate...)
 *
 *   ADDITIONAL NOTES:
-*       When choosing an OpenGL backend different than OpenGL 1.1, some internal buffer are
+*       When choosing an OpenGL backend different than OpenGL 1.1, some internal buffers are
 *       initialized on rlglInit() to accumulate vertex data
 *
-*       When an internal state change is required all the stored vertex data is renderer in batch,
+*       When an internal state change is required all the stored vertex data is rendered in a batch,
 *       additionally, rlDrawRenderBatchActive() could be called to force flushing of the batch
 *
 *       Some resources are also loaded for convenience, here the complete list:
@@ -21,6 +21,7 @@
 *       Internal buffer (and resources) must be manually unloaded calling rlglClose()
 *
 *   CONFIGURATION:
+*       #define GRAPHICS_API_OPENGL_SOFTWARE
 *       #define GRAPHICS_API_OPENGL_11
 *       #define GRAPHICS_API_OPENGL_21
 *       #define GRAPHICS_API_OPENGL_33
@@ -28,7 +29,7 @@
 *       #define GRAPHICS_API_OPENGL_ES2
 *       #define GRAPHICS_API_OPENGL_ES3
 *           Use selected OpenGL graphics backend, should be supported by platform
-*           Those preprocessor defines are only used on rlgl module, if OpenGL version is
+*           Those preprocessor defines are only used on the rlgl module, if OpenGL version is
 *           required by any other module, use rlGetVersion() to check it
 *
 *       #define RLGL_IMPLEMENTATION
@@ -36,28 +37,24 @@
 *           If not defined, the library is in header only mode and can be included in other headers
 *           or source files without problems. But only ONE file should hold the implementation
 *
-*       #define RLGL_RENDER_TEXTURES_HINT
-*           Enable framebuffer objects (fbo) support (enabled by default)
-*           Some GPUs could not support them despite the OpenGL version
-*
-*       #define RLGL_SHOW_GL_DETAILS_INFO
+*       #if RLGL_SHOW_GL_DETAILS_INFO
 *           Show OpenGL extensions and capabilities detailed logs on init
 *
-*       #define RLGL_ENABLE_OPENGL_DEBUG_CONTEXT
+*       #if RLGL_ENABLE_OPENGL_DEBUG_CONTEXT
 *           Enable debug context (only available on OpenGL 4.3)
 *
-*       rlgl capabilities could be customized just defining some internal
+*       rlgl capabilities could be customized defining some internal
 *       values before library inclusion (default values listed):
 *
 *       #define RL_DEFAULT_BATCH_BUFFER_ELEMENTS   8192    // Default internal render batch elements limits
 *       #define RL_DEFAULT_BATCH_BUFFERS              1    // Default number of batch buffers (multi-buffering)
 *       #define RL_DEFAULT_BATCH_DRAWCALLS          256    // Default number of batch draw calls (by state changes: mode, texture)
-*       #define RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS    4    // Maximum number of textures units that can be activated on batch drawing (SetShaderValueTexture())
+*       #define RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS    4    // Maximum number of texture units that can be activated on batch drawing (SetShaderValueTexture())
 *
 *       #define RL_MAX_MATRIX_STACK_SIZE             32    // Maximum size of internal Matrix stack
 *       #define RL_MAX_SHADER_LOCATIONS              32    // Maximum number of shader locations supported
-*       #define RL_CULL_DISTANCE_NEAR              0.01    // Default projection matrix near cull distance
-*       #define RL_CULL_DISTANCE_FAR             1000.0    // Default projection matrix far cull distance
+*       #define RL_CULL_DISTANCE_NEAR              0.05    // Default projection matrix near cull distance
+*       #define RL_CULL_DISTANCE_FAR             4000.0    // Default projection matrix far cull distance
 *
 *       When loading a shader, the following vertex attributes and uniform
 *       location names are tried to be set automatically:
@@ -68,7 +65,7 @@
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR        "vertexColor"       // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT      "vertexTangent"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
-*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEIDS      "vertexBoneIds"     // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEINDICES  "vertexBoneIndices" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS  "vertexBoneWeights" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MVP         "mvp"               // model-view-projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW        "matView"           // view matrix
@@ -76,7 +73,7 @@
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MODEL       "matModel"          // model matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL      "matNormal"         // normal matrix (transpose(inverse(matModelView)))
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR       "colDiffuse"        // color diffuse (base tint color, multiplied by texture color)
-*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONE_MATRICES  "boneMatrices"   // bone matrices
+*       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONEMATRICES "boneMatrices"     // bone matrices
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0  "texture0"          // texture0 (texture slot active 0)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1  "texture1"          // texture1 (texture slot active 1)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
@@ -88,7 +85,7 @@
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2014-2024 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014-2026 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -112,17 +109,17 @@ import raylib;
 
 extern (C) @nogc nothrow:
 
-enum RLGL_VERSION = "5.0";
+enum RLGL_VERSION = "6.0";
 
 // Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
 // NOTE: visibility(default) attribute makes symbols "visible" when compiled with -fvisibility=hidden
 
-// We are building the library as a Win32 shared library (.dll)
+// Building the library as a Win32 shared library (.dll)
 
-// We are building the library as a Unix shared library (.so/.dylib)
+// Building the library as a Unix shared library (.so/.dylib)
 
-// We are using the library as a Win32 shared library (.dll)
+// Using the library as a Win32 shared library (.dll)
 
 // Function specifiers definition // Functions defined as 'extern' by default (implicit specifiers)
 
@@ -134,15 +131,14 @@ enum RLGL_VERSION = "5.0";
 
 // Security check in case multiple GRAPHICS_API_OPENGL_* defined
 
+// Software implementation uses OpenGL 1.1 functionality
+
 // OpenGL 2.1 uses most of OpenGL 3.3 Core functionality
 // WARNING: Specific parts are checked with #if defines
 
 // OpenGL 4.3 uses OpenGL 3.3 Core functionality
 
 // OpenGL ES 3.0 uses OpenGL ES 2.0 functionality (and more)
-
-// Support framebuffer objects by default
-// NOTE: Some driver implementation do not support it, despite they should
 
 //----------------------------------------------------------------------------------
 // Defines and Macros
@@ -154,9 +150,9 @@ enum RLGL_VERSION = "5.0";
 // NOTE: Be careful with text, every letter maps to a quad
 enum RL_DEFAULT_BATCH_BUFFER_ELEMENTS = 8192;
 
-// We reduce memory sizes for embedded systems (RPI and HTML5)
+// Reducing memory sizes for embedded systems (RPI and HTML5)
 // NOTE: On HTML5 (emscripten) this is allocated on heap,
-// by default it's only 16MB!...just take care...
+// by default heap is only 16MB!...just take care...
 
 enum RL_DEFAULT_BATCH_BUFFERS = 1; // Default number of batch buffers (multi-buffering)
 
@@ -174,9 +170,9 @@ enum RL_MAX_SHADER_LOCATIONS = 32; // Maximum number of shader locations support
 
 // Projection matrix culling
 
-enum RL_CULL_DISTANCE_NEAR = 0.01; // Default near cull distance
+enum RL_CULL_DISTANCE_NEAR = 0.05; // Default near cull distance
 
-enum RL_CULL_DISTANCE_FAR = 1000.0; // Default far cull distance
+enum RL_CULL_DISTANCE_FAR = 4000.0; // Default far cull distance
 
 // Texture parameters (equivalent to OpenGL defines)
 enum RL_TEXTURE_WRAP_S = 0x2802; // GL_TEXTURE_WRAP_S
@@ -279,6 +275,12 @@ enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2 = 5;
 
 enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES = 6;
 
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES = 7;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS = 8;
+
+enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM = 9;
+
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
@@ -312,7 +314,7 @@ struct rlVertexBuffer
 
 // Draw call type
 // NOTE: Only texture changes register a new draw, other state-change-related elements are not
-// used at this moment (vaoId, shaderId, matrices), raylib just forces a batch draw call if any
+// used at this moment (vaoId, shaderId, matrices), raylib forces a batch draw call if any
 // of those state-change happens (this is done in core module)
 struct rlDrawCall
 {
@@ -342,6 +344,7 @@ struct rlRenderBatch
 // OpenGL version
 enum rlGlVersion
 {
+    RL_OPENGL_SOFTWARE = 0, // Software rendering
     RL_OPENGL_11 = 1, // OpenGL 1.1
     RL_OPENGL_21 = 2, // OpenGL 2.1 (GLSL 120)
     RL_OPENGL_33 = 3, // OpenGL 3.3 (GLSL 330)
@@ -399,7 +402,7 @@ enum rlPixelFormat
 // NOTE 2: Filter is accordingly set for minification and magnification
 enum rlTextureFilter
 {
-    RL_TEXTURE_FILTER_POINT = 0, // No filter, just pixel approximation
+    RL_TEXTURE_FILTER_POINT = 0, // No filter, pixel approximation
     RL_TEXTURE_FILTER_BILINEAR = 1, // Linear filtering
     RL_TEXTURE_FILTER_TRILINEAR = 2, // Trilinear filtering (linear with mipmaps)
     RL_TEXTURE_FILTER_ANISOTROPIC_4X = 3, // Anisotropic filtering 4x
@@ -567,9 +570,8 @@ void rlEnableVertexBufferElement(uint id); // Enable vertex buffer element (VBO 
 void rlDisableVertexBufferElement(); // Disable vertex buffer element (VBO element)
 void rlEnableVertexAttribute(uint index); // Enable vertex attribute index
 void rlDisableVertexAttribute(uint index); // Disable vertex attribute index
-
-// Enable attribute state pointer
-// Disable attribute state pointer
+void rlEnableStatePointer(int vertexAttribType, void* buffer); // Enable attribute state pointer
+void rlDisableStatePointer(int vertexAttribType); // Disable attribute state pointer
 
 // Textures state
 void rlActiveTextureSlot(int slot); // Select and active a texture slot
@@ -606,9 +608,12 @@ void rlSetCullFace(int mode); // Set face culling mode
 void rlEnableScissorTest(); // Enable scissor test
 void rlDisableScissorTest(); // Disable scissor test
 void rlScissor(int x, int y, int width, int height); // Scissor test
-void rlEnableWireMode(); // Enable wire mode
 void rlEnablePointMode(); // Enable point mode
-void rlDisableWireMode(); // Disable wire (and point) mode
+void rlDisablePointMode(); // Disable point mode
+void rlSetPointSize(float size); // Set the point drawing size
+float rlGetPointSize(); // Get the point drawing size
+void rlEnableWireMode(); // Enable wire mode
+void rlDisableWireMode(); // Disable wire mode
 void rlSetLineWidth(float width); // Set the line drawing width
 float rlGetLineWidth(); // Get the line drawing width
 void rlEnableSmoothLines(); // Enable line aliasing
@@ -631,6 +636,7 @@ void rlSetBlendFactorsSeparate(int glSrcRGB, int glDstRGB, int glSrcAlpha, int g
 void rlglInit(int width, int height); // Initialize rlgl (buffers, shaders, textures, states)
 void rlglClose(); // De-initialize rlgl (buffers, shaders, textures)
 void rlLoadExtensions(void* loader); // Load OpenGL extensions (loader function required)
+void* rlGetProcAddress(const(char)* procName); // Get OpenGL procedure address
 int rlGetVersion(); // Get current OpenGL version
 void rlSetFramebufferWidth(int width); // Set current framebuffer width
 int rlGetFramebufferWidth(); // Get default framebuffer width
@@ -685,17 +691,22 @@ ubyte* rlReadScreenPixels(int width, int height); // Read screen pixel data (col
 
 // Framebuffer management (fbo)
 uint rlLoadFramebuffer(); // Load an empty framebuffer
-void rlFramebufferAttach(uint fboId, uint texId, int attachType, int texType, int mipLevel); // Attach texture/renderbuffer to a framebuffer
+void rlFramebufferAttach(uint id, uint texId, int attachType, int texType, int mipLevel); // Attach texture/renderbuffer to a framebuffer
 bool rlFramebufferComplete(uint id); // Verify framebuffer is complete
 void rlUnloadFramebuffer(uint id); // Delete framebuffer from GPU
+// WARNING: Copy and resize framebuffer functionality only defined for software backend
+void rlCopyFramebuffer(int x, int y, int width, int height, int format, void* pixels); // Copy framebuffer pixel data to internal buffer
+void rlResizeFramebuffer(int width, int height); // Resize internal framebuffer
 
 // Shaders management
-uint rlLoadShaderCode(const(char)* vsCode, const(char)* fsCode); // Load shader from code strings
-uint rlCompileShader(const(char)* shaderCode, int type); // Compile custom shader and return shader id (type: RL_VERTEX_SHADER, RL_FRAGMENT_SHADER, RL_COMPUTE_SHADER)
-uint rlLoadShaderProgram(uint vShaderId, uint fShaderId); // Load custom shader program
+uint rlLoadShader(const(char)* code, int type); // Load (compile) shader and return shader id (type: RL_VERTEX_SHADER, RL_FRAGMENT_SHADER, RL_COMPUTE_SHADER)
+uint rlLoadShaderProgram(const(char)* vsCode, const(char)* fsCode); // Load shader from code strings
+uint rlLoadShaderProgramEx(uint vsId, uint fsId); // Load shader program, using already loaded shader ids
+uint rlLoadShaderProgramCompute(uint csId); // Load compute shader program
+void rlUnloadShader(uint id); // Unload shader, loaded with rlLoadShader()
 void rlUnloadShaderProgram(uint id); // Unload shader program
-int rlGetLocationUniform(uint shaderId, const(char)* uniformName); // Get shader location uniform
-int rlGetLocationAttrib(uint shaderId, const(char)* attribName); // Get shader location attribute
+int rlGetLocationUniform(uint id, const(char)* uniformName); // Get shader location uniform, requires shader program id
+int rlGetLocationAttrib(uint id, const(char)* attribName); // Get shader location attribute, requires shader program id
 void rlSetUniform(int locIndex, const(void)* value, int uniformType, int count); // Set shader value uniform
 void rlSetUniformMatrix(int locIndex, Matrix mat); // Set shader value matrix
 void rlSetUniformMatrices(int locIndex, const(Matrix)* mat, int count); // Set shader value matrices
@@ -703,7 +714,6 @@ void rlSetUniformSampler(int locIndex, uint textureId); // Set shader value samp
 void rlSetShader(uint id, int* locs); // Set shader currently active (id and locations)
 
 // Compute shader management
-uint rlLoadComputeShaderProgram(uint shaderId); // Load compute shader program
 void rlComputeShaderDispatch(uint groupX, uint groupY, uint groupZ); // Dispatch compute shader (equivalent to *draw* for graphics pipeline)
 
 // Shader buffer storage object management (ssbo)
@@ -743,6 +753,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Expose OpenGL functions from glad in raylib
 
+// OpenGL 1.1 software implementation
+
 // OpenGL 1.1 library for OSX
 // OpenGL extensions library
 
@@ -760,6 +772,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // NOTE: OpenGL ES 2.0 can be enabled on Desktop platforms,
 // in that case, functions are loaded from a custom glad for OpenGL ES 2.0
+// TODO: OpenGL ES 2.0 support shouldn't be platform-dependent, neither require GLAD
 
 //#include <EGL/egl.h>          // EGL library -> not required, platform layer
 // OpenGL ES 2.0 library
@@ -767,8 +780,9 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // It seems OpenGL ES 2.0 instancing entry points are not defined on Raspberry Pi
 // provided headers (despite being defined in official Khronos GLES2 headers)
+// TODO: Avoid raylib platform-dependent code on rlgl, it should be a completely portable library
 
-// Required for: malloc(), free()
+// Required for: calloc(), free()
 // Required for: strcmp(), strlen() [Used in rlglInit(), on extensions loading]
 // Required for: sqrtf(), sinf(), cosf(), floor(), log()
 
@@ -778,21 +792,23 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Default shader vertex attribute names to set location points
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_NORMAL
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_COLOR
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_TANGENT
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_BONEIDS
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES
 
-// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
+
+// Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM
 
 // model-view-projection matrix
 
@@ -806,20 +822,24 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // color diffuse (base tint color, multiplied by texture color)
 
-// bone matrices
-
 // texture0 (texture slot active 0)
 
 // texture1 (texture slot active 1)
 
 // texture2 (texture slot active 2)
 
+// bone matrices (required for GPU skinning)
+
 //----------------------------------------------------------------------------------
-// Types and Structures Definition
+// Module Types and Structures Definition
 //----------------------------------------------------------------------------------
+
+// OpenGL extension functions loader signature (same as GLADloadproc)
 
 // Current render batch
 // Default internal render batch
+
+// OpenGL function loader
 
 // Current active render batch vertex counter (generic, used for all batches)
 // Current active texture coordinate (added on glVertex*())
@@ -835,6 +855,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Matrix stack for push/pop
 // Matrix stack counter
 
+// Current texture id to be used on glBegin
 // Default texture used on shapes/poly drawing (required by shader)
 // Active texture ids to be enabled on batch drawing (0 active by default)
 // Default vertex shader id (used by default shader program)
@@ -888,38 +909,35 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Extensions supported flags
 
-// OpenGL extension functions loader signature (same as GLADloadproc)
-
 // GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
 //----------------------------------------------------------------------------------
 
-// GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
-
+// VAO functions entry points
 // NOTE: VAO functionality is exposed through extensions (OES)
 
-// NOTE: Instancing functionality could also be available through extension
+// Instancing functionality entry points
+// NOTE: Instancing functionality could be available through extensions
 
 //----------------------------------------------------------------------------------
-// Module specific Functions Declaration
+// Module Functions Declaration
 //----------------------------------------------------------------------------------
 
 // Load default shader
 // Unload default shader
 
 // Get compressed format official GL identifier name
-// RLGL_SHOW_GL_DETAILS_INFO
-// GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
 
 // Get pixel data size in bytes (image or texture)
+
+// Get identity matrix
 
 // Auxiliar matrix math functions
 
 // Get float array of matrix data
 // Get float vector for Matrix
-// Get identity matrix
 // Multiply two matrices
 // Transposes provided matrix
 // Invert provided matrix
@@ -937,13 +955,15 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Push the current matrix into RLGL.State.stack
 
-// Pop lattest inserted matrix from RLGL.State.stack
+// Pop latest inserted matrix from RLGL.State.stack
 
 // Reset current matrix to identity matrix
 
 // Multiply the current matrix by a translation matrix
 
-// NOTE: We transpose matrix with multiplication order
+// Set translation component of matrix
+
+// NOTE: Transposing matrix by multiplication order
 
 // Multiply the current matrix by a rotation matrix
 // NOTE: The provided angle must be in degrees
@@ -952,25 +972,27 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Rotation matrix generation
 
-// NOTE: We transpose matrix with multiplication order
+// NOTE: Transposing matrix by multiplication order
 
 // Multiply the current matrix by a scaling matrix
 
-// NOTE: We transpose matrix with multiplication order
+// Set scale component of matrix
+
+// NOTE: Transposing matrix by multiplication order
 
 // Multiply the current matrix by another matrix
 
 // Matrix creation from array
+// Conversion from column-major to row-major memory order
 
 // Multiply the current matrix by a perspective matrix generated by parameters
 
 // Multiply the current matrix by an orthographic matrix generated by parameters
 
 // NOTE: If left-right and top-botton values are equal it could create a division by zero,
-// response to it is platform/compiler dependant
+// response to it is platform/compiler dependent
 
 // Set the viewport area (transformation from normalized device coordinates to window coordinates)
-// NOTE: We store current viewport dimensions
 
 // Set clip planes distances
 
@@ -998,7 +1020,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Finish vertex providing
 
-// NOTE: Depth increment is dependant on rlOrtho(): z-near and z-far values,
+// NOTE: Depth increment is dependent on rlOrtho(): z-near and z-far values,
 // as well as depth buffer bit-depth (16bit or 24bit or 32bit)
 // Correct increment formula would be: depthInc = (zfar - znear)/pow(2, bits)
 
@@ -1007,13 +1029,13 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Transform provided vector if required
 
-// WARNING: We can't break primitives when launching a new batch
+// WARNING: Be careful with primitives breaking when launching a new batch!
 // RL_LINES comes in pairs, RL_TRIANGLES come in groups of 3 vertices and RL_QUADS come in groups of 4 vertices
-// We must check current draw.mode when a new vertex is required and finish the batch only if the draw.mode draw.vertexCount is %2, %3 or %4
+// Checking current draw.mode when a new vertex is required and finish the batch only if the draw.mode draw.vertexCount is %2, %3 or %4
 
 // Reached the maximum number of vertices for RL_LINES drawing
 // Launch a draw call but keep current state for next vertices comming
-// NOTE: We add +1 vertex to the check for security
+// NOTE: Adding +1 vertex to the check for some safety
 
 // Add vertices
 
@@ -1033,6 +1055,20 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Define one vertex (normal)
 // NOTE: Normals limited to TRIANGLES only?
 
+// NOTE: Default behavior assumes the normal vector is in the correct space for what the shader expects,
+// it could be not normalized to 0.0f..1.0f, magnitud can be useed for some effects
+/*
+// WARNING: Vector normalization if required
+float length = sqrtf(normalx*normalx + normaly*normaly + normalz*normalz);
+if (length != 0.0f)
+{
+    float ilength = 1.0f/length;
+    normalx *= ilength;
+    normaly *= ilength;
+    normalz *= ilength;
+}
+*/
+
 // Define one vertex (color)
 
 // Define one vertex (color)
@@ -1045,7 +1081,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Set current texture to use
 
-// NOTE: If quads batch limit is reached, we force a draw call and next batch starts
+// NOTE: If quads batch limit is reached, force a draw call and next batch starts
 
 // Make sure current RLGL.currentBatch->draws[i].vertexCount is aligned a multiple of 4,
 // that way, following QUADS drawing will keep aligned with index processing
@@ -1088,7 +1124,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Activate multiple draw color buffers
 // NOTE: One color buffer is always active by default
 
-// NOTE: Maximum number of draw buffers supported is implementation dependant,
+// NOTE: Maximum number of draw buffers supported is implementation dependent,
 // it can be queried with glGet*() but it must be at least 8
 //GLint maxDrawBuffers = 0;
 //glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
@@ -1127,17 +1163,25 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // NOTE: glPolygonMode() not available on OpenGL ES
 
+// Disable wire mode
+
+// NOTE: glPolygonMode() not available on OpenGL ES
+
 // Enable point mode
 
 // NOTE: glPolygonMode() not available on OpenGL ES
 
-// Disable wire mode
+// Disable point mode
 
 // NOTE: glPolygonMode() not available on OpenGL ES
 
 // Set the line drawing width
 
 // Get the line drawing width
+
+// Set the point drawing size
+
+// Get the point drawing size
 
 // Enable line aliasing
 
@@ -1189,7 +1233,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Initialize rlgl: OpenGL extensions, default buffers/shaders/textures, OpenGL states
 
-// Enable OpenGL debug context if required
+// Enable OpenGL debug context if requested (and supported)
 
 // glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_HIGH, 0, 0, GL_TRUE);
 
@@ -1212,6 +1256,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
 
+// Initialize software renderer backend
+
 // Initialize OpenGL default states
 //----------------------------------------------------------
 // Init state: Depth test
@@ -1228,28 +1274,29 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Front face are defined counter clockwise (default)
 // Enable backface culling
 
-// Init state: Cubemap seamless
-
-// Seamless cubemaps (not supported on OpenGL ES 2.0)
-
 // Init state: Color hints (deprecated in OpenGL 3.0+)
 // Improve quality of color and texture coordinate interpolation
 // Smooth shading between vertex (vertex colors interpolation)
 
-// Store screen size into global variables
+// Init state: Cubemap seamless
+// Seamless cubemaps (not supported on OpenGL ES 2.0)
 
-//----------------------------------------------------------
+// Store screen size into global variables
 
 // Init state: Color/Depth buffers clear
 // Set clear color (black)
 // Set clear depth value (default)
 // Clear color and depth buffers (depth buffer required for 3D)
 
+//----------------------------------------------------------
+
 // Vertex Buffer Object deinitialization (memory free)
 
 // Unload default shader
 
 // Unload default texture
+
+// Unload sofware renderer resources
 
 // Load OpenGL extensions
 // NOTE: External loader function must be provided
@@ -1295,8 +1342,9 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Allocate 512 strings pointers (2 KB)
 // One big const string
 
-// NOTE: We have to duplicate string because glGetString() returns a const string
+// NOTE: String duplication rquired because glGetString() returns a const string
 // Get extensions string size in bytes
+// Allocate space for copy with additional EOL byte
 
 // Check required extensions
 
@@ -1363,14 +1411,13 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Show some OpenGL GPU capabilities
 
-// GRAPHICS_API_OPENGL_43
-// RLGL_SHOW_GL_DETAILS_INFO
+// !RLGL_SHOW_GL_DETAILS_INFO
 
 // Show some basic info about GL supported features
 
-// RLGL_SHOW_GL_DETAILS_INFO
-
 // GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
+
+// Get OpenGL procedure address
 
 // Get current OpenGL version
 
@@ -1460,14 +1507,16 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Unload arrays
 
 // Draw render batch
-// NOTE: We require a pointer to reset batch and increase current buffer (multi-buffer)
+// NOTE: Batch is reseted and current buffer is updated (for multi-buffer config)
 
 // Update batch vertex buffers
 //------------------------------------------------------------------------------------------------------------
 // NOTE: If there is not vertex data, buffers doesn't need to be updated (vertexCount > 0)
-// TODO: If no data changed on the CPU arrays --> No need to re-update GPU arrays (use a change detector flag?)
 
 // Activate elements VAO
+
+// TODO: If no data changed on the CPU arrays there is no need to re-upload data to GPU,
+// a flag can be used to detect changes but it would imply keeping a copy buffer and memcmp() both, does it worth it?
 
 // Vertex positions buffer
 
@@ -1487,18 +1536,17 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // NOTE: glMapBuffer() causes sync issue
 // If GPU is working with this buffer, glMapBuffer() will wait(stall) until GPU to finish its job
-// To avoid waiting (idle), you can call first glBufferData() with NULL pointer before glMapBuffer()
-// If you do that, the previous data in PBO will be discarded and glMapBuffer() returns a new
+// To avoid waiting (idle), glBufferData() can bee called first with NULL pointer before glMapBuffer()
+// Doing that, the previous data in PBO will be discarded and glMapBuffer() returns a new
 // allocated pointer immediately even if GPU is still working with the previous data
 
 // Another option: map the buffer object into client's memory
-// Probably this code could be moved somewhere else...
-// batch->vertexBuffer[batch->currentBuffer].vertices = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
-// if (batch->vertexBuffer[batch->currentBuffer].vertices)
-// {
-// Update vertex data
-// }
-// glUnmapBuffer(GL_ARRAY_BUFFER);
+//batch->vertexBuffer[batch->currentBuffer].vertices = (float *)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+//if (batch->vertexBuffer[batch->currentBuffer].vertices)
+//{
+//    Update vertex data
+//}
+//glUnmapBuffer(GL_ARRAY_BUFFER);
 
 // Unbind the current VAO
 
@@ -1540,9 +1588,9 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Activate default sampler2D texture0 (one texture is always active for default batch shader)
 // NOTE: Batch system accumulates calls by texture0 changes, additional textures are enabled for all the draw calls
 
-// Bind current draw call texture, activated as GL_TEXTURE0 and Bound to sampler2D texture0 by default
+// Bind current draw call texture, activated as GL_TEXTURE0 and bound to sampler2D texture0 by default
 
-// We need to define the number of indices to be processed: elementCount*6
+// The number of indices to be processed needs to be defined: elementCount*6
 // NOTE: The final parameter tells the GPU the offset in bytes from the
 // start of the index buffer to the location of the first index to process
 
@@ -1587,7 +1635,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // NOTE: Stereo rendering is checked inside
 
-// Restore state of last batch so we can continue adding vertices
+// Restore state of last batch so new vertices can be added
 
 // Textures data management
 //-----------------------------------------------------------------------------------------
@@ -1597,11 +1645,14 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Check texture format support by OpenGL 1.1 (compressed textures not supported)
 
+// TODO: Support texture data decompression
+
 // GRAPHICS_API_OPENGL_11
 
 // Generate texture id
 
 // Mipmap data offset, only used for tracelog
+// Used to avoid gcc warnings about unused variable
 
 // NOTE: Added pointer math separately from function to avoid UBSAN complaining
 
@@ -1613,7 +1664,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Security check for NPOT textures
 
 // Texture parameters configuration
-// NOTE: glTexParameteri does NOT affect texture uploading, just the way it's used
+// NOTE: glTexParameteri does NOT affect texture uploading
 
 // NOTE: OpenGL ES 2.0 with no GL_OES_texture_npot support (i.e. WebGL) has limited NPOT support, so CLAMP_TO_EDGE must be used
 
@@ -1631,9 +1682,16 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Alternative: GL_LINEAR
 // Alternative: GL_LINEAR
 
-// Activate Trilinear filtering if mipmaps are available
+// Activate trilinear filtering if mipmaps are available
 
-// At this point we have the texture loaded in GPU and texture parameters configured
+// Define the maximum number of mipmap levels to be used, 0 is base texture size
+
+// Check if the loaded texture with mipmaps is complete,
+// uncomplete textures will draw in black if mipmap filtering is required
+//GLint complete = 0;
+//glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_IMMUTABLE_FORMAT, &complete);
+
+// At this point texture is loaded in GPU and texture parameters configured
 
 // NOTE: If mipmaps were not in data, they are not generated automatically
 
@@ -1642,16 +1700,23 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Load depth texture/renderbuffer (to be attached to fbo)
 // WARNING: OpenGL ES 2.0 requires GL_OES_depth_texture and WebGL requires WEBGL_depth_texture extensions
 
-// In case depth textures not supported, we force renderbuffer usage
+// In case depth textures were not supported, force renderbuffer usage
 
-// NOTE: We let the implementation to choose the best bit-depth
+// NOTE: Letting the implementation to choose the best bit-depth
 // Possible formats: GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32 and GL_DEPTH_COMPONENT32F
 
 // WARNING: WebGL platform requires unsized internal format definition (GL_DEPTH_COMPONENT)
 // while other platforms using OpenGL ES 2.0 require/support sized internal formats depending on the GPU capabilities
 
+// NOTE: This sized internal format should also work for WebGL 2.0
+// WARNING: Specification only allows GL_DEPTH_COMPONENT32F for GL_FLOAT type
+// REF: https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml
+
 // Create the renderbuffer that will serve as the depth attachment for the framebuffer
 // NOTE: A renderbuffer is simpler than a texture and could offer better performance on embedded devices
+
+// NOTE: Renderbuffers are the same type of object as textures in rlsw
+// WARNING: Ensure that the depth format is the one specified at rlsw compilation
 
 // Load texture cubemap
 // NOTE: Cubemap data is expected to be 6 images in a single data array (one after the other),
@@ -1670,7 +1735,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Flag not supported on OpenGL ES 2.0
 
 // Update already loaded texture in GPU with new data
-// NOTE: We don't know safely if internal texture format is the expected one...
+// WARNING: Not possible to know safely if internal texture format is the expected one...
 
 // Get OpenGL internal formats and data type from raylib PixelFormat
 
@@ -1705,7 +1770,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Read texture pixel data
 
-// NOTE: Using texture id, we can retrieve some texture info (but not on OpenGL ES 2.0)
+// NOTE: Using texture id, some texture info can be retrieved (but not on OpenGL ES 2.0)
 // Possible texture info: GL_TEXTURE_RED_SIZE, GL_TEXTURE_GREEN_SIZE, GL_TEXTURE_BLUE_SIZE, GL_TEXTURE_ALPHA_SIZE
 //int width, height, format;
 //glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
@@ -1722,26 +1787,32 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Two possible Options:
 // 1 - Bind texture to color fbo attachment and glReadPixels()
 // 2 - Create an fbo, activate it, render quad with texture, glReadPixels()
-// We are using Option 1, just need to care for texture format on retrieval
+// Using Option 1, care for texture format on retrieval
 // NOTE: This behaviour could be conditioned by graphic driver...
 
 // Attach our texture to FBO
 
-// We read data as RGBA because FBO texture is configured as RGBA, despite binding another texture format
+// Reading data as RGBA because FBO texture is configured as RGBA, despite binding another texture format
 
 // Clean up temporal fbo
 
+// Copy framebuffer pixel data to internal buffer
+
+// Get OpenGL texture format
+
+// Resize internal framebuffer
+
 // Read screen pixel data (color buffer)
 
-// NOTE 1: glReadPixels returns image flipped vertically -> (0,0) is the bottom left corner of the framebuffer
-// NOTE 2: We are getting alpha channel! Be careful, it can be transparent if not cleared properly!
+// NOTE: glReadPixels() returns image flipped vertically -> (0,0) is the bottom left corner of the framebuffer
+// WARNING: Getting alpha channel! Be careful, it can be transparent if not cleared properly!
 
-// Flip image vertically!
-
-// Flip line
+// Flip image vertically
+// NOTE: Alpha value has already been applied to RGB in framebuffer, not needed anymore
 
 // Set alpha component value to 255 (no trasparent image retrieval)
-// NOTE: Alpha value has already been applied to RGB in framebuffer, we don't need it!
+
+// Ditto
 
 // NOTE: image data should be freed
 
@@ -1753,7 +1824,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Create the framebuffer object
 // Unbind any framebuffer
 
-// Attach color buffer texture to an fbo (unloads previous attachment)
+// Attach color buffer texture to a framebuffer object (unloads previous attachment)
 // NOTE: Attach type: 0-Color, 1-Depth renderbuffer, 2-Depth texture
 
 // Verify render texture is complete
@@ -1765,9 +1836,8 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Bind framebuffer to query depth texture type
 
-// TODO: Review warning retrieving object name in WebGL
 // WARNING: WebGL: INVALID_ENUM: getFramebufferAttachmentParameter: invalid parameter name
-// https://registry.khronos.org/webgl/specs/latest/1.0/
+// REF: https://registry.khronos.org/webgl/specs/latest/1.0/
 
 // NOTE: If a texture object is deleted while its image is attached to the *currently bound* framebuffer,
 // the texture image is automatically detached from the currently bound framebuffer
@@ -1837,8 +1907,19 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // Shaders management
 //-----------------------------------------------------------------------------------------------
-// Load shader from code strings
+// Load (compile) shader and return shader id
+
+//case GL_GEOMETRY_SHADER:
+
+// Unload object allocated by glCreateShader(),
+// despite failing in the compilation process
+
+//case GL_GEOMETRY_SHADER:
+
+// Load shader program from code strings
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
+
+// Shader program id
 
 // Compile vertex shader (if provided)
 // NOTE: If not vertex shader is provided, use default one
@@ -1846,20 +1927,20 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // Compile fragment shader (if provided)
 // NOTE: If not vertex shader is provided, use default one
 
-// In case vertex and fragment shader are the default ones, no need to recompile, we can just assign the default shader program id
+// In case vertex and fragment shader are the default ones, no need to recompile, assign the default shader program id
 
-// One of or both shader are new, we need to compile a new shader program
+// One of or both shader are new, a new shader program needs to be compiled
 
-// We can detach and delete vertex/fragment shaders (if not default ones)
-// NOTE: We detach shader before deletion to make sure memory is freed
-
-// WARNING: Shader program linkage could fail and returned id is 0
+// Detaching and deleting vertex/fragment shaders (if not default ones)
+// WARNING: Detach shader before deletion to make sure memory is freed
 
 // WARNING: Shader program linkage could fail and returned id is 0
 
-// In case shader program loading failed, we assign default shader
+// WARNING: Shader program linkage could fail and returned id is 0
 
-// In case shader loading fails, we return the default shader
+// In case shader program loading failed, assign default shader
+
+// In case shader loading fails, reassigning default shader
 
 /*
 else
@@ -1880,22 +1961,16 @@ else
         glGetActiveUniform(id, i, sizeof(name) - 1, &namelen, &num, &type, name);
 
         name[namelen] = 0;
-        TRACELOGD("SHADER: [ID %i] Active uniform (%s) set at location: %i", id, name, glGetUniformLocation(id, name));
+        TRACELOG(RL_LOG_DEBUG, "SHADER: [ID %i] Active uniform (%s) set at location: %i", id, name, glGetUniformLocation(id, name));
     }
 }
 */
 
-// Compile custom shader and return shader id
+// Load shader program from already loaded shader ids
 
-//case GL_GEOMETRY_SHADER:
-
-//case GL_GEOMETRY_SHADER:
-
-// Load custom shader strings and return program id
-
-// NOTE: Default attribute shader locations must be Bound before linking
-
-// NOTE: If some attrib name is no found on the shader, it locations becomes -1
+// Default attribute shader locations must be bound before linking
+// NOTE: There is no problem with binding a generic attribute index to an attribute variable name
+// that is never used; if some attrib name is no found on the shader, it locations becomes -1
 
 // NOTE: All uniform variables are intitialised to 0 when a program links
 
@@ -1904,21 +1979,32 @@ else
 //GLint binarySize = 0;
 //glGetProgramiv(id, GL_PROGRAM_BINARY_LENGTH, &binarySize);
 
+// Load compute shader program
+
+// NOTE: All uniform variables are intitialised to 0 when a program links
+
+// Get the size of compiled shader program (not available on OpenGL ES 2.0)
+// NOTE: If GL_LINK_STATUS is GL_FALSE, program binary length is zero
+//GLint binarySize = 0;
+//glGetProgramiv(id, GL_PROGRAM_BINARY_LENGTH, &binarySize);
+
+// Delete shader
+
 // Unload shader program
 
 // Get shader location uniform
+// NOTE: First parameter refers to shader program id
 
 //if (location == -1) TRACELOG(RL_LOG_WARNING, "SHADER: [ID %i] Failed to find shader uniform: %s", shaderId, uniformName);
 //else TRACELOG(RL_LOG_INFO, "SHADER: [ID %i] Shader uniform (%s) set at location: %i", shaderId, uniformName, location);
 
 // Get shader location attribute
+// NOTE: First parameter refers to shader program id
 
 //if (location == -1) TRACELOG(RL_LOG_WARNING, "SHADER: [ID %i] Failed to find shader attribute: %s", shaderId, attribName);
 //else TRACELOG(RL_LOG_INFO, "SHADER: [ID %i] Shader attribute (%s) set at location: %i", shaderId, attribName, location);
 
 // Set shader value uniform
-
-// TODO: Support glUniform1uiv(), glUniform2uiv(), glUniform3uiv(), glUniform4uiv()
 
 // Set shader value attribute
 
@@ -1940,15 +2026,6 @@ else
 // Save texture id for binding on drawing
 
 // Set shader currently active (id and locations)
-
-// Load compute shader program
-
-// NOTE: All uniform variables are intitialised to 0 when a program links
-
-// Get the size of compiled shader program (not available on OpenGL ES 2.0)
-// NOTE: If GL_LINK_STATUS is GL_FALSE, program binary length is zero
-//GLint binarySize = 0;
-//glGetProgramiv(id, GL_PROGRAM_BINARY_LENGTH, &binarySize);
 
 // Dispatch compute shader (equivalent to *draw* for graphics pilepine)
 
@@ -1979,7 +2056,6 @@ else
 // Get internal accumulated transform matrix
 
 // TODO: Consider possible transform matrices in the RLGL.State.stack
-// Is this the right order? or should we start with the first stored matrix instead of the last one?
 //Matrix matStackTransform = rlMatrixIdentity();
 //for (int i = RLGL.State.stackCounter; i > 0; i--) matStackTransform = rlMatrixMultiply(RLGL.State.stack[i], matStackTransform);
 
@@ -2061,7 +2137,7 @@ else
 // 2 bpp
 
 //----------------------------------------------------------------------------------
-// Module specific Functions Definition
+// Module Functions Definition
 //----------------------------------------------------------------------------------
 
 // Load default shader (just vertex positioning and texture coloring)
@@ -2112,8 +2188,6 @@ else
 
 // GL_KHR_texture_compression_astc_hdr
 
-// RLGL_SHOW_GL_DETAILS_INFO
-
 // GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
 
 // Get pixel data size in bytes (image or texture)
@@ -2122,16 +2196,22 @@ else
 // Size in bytes
 // Bits per pixel
 
+// 8 bytes per each 4x4 block
+
+// 16 bytes per each 4x4 block
+
+// 4 bytes per each 4x4 block
+
+// Compute dataSize for uncompressed texture data (no blocks)
+
 // Total data size in bytes
 
-// Most compressed formats works on 4x4 blocks,
-// if texture is smaller, minimum dataSize is 8 or 16
-
 // Auxiliar math functions
+//-------------------------------------------------------------------------------
+// Get identity matrix
 
 // Get float array of matrix data
-
-// Get identity matrix
+// Explicit conversion to column-major memory layout
 
 // Get two matrix multiplication
 // NOTE: When multiplying matrices... the order matters!

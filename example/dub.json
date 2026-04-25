@@ -1,15 +1,27 @@
 {
-	"authors": [
-		"Unknown"
-	],
-	"copyright": "Copyright © 2020, Unknown",
-	"dependencies": {
-		"raylib-d": {"path": "../"}
-	},
-	"libs": [
-		"raylib"
-	],
-	"description": "A minimal D application.",
-	"license": "Zlib",
-	"name": "example"
+  "libs": [
+    "raylib"
+  ],
+  "lflags-posix": [
+    "-L."
+  ],
+  "lflags-osx": [
+    "-rpath",
+    "@executable_path/"
+  ],
+  "lflags-linux": [
+    "-rpath=$$ORIGIN"
+  ],
+  "description": "A minimal D application.",
+  "name": "example",
+  "dependencies": {
+    "raylib-d": {
+      "path": "../"
+    }
+  },
+  "authors": [
+    "Unknown"
+  ],
+  "copyright": "Copyright © 2020, Unknown",
+  "license": "Zlib"
 }
