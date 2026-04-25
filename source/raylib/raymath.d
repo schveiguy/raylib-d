@@ -15,24 +15,29 @@
 *     - Functions use always a "result" variable for return (except C++ operators)
 *     - Functions are always defined inline
 *     - Angles are always in radians (DEG2RAD/RAD2DEG macros provided for convenience)
-*     - No compound literals used to make sure libray is compatible with C++
+*     - No compound literals used to make sure the library is compatible with C++
 *
 *   CONFIGURATION:
 *       #define RAYMATH_IMPLEMENTATION
-*           Generates the implementation of the library into the included file.
+*           Generates the implementation of the library into the included file
 *           If not defined, the library is in header only mode and can be included in other headers
-*           or source files without problems. But only ONE file should hold the implementation.
+*           or source files without problems. But only ONE file should hold the implementation
 *
 *       #define RAYMATH_STATIC_INLINE
-*           Define static inline functions code, so #include header suffices for use.
-*           This may use up lots of memory.
+*           Define static inline functions code, so #include header suffices for use
+*           This may use up lots of memory
 *
 *       #define RAYMATH_DISABLE_CPP_OPERATORS
 *           Disables C++ operator overloads for raymath types.
 *
+*       #define RAYMATH_USE_SIMD_INTRINSICS   1
+*           Try to enable SIMD intrinsics for MatrixMultiply()
+*           Note that users enabling it must be aware of the target platform where application will
+*           run to support the selected SIMD intrinsic, for now, only SSE is supported
+*
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2015-2024 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2015-2026 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -58,11 +63,11 @@ extern (C) @nogc nothrow:
 
 // Function specifiers definition
 
-// We are building raylib as a Win32 shared library (.dll)
+// Building raylib as a Win32 shared library (.dll)
 
-// We are building raylib as a Unix shared library (.so/.dylib)
+// Building raylib as a Unix shared library (.so/.dylib)
 
-// We are using raylib as a Win32 shared library (.dll)
+// Using raylib as a Win32 shared library (.dll)
 
 // Provide external definition
 
@@ -116,6 +121,7 @@ extern (D) auto Vector3ToFloat(T)(auto ref T vec)
 // Matrix fourth row (4 components)
 
 // NOTE: Helper types to be used instead of array return types for *ToFloat functions
+
 struct float3
 {
     float[3] v;
@@ -127,6 +133,29 @@ struct float16
 }
 
 // Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), floor(), fminf(), fmaxf(), fabsf()
+
+// SIMD is used on the most costly raymath function MatrixMultiply()
+// NOTE: Only SSE intrinsics support implemented
+// TODO: Consider support for other SIMD intrinsics:
+//  - SSEx, AVX, AVX2, FMA, NEON, RVV
+/*
+#if defined(__SSE4_2__)
+    #include <nmmintrin.h>
+    #define RAYMATH_SSE42_ENABLED
+#elif defined(__SSE4_1__)
+    #include <smmintrin.h>
+    #define RAYMATH_SSE41_ENABLED
+#elif defined(__SSSE3__)
+    #include <tmmintrin.h>
+    #define RAYMATH_SSSE3_ENABLED
+#elif defined(__SSE3__)
+    #include <pmmintrin.h>
+    #define RAYMATH_SSE3_ENABLED
+#elif defined(__SSE2__) || (defined(_M_AMD64) || defined(_M_X64)) // SSE2 x64
+    #include <emmintrin.h>
+    #define RAYMATH_SSE2_ENABLED
+#endif
+*/
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Utils math
@@ -186,14 +215,18 @@ float Vector2LengthSqr(Vector2 v);
 // Calculate two vectors dot product
 float Vector2DotProduct(Vector2 v1, Vector2 v2);
 
+// Calculate two vectors cross product
+float Vector2CrossProduct(Vector2 v1, Vector2 v2);
+
 // Calculate distance between two vectors
 float Vector2Distance(Vector2 v1, Vector2 v2);
 
 // Calculate square distance between two vectors
 float Vector2DistanceSqr(Vector2 v1, Vector2 v2);
 
-// Calculate angle between two vectors
-// NOTE: Angle is calculated from origin point (0, 0)
+// Calculate the signed angle from v1 to v2, relative to the origin (0, 0)
+// NOTE: Coordinate system convention: positive X right, positive Y down
+// positive angles appear clockwise, and negative angles appear counterclockwise
 float Vector2Angle(Vector2 v1, Vector2 v2);
 
 // Calculate angle defined by a two vectors line
@@ -250,7 +283,7 @@ Vector2 Vector2Clamp(Vector2 v, Vector2 min, Vector2 max);
 
 // Clamp the magnitude of the vector between two min and max values
 
-// By default, 1 as the neutral element.
+// By default, 1 as the neutral element
 Vector2 Vector2ClampValue(Vector2 v, float min, float max);
 
 // Check whether two given vectors are almost equal
@@ -260,7 +293,7 @@ int Vector2Equals(Vector2 p, Vector2 q);
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 Vector2 Vector2Refract(Vector2 v, Vector2 n, float r);
 
 //----------------------------------------------------------------------------------
@@ -409,7 +442,7 @@ Vector3 Vector3Max(Vector3 v1, Vector3 v2);
 Vector3 Vector3Barycenter(Vector3 p, Vector3 a, Vector3 b, Vector3 c);
 
 // Projects a Vector3 from screen space into object space
-// NOTE: We are avoiding calling other raymath functions despite available
+// NOTE: Self-contained function, no other raymath functions are called
 
 // Calculate unprojected matrix (multiply view matrix by projection matrix) and invert it
 // MatrixMultiply(view, projection);
@@ -421,7 +454,7 @@ Vector3 Vector3Barycenter(Vector3 p, Vector3 a, Vector3 b, Vector3 c);
 
 // Create quaternion from source point
 
-// Multiply quat point by unprojecte matrix
+// Multiply quat point by unprojected matrix
 // QuaternionTransform(quat, matViewProjInv)
 
 // Normalized world points in vectors
@@ -439,7 +472,7 @@ Vector3 Vector3Clamp(Vector3 v, Vector3 min, Vector3 max);
 
 // Clamp the magnitude of the vector between two values
 
-// By default, 1 as the neutral element.
+// By default, 1 as the neutral element
 Vector3 Vector3ClampValue(Vector3 v, float min, float max);
 
 // Check whether two given vectors are almost equal
@@ -449,29 +482,37 @@ int Vector3Equals(Vector3 p, Vector3 q);
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 Vector3 Vector3Refract(Vector3 v, Vector3 n, float r);
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition - Vector4 math
 //----------------------------------------------------------------------------------
-
+// Get  vector zero
 Vector4 Vector4Zero();
 
+// Get vector one
 Vector4 Vector4One();
 
+// Add two vectors
 Vector4 Vector4Add(Vector4 v1, Vector4 v2);
 
+// Add value to vector components
 Vector4 Vector4AddValue(Vector4 v, float add);
 
+// Substract vectors
 Vector4 Vector4Subtract(Vector4 v1, Vector4 v2);
 
+// Substract value from vector components
 Vector4 Vector4SubtractValue(Vector4 v, float add);
 
+// Vector length
 float Vector4Length(Vector4 v);
 
+// Vector square length
 float Vector4LengthSqr(Vector4 v);
 
+// Vectors dot product
 float Vector4DotProduct(Vector4 v1, Vector4 v2);
 
 // Calculate distance between two vectors
@@ -480,6 +521,7 @@ float Vector4Distance(Vector4 v1, Vector4 v2);
 // Calculate square distance between two vectors
 float Vector4DistanceSqr(Vector4 v1, Vector4 v2);
 
+// Scale vector components by value (multiply)
 Vector4 Vector4Scale(Vector4 v, float scale);
 
 // Multiply vector by vector
@@ -518,6 +560,25 @@ int Vector4Equals(Vector4 p, Vector4 q);
 
 // Compute matrix determinant
 
+/*
+    // Cache the matrix values (speed optimization)
+    float a00 = mat.m0, a01 = mat.m1, a02 = mat.m2, a03 = mat.m3;
+    float a10 = mat.m4, a11 = mat.m5, a12 = mat.m6, a13 = mat.m7;
+    float a20 = mat.m8, a21 = mat.m9, a22 = mat.m10, a23 = mat.m11;
+    float a30 = mat.m12, a31 = mat.m13, a32 = mat.m14, a33 = mat.m15;
+
+    // NOTE: It takes 72 multiplication to calculate 4x4 matrix determinant
+    result = a30*a21*a12*a03 - a20*a31*a12*a03 - a30*a11*a22*a03 + a10*a31*a22*a03 +
+             a20*a11*a32*a03 - a10*a21*a32*a03 - a30*a21*a02*a13 + a20*a31*a02*a13 +
+             a30*a01*a22*a13 - a00*a31*a22*a13 - a20*a01*a32*a13 + a00*a21*a32*a13 +
+             a30*a11*a02*a23 - a10*a31*a02*a23 - a30*a01*a12*a23 + a00*a31*a12*a23 +
+             a10*a01*a32*a23 - a00*a11*a32*a23 - a20*a11*a02*a33 + a10*a21*a02*a33 +
+             a20*a01*a12*a33 - a00*a21*a12*a33 - a10*a01*a22*a33 + a00*a11*a22*a33;
+*/
+// Using Laplace expansion (https://en.wikipedia.org/wiki/Laplace_expansion),
+// previous operation can be simplified to 40 multiplications, decreasing matrix
+// size from 4x4 to 2x2 using minors
+
 // Cache the matrix values (speed optimization)
 float MatrixDeterminant(Matrix mat);
 
@@ -545,7 +606,22 @@ Matrix MatrixSubtract(Matrix left, Matrix right);
 
 // Get two matrix multiplication
 // NOTE: When multiplying matrices... the order matters!
+
+// Load left side and right side
+
+// Transpose so c0..c3 become *rows* of the right matrix in semantic order
+
+// Row 0 of result: [m0, m1, m2, m3]
+
+// Row 1 of result: [m4, m5, m6, m7]
+
+// Row 2 of result: [m8, m9, m10, m11]
+
+// Row 3 of result: [m12, m13, m14, m15]
 Matrix MatrixMultiply(Matrix left, Matrix right);
+
+// Multiply matrix components by value
+Matrix MatrixMultiplyValue(Matrix left, float value);
 
 // Get translation matrix
 Matrix MatrixTranslate(float x, float y, float z);
@@ -721,8 +797,8 @@ Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle);
 
 // QuaternionNormalize(q);
 
-// This occurs when the angle is zero.
-// Not a problem: just set an arbitrary normalized axis.
+// This occurs when the angle is zero
+// Not a problem, set an arbitrary normalized axis
 void QuaternionToAxisAngle(Quaternion q, Vector3* outAxis, float* outAngle);
 
 // Get the quaternion equivalent to Euler angles
@@ -745,19 +821,51 @@ Quaternion QuaternionTransform(Quaternion q, Matrix mat);
 // Check whether two given quaternions are almost equal
 int QuaternionEquals(Quaternion p, Quaternion q);
 
-// Decompose a transformation matrix into its rotational, translational and scaling components
+// Compose a transformation matrix from rotational, translational and scaling components
+// TODO: This function is not following raymath conventions defined in header: NOT self-contained
 
-// Extract translation.
+// Initialize vectors
 
-// Extract upper-left for determinant computation
+// Scale vectors
 
-// Extract scale
+// Rotate vectors
 
-// Remove scale from the matrix if it is not close to zero
+// Set result matrix output
+Matrix MatrixCompose(Vector3 translation, Quaternion rotation, Vector3 scale);
 
-// Extract rotation
+// Decompose a transformation matrix into its rotational, translational and scaling components and remove shear
+// TODO: This function is not following raymath conventions defined in header: NOT self-contained
 
-// Set to identity if close to zero
+// Extract Translation
+
+// Matrix Columns - Rotation will be extracted into here
+
+// Shear Parameters XY, XZ, and YZ (extract and ignored)
+
+// Normalized Scale Parameters
+
+// Max-Normalizing helps numerical stability
+
+// X Scale
+
+// Compute XY shear and make col2 orthogonal
+
+// Y Scale
+
+// Correct XY shear
+
+// Compute XZ and YZ shears and make col3 orthogonal
+
+// Z Scale
+
+// Correct XZ shear
+// Correct YZ shear
+
+// matColumns are now orthonormal in O(3). Now ensure its in SO(3) by enforcing det = 1
+
+// Set Scale
+
+// Extract Rotation
 void MatrixDecompose(
     Matrix mat,
     Vector3* translation,

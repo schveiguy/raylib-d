@@ -20,7 +20,7 @@
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2022-2024 Christoph Wagner (@Crydsch) & Ramon Santamaria (@raysan5)
+*   Copyright (c) 2022-2026 Christoph Wagner (@Crydsch) and Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -52,9 +52,9 @@ extern (C) @nogc nothrow:
 // Function specifiers in case library is build/used as a shared library (Windows)
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
 
-// We are building the library as a Win32 shared library (.dll)
+// Building the library as a Win32 shared library (.dll)
 
-// We are using the library as a Win32 shared library (.dll) // Functions defined as 'extern' by default (implicit specifiers)
+// Using the library as a Win32 shared library (.dll) // Functions defined as 'extern' by default (implicit specifiers)
 
 enum CAMERA_CULL_DISTANCE_NEAR = RL_CULL_DISTANCE_NEAR;
 enum CAMERA_CULL_DISTANCE_FAR = RL_CULL_DISTANCE_FAR;
@@ -87,7 +87,7 @@ enum CAMERA_CULL_DISTANCE_FAR = RL_CULL_DISTANCE_FAR;
 // Camera position
 // Camera target it looks-at
 // Camera up vector (rotation over its axis)
-// Camera field-of-view apperture in Y (degrees) in perspective, used as near plane width in orthographic
+// Camera field-of-view aperture in Y (degrees) in perspective, used as near plane width in orthographic
 // Camera projection type: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
 
 // Camera type fallback, defaults to Camera3D
@@ -164,6 +164,8 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 // IsKeyPressed()
 // GetFrameTime()
 
+// Required for: fabsf()
+
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
@@ -185,7 +187,7 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 //...
 
 //----------------------------------------------------------------------------------
-// Module specific Functions Declaration
+// Module Internal Functions Declaration
 //----------------------------------------------------------------------------------
 //...
 
@@ -201,7 +203,7 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 
 // Moves the camera in its forward direction
 
-// Project vector onto world plane
+// Project vector onto world plane (the plane defined by the up vector)
 
 // Scale by distance
 
@@ -215,7 +217,7 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 
 // Moves the camera target in its current right direction
 
-// Project vector onto world plane
+// Project vector onto world plane (the plane defined by the up vector)
 
 // Scale by distance
 
@@ -249,15 +251,15 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 // Rotates the camera around its right vector, pitch is "looking up and down"
 //  - lockView prevents camera overrotation (aka "somersaults")
 //  - rotateAroundTarget defines if rotation is around target or around its position
-//  - rotateUp rotates the up direction as well (typically only usefull in CAMERA_FREE)
-// NOTE: angle must be provided in radians
+//  - rotateUp rotates the up direction as well (typically only useful in CAMERA_FREE)
+// NOTE: [angle] must be provided in radians
 
 // Up direction
 
 // View vector
 
-// In these camera modes we clamp the Pitch angle
-// to allow only viewing straight up or down.
+// In these camera modes, clamp the Pitch angle
+// to allow only viewing straight up or down
 
 // Clamp view up
 
@@ -274,7 +276,7 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 
 // Move position relative to target
 
-// rotate around camera.position
+// Rotate around camera.position
 
 // Move target relative to position
 
@@ -296,8 +298,6 @@ Matrix GetCameraProjectionMatrix(Camera* camera, float aspect);
 // Camera mode: CAMERA_FREE, CAMERA_FIRST_PERSON, CAMERA_THIRD_PERSON, CAMERA_ORBITAL or CUSTOM
 
 // Camera speeds based on frame time
-
-// Orbital can just orbit
 
 // Camera rotation
 
