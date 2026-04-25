@@ -13,7 +13,7 @@ Use `dub add` to add raylib-d to the dependency list of an existing project:
 
 ```sh
 > dub add raylib-d
-Adding dependency raylib-d ~>5.5.0
+Adding dependency raylib-d ~>6.0.0
 >
 ```
 
@@ -39,6 +39,7 @@ Run this command from your project directory, and it will copy all the appropria
 The following OS/arch combinations are included:
 
 * Windows - x86_64
+* Windows - x86
 * Linux -x86_64 *Note: 4.2.4 and above!*
 * MacOS - x86_64
 * MacOS - arm64
@@ -90,7 +91,7 @@ You must include the linker flags to link against the raylib library in your dub
 The following directives should work for all systems, for the case where the library is in the project directory.
 
 ```json
-"dependencies": { "raylib-d": "~>5.5.0" },
+"dependencies": { "raylib-d": "~>6.0.0" },
 "libs": [ "raylib" ],
 "lflags-posix" : ["-L."],
 "lflags-osx" : ["-rpath", "@executable_path/"],
