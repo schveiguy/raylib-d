@@ -1,6 +1,6 @@
 /**********************************************************************************************
 *
-*   raymath v2.0 - Math functions to work with Vector2, Vector3, Matrix and Quaternions
+*   raymath v2.0 - Math functions to work with Vector2, Vector3, Vector4, Matrix and Quaternions
 *
 *   CONVENTIONS:
 *     - Matrix structure is defined as row-major (memory layout) but parameters naming AND all
@@ -232,8 +232,6 @@ float Vector2Angle(Vector2 v1, Vector2 v2);
 // Calculate angle defined by a two vectors line
 // NOTE: Parameters need to be normalized
 // Current implementation should be aligned with glm::angle
-
-// TODO(10/9/2023): Currently angles move clockwise, determine if this is wanted behavior
 float Vector2LineAngle(Vector2 start, Vector2 end);
 
 // Scale vector (multiply by value)
@@ -773,6 +771,10 @@ Quaternion QuaternionCubicHermiteSpline(
 // Vector3DotProduct(from, to)
 // Vector3CrossProduct(from, to)
 
+// |from|*|to|
+
+// Opposite vectors: cross product is zero, rotate 180 degrees around any axis perpendicular to 'from'
+
 // QuaternionNormalize(q);
 // NOTE: Normalize to essentially nlerp the original and identity to 0.5
 Quaternion QuaternionFromVector3ToVector3(Vector3 from, Vector3 to);
@@ -822,19 +824,25 @@ Quaternion QuaternionTransform(Quaternion q, Matrix mat);
 int QuaternionEquals(Quaternion p, Quaternion q);
 
 // Compose a transformation matrix from rotational, translational and scaling components
-// TODO: This function is not following raymath conventions defined in header: NOT self-contained
 
 // Initialize vectors
 
 // Scale vectors
 
 // Rotate vectors
+// NOTE: A copy of each vector is required, every rotated component depends on all original components
+
+//right = Vector3RotateByQuaternion(right, rotation);
+
+//up = Vector3RotateByQuaternion(up, rotation);
+
+//forward = Vector3RotateByQuaternion(forward, rotation);
 
 // Set result matrix output
 Matrix MatrixCompose(Vector3 translation, Quaternion rotation, Vector3 scale);
 
 // Decompose a transformation matrix into its rotational, translational and scaling components and remove shear
-// TODO: This function is not following raymath conventions defined in header: NOT self-contained
+// TODO: WARNING: Following raymath convention and make the function self-contained
 
 // Extract Translation
 

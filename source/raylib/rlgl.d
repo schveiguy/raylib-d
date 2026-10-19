@@ -56,8 +56,8 @@
 *       #define RL_CULL_DISTANCE_NEAR              0.05    // Default projection matrix near cull distance
 *       #define RL_CULL_DISTANCE_FAR             4000.0    // Default projection matrix far cull distance
 *
-*       When loading a shader, the following vertex attributes and uniform
-*       location names are tried to be set automatically:
+*       When loading a shader, the following vertex attributes and uniform location names are tried to be set automatically:
+*       WARNING: Pre-defined names can not be changed, they are used by default shaders and all raylib examples shaders, they are just listed here for reference
 *
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_POSITION     "vertexPosition"    // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD     "vertexTexCoord"    // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD
@@ -67,6 +67,8 @@
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_TEXCOORD2    "vertexTexCoord2"   // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEINDICES  "vertexBoneIndices" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES
 *       #define RL_DEFAULT_SHADER_ATTRIB_NAME_BONEWEIGHTS  "vertexBoneWeights" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
+*       #define RL_DEFAULT_SHADER_ATTRIB_NAME_INSTANCETRANSFORM "instanceTransform" // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM
+*
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_MVP         "mvp"               // model-view-projection matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_VIEW        "matView"           // view matrix
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_PROJECTION  "matProjection"     // projection matrix
@@ -74,6 +76,7 @@
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_NORMAL      "matNormal"         // normal matrix (transpose(inverse(matModelView)))
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_COLOR       "colDiffuse"        // color diffuse (base tint color, multiplied by texture color)
 *       #define RL_DEFAULT_SHADER_UNIFORM_NAME_BONEMATRICES "boneMatrices"     // bone matrices
+*
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE0  "texture0"          // texture0 (texture slot active 0)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE1  "texture1"          // texture1 (texture slot active 1)
 *       #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
@@ -260,6 +263,7 @@ enum RL_READ_FRAMEBUFFER = 0x8CA8; // GL_READ_FRAMEBUFFER
 enum RL_DRAW_FRAMEBUFFER = 0x8CA9; // GL_DRAW_FRAMEBUFFER
 
 // Default shader vertex attribute locations
+// NOTE: Locations can be redefined by user if required
 
 enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION = 0;
 
@@ -284,8 +288,6 @@ enum RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM = 9;
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
-
-// Boolean type
 
 // Matrix, 4x4 components, column major, OpenGL style, right handed
 
@@ -772,7 +774,7 @@ void rlLoadDrawQuad(); // Load and draw a quad
 
 // NOTE: OpenGL ES 2.0 can be enabled on Desktop platforms,
 // in that case, functions are loaded from a custom glad for OpenGL ES 2.0
-// TODO: OpenGL ES 2.0 support shouldn't be platform-dependent, neither require GLAD
+// TODO: rlgl OpenGL ES 2.0 selection shouldn't depend on raylib platform macros, a specific GLAD shouldn't be neither required
 
 //#include <EGL/egl.h>          // EGL library -> not required, platform layer
 // OpenGL ES 2.0 library
@@ -781,54 +783,40 @@ void rlLoadDrawQuad(); // Load and draw a quad
 // It seems OpenGL ES 2.0 instancing entry points are not defined on Raspberry Pi
 // provided headers (despite being defined in official Khronos GLES2 headers)
 // TODO: Avoid raylib platform-dependent code on rlgl, it should be a completely portable library
+// Use CONFIG_DRM?
 
 // Required for: calloc(), free()
 // Required for: strcmp(), strlen() [Used in rlglInit(), on extensions loading]
 // Required for: sqrtf(), sinf(), cosf(), floor(), log()
+// Required for: INT_MAX
 
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
 
 // Default shader vertex attribute names to set location points
-
+// WARNING: Pre-defined names can not be changed, they are used by default shaders and all raylib examples shaders, they are just listed here for reference
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEINDICES
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS
-
 // Bound by default to shader location: RL_DEFAULT_SHADER_ATTRIB_LOCATION_INSTANCETRANSFORM
 
 // model-view-projection matrix
-
 // view matrix
-
 // projection matrix
-
 // model matrix
-
 // normal matrix (transpose(inverse(matModelView))
-
 // color diffuse (base tint color, multiplied by texture color)
+// bone matrices (required for GPU skinning)
 
 // texture0 (texture slot active 0)
-
 // texture1 (texture slot active 1)
-
 // texture2 (texture slot active 2)
-
-// bone matrices (required for GPU skinning)
 
 //----------------------------------------------------------------------------------
 // Module Types and Structures Definition
@@ -1515,8 +1503,9 @@ if (length != 0.0f)
 
 // Activate elements VAO
 
-// TODO: If no data changed on the CPU arrays there is no need to re-upload data to GPU,
-// a flag can be used to detect changes but it would imply keeping a copy buffer and memcmp() both, does it worth it?
+// NOTE: If no data changed on the CPU arrays there is no need to re-upload data to GPU,
+// a flag can be used to detect changes but it would imply keeping a copy buffer and memcmp() both
+// It was tested and the gain seemed to be minimal or nothing at all, probably driver already takes care of that
 
 // Vertex positions buffer
 
@@ -1536,7 +1525,7 @@ if (length != 0.0f)
 
 // NOTE: glMapBuffer() causes sync issue
 // If GPU is working with this buffer, glMapBuffer() will wait(stall) until GPU to finish its job
-// To avoid waiting (idle), glBufferData() can bee called first with NULL pointer before glMapBuffer()
+// To avoid waiting (idle), glBufferData() can be called first with NULL pointer before glMapBuffer()
 // Doing that, the previous data in PBO will be discarded and glMapBuffer() returns a new
 // allocated pointer immediately even if GPU is still working with the previous data
 
@@ -1645,8 +1634,6 @@ if (length != 0.0f)
 
 // Check texture format support by OpenGL 1.1 (compressed textures not supported)
 
-// TODO: Support texture data decompression
-
 // GRAPHICS_API_OPENGL_11
 
 // Generate texture id
@@ -1665,6 +1652,8 @@ if (length != 0.0f)
 
 // Texture parameters configuration
 // NOTE: glTexParameteri does NOT affect texture uploading
+
+// Check if texture is power-of-two (POT)
 
 // NOTE: OpenGL ES 2.0 with no GL_OES_texture_npot support (i.e. WebGL) has limited NPOT support, so CLAMP_TO_EDGE must be used
 
@@ -1745,7 +1734,7 @@ if (length != 0.0f)
 // NOTE: Requires extension OES_texture_float
 // NOTE: Requires extension OES_texture_float
 
-// defined(GRAPHICS_API_OPENGL_ES2)
+// GRAPHICS_API_OPENGL_ES2
 // NOTE: Requires extension OES_texture_half_float
 // NOTE: Requires extension OES_texture_half_float
 // NOTE: Requires extension OES_texture_half_float
@@ -1794,6 +1783,8 @@ if (length != 0.0f)
 
 // Reading data as RGBA because FBO texture is configured as RGBA, despite binding another texture format
 
+// Reading data as original texture format, in some platforms (RPI, Wasm) it works
+
 // Clean up temporal fbo
 
 // Copy framebuffer pixel data to internal buffer
@@ -1803,6 +1794,10 @@ if (length != 0.0f)
 // Resize internal framebuffer
 
 // Read screen pixel data (color buffer)
+
+// NOTE: Buffer retrieved is GL_FRONT in single-buffered configurations
+// and GL_BACK in double-buffered configurations, make sure to call it at the end of frame
+//glReadBuffer(GL_BACK);
 
 // NOTE: glReadPixels() returns image flipped vertically -> (0,0) is the bottom left corner of the framebuffer
 // WARNING: Getting alpha channel! Be careful, it can be transparent if not cleared properly!
@@ -2148,15 +2143,11 @@ else
 
 // Vertex shader directly defined, no external file required
 
-// Precision required for OpenGL ES3 (WebGL 2) (on some browsers)
+// Precision highp is mandatory in vertex shaders, mediump may run as fp16 and misplace vertices
 
-// Precision required for OpenGL ES2 (WebGL) (on some browsers)
+// Precision highp is mandatory in vertex shaders, mediump may run as fp16 and misplace vertices
 
 // Fragment shader directly defined, no external file required
-
-// Precision required for OpenGL ES3 (WebGL 2)
-
-// Precision required for OpenGL ES2 (WebGL)
 
 // NOTE: Compiled vertex/fragment shaders are not deleted,
 // they are kept for re-use as default shaders in case some shader loading fails
@@ -2204,7 +2195,7 @@ else
 
 // Compute dataSize for uncompressed texture data (no blocks)
 
-// Total data size in bytes
+// Get size in bytes (dividing by 8)
 
 // Auxiliar math functions
 //-------------------------------------------------------------------------------
